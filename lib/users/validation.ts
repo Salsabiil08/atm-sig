@@ -6,11 +6,13 @@ export type CreateUserInviteInput = {
 export type UpdateUserNameInput = {
   userId: string
   name: string
+  email?: string
 }
 
 export type UpdateUserStatusInput = {
   userId: string
   status: 'aktif' | 'nonaktif'
+  email?: string
 }
 
 export type AssignUserRoleInput = {
@@ -18,6 +20,7 @@ export type AssignUserRoleInput = {
   roleId: number
   orgUnitId: number
   supervisorId: string | null
+  email?: string
 }
 
 export type DecideUserRoleChangeInput = {
@@ -55,7 +58,14 @@ export function validateUpdateUserNameInput(input: unknown): UpdateUserNameInput
   const name = value.name.trim()
   if (name.length < 2 || name.length > 100) return null
 
-  return { userId: value.userId, name }
+  if (value.email !== undefined && (typeof value.email !== 'string' || value.email.length > 254)) {
+    return null
+  }
+  return {
+    userId: value.userId,
+    name,
+    ...(typeof value.email === 'string' ? { email: value.email.trim().toLowerCase() } : {}),
+  }
 }
 
 export function validateUpdateUserStatusInput(input: unknown): UpdateUserStatusInput | null {
@@ -66,8 +76,15 @@ export function validateUpdateUserStatusInput(input: unknown): UpdateUserStatusI
     return null
   }
   if (value.status !== 'aktif' && value.status !== 'nonaktif') return null
+  if (value.email !== undefined && (typeof value.email !== 'string' || value.email.length > 254)) {
+    return null
+  }
 
-  return { userId: value.userId, status: value.status }
+  return {
+    userId: value.userId,
+    status: value.status,
+    ...(typeof value.email === 'string' ? { email: value.email.trim().toLowerCase() } : {}),
+  }
 }
 
 export function validateAssignUserRoleInput(input: unknown): AssignUserRoleInput | null {
@@ -90,11 +107,16 @@ export function validateAssignUserRoleInput(input: unknown): AssignUserRoleInput
     return null
   }
 
+  if (value.email !== undefined && (typeof value.email !== 'string' || value.email.length > 254)) {
+    return null
+  }
+
   return {
     userId: value.userId,
     roleId: value.roleId,
     orgUnitId: value.orgUnitId,
     supervisorId: value.supervisorId,
+    ...(typeof value.email === 'string' ? { email: value.email.trim().toLowerCase() } : {}),
   }
 }
 

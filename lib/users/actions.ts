@@ -41,6 +41,7 @@ function recordAdminConfigurationError(error: unknown): UserActionResult | null 
 async function getTargetUser(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
+  email?: string,
 ): Promise<TargetUser | null> {
   const { data, error } = await admin
     .from('users')
@@ -49,7 +50,24 @@ async function getTargetUser(
     .maybeSingle()
 
   if (error) throw new Error('Gagal membaca profil user.')
-  return data
+  if (data || !email) return data
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const { data: emailMatch, error: emailError } = await admin
+    .from('users')
+    .select('id, name, role_id, org_unit_id, supervisor_id, status')
+    .eq('email', normalizedEmail)
+    .maybeSingle()
+
+  if (emailError) throw new Error('Gagal membaca profil user.')
+  if (!emailMatch) return null
+
+  const { data: authResult, error: authError } = await admin.auth.admin.getUserById(emailMatch.id)
+  if (authError || !authResult.user?.email || authResult.user.email.toLowerCase() !== normalizedEmail) {
+    return null
+  }
+
+  return emailMatch
 }
 
 async function isAuthorizedTarget(
@@ -320,10 +338,10 @@ export async function updateUserName(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId)
+  const target = await getTargetUser(admin, validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
@@ -385,10 +403,10 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId)
+  const target = await getTargetUser(admin, validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
   }
 
   const assignmentResult = await validateUserAssignment(admin, validated)
@@ -474,10 +492,10 @@ export async function proposeUserRoleChange(input: unknown): Promise<UserActionR
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId)
+  const target = await getTargetUser(admin, validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengusulkan perubahan untuk user ini.' }
@@ -686,10 +704,10 @@ export async function updateUserStatus(input: unknown): Promise<UserActionResult
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId)
+  const target = await getTargetUser(admin, validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }

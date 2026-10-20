@@ -116,13 +116,6 @@ export default function UserManagement({
         router.refresh()
         return true
       }
-      if (result.error.startsWith('User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.')) {
-        setError('Daftar user sudah berubah. Daftar dimuat ulang; pilih user kembali untuk melanjutkan.')
-        setEditingUser(null)
-        setAssignmentUser(null)
-        router.refresh()
-        return false
-      }
       setError(result.error)
       return false
     } catch {
@@ -147,7 +140,7 @@ export default function UserManagement({
     event.preventDefault()
     if (!editingUser) return
     const succeeded = await finishAction(
-      updateUserName({ userId: editingUser.id, name: editedName }),
+      updateUserName({ userId: editingUser.id, name: editedName, email: editingUser.email }),
     )
     if (succeeded) setEditingUser(null)
   }
@@ -158,6 +151,7 @@ export default function UserManagement({
 
     const assignment = {
       userId: assignmentUser.id,
+      email: assignmentUser.email,
       roleId: Number(assignmentRoleId),
       orgUnitId: Number(assignmentOrgUnitId),
       supervisorId: assignmentSupervisorId || null,
@@ -177,7 +171,7 @@ export default function UserManagement({
     const verb = nextStatus === 'nonaktif' ? 'menonaktifkan' : 'mengaktifkan kembali'
     if (!window.confirm(`Yakin ingin ${verb} ${user.name}?`)) return
 
-    await finishAction(updateUserStatus({ userId: user.id, status: nextStatus }))
+    await finishAction(updateUserStatus({ userId: user.id, email: user.email, status: nextStatus }))
   }
 
   return (

@@ -54,7 +54,8 @@ export default function SignupForm() {
 
     setBusy(true)
     try {
-      const callbackUrl = new URL('/auth/confirm', window.location.origin)
+      const callbackBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || window.location.origin
+      const callbackUrl = new URL('/auth/confirm', callbackBaseUrl)
       callbackUrl.searchParams.set('next', 'email-confirmed')
       const supabase = createClient()
       const { data, error: signupError } = await supabase.auth.signUp({
