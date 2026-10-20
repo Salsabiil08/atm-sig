@@ -1,4 +1,4 @@
-// NFR-001 — Supabase session refresh helper untuk middleware
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/lib/supabase/database.types'
@@ -11,120 +11,152 @@ function requiredRoleLevel(pathname: string): number | null {
 }
 
 export async function updateSession(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Supabase environment variables are missing', {
+      hasUrl: Boolean(supabaseUrl),
+      hasKey: Boolean(supabaseKey),
+    })
+
+    return new NextResponse('Server configuration error', { status: 500 })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value)
-          )
+          })
+
           supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
+
+          cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options)
-          )
+          })
         },
       },
-    }
+    },
   )
 
-  // Jangan hapus pemanggilan getUser() — penting untuk menyegarkan session
-  const { data: { user } } = await supabase.auth.getUser()
+  const redirectWithCookies = (url: URL) => {
+    const response = NextResponse.redirect(url)
 
-  const { pathname } = request.nextUrl
-
-  // Rute konfirmasi undangan harus dapat diakses sebelum sesi dibuat.
-  const isPublicRoute = [
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-    '/auth/confirm',
-  ].includes(pathname)
-
-  if (!user && !isPublicRoute) {
-    // Belum login → redirect ke login
-    const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/login'
-    const response = NextResponse.redirect(loginUrl)
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       response.cookies.set(cookie)
     })
+
     return response
   }
 
-  if (user) {
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('status, role_id')
-      .eq('id', user.id)
-      .single()
+  try {
+    // Jangan hapus: diperlukan untuk memvalidasi user dan refresh session.
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
-    if (profileError || profile?.status !== 'aktif') {
-      await supabase.auth.signOut()
+    if (authError) {
+      console.error('Supabase getUser error:', authError.message)
+    }
+
+    const { pathname } = request.nextUrl
+
+    const isPublicRoute = [
+      '/login',
+      '/signup',
+      '/forgot-password',
+      '/reset-password',
+      '/auth/confirm',
+    ].includes(pathname)
+
+    if (!user && !isPublicRoute) {
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
       loginUrl.search = ''
-      loginUrl.searchParams.set(
-        'error',
-        profileError ? 'account_unavailable' : 'account_inactive',
-      )
-      const response = NextResponse.redirect(loginUrl)
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        response.cookies.set(cookie)
-      })
-      return response
+
+      return redirectWithCookies(loginUrl)
     }
 
-    const { data: role, error: roleError } = await supabase
-      .from('roles')
-      .select('level')
-      .eq('id', profile.role_id)
-      .single()
+    if (user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('status, role_id')
+        .eq('id', user.id)
+        .maybeSingle()
 
-    if (roleError || !role) {
-      await supabase.auth.signOut()
-      const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login'
-      loginUrl.search = ''
-      loginUrl.searchParams.set('error', 'account_unavailable')
-      const response = NextResponse.redirect(loginUrl)
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        response.cookies.set(cookie)
-      })
-      return response
+      if (profileError || !profile || profile.status !== 'aktif') {
+        await supabase.auth.signOut()
+
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = '/login'
+        loginUrl.search = ''
+        loginUrl.searchParams.set(
+          'error',
+          profileError ? 'account_unavailable' : 'account_inactive',
+        )
+
+        return redirectWithCookies(loginUrl)
+      }
+
+      const { data: role, error: roleError } = await supabase
+        .from('roles')
+        .select('level')
+        .eq('id', profile.role_id)
+        .maybeSingle()
+
+      if (roleError || !role) {
+        console.error('Supabase role lookup error:', roleError?.message)
+
+        await supabase.auth.signOut()
+
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = '/login'
+        loginUrl.search = ''
+        loginUrl.searchParams.set('error', 'account_unavailable')
+
+        return redirectWithCookies(loginUrl)
+      }
+
+      const minimumRoleLevel = requiredRoleLevel(pathname)
+
+      if (
+        minimumRoleLevel !== null &&
+        (typeof role.level !== 'number' || role.level < minimumRoleLevel)
+      ) {
+        const fallbackUrl = request.nextUrl.clone()
+        fallbackUrl.pathname = '/tasks'
+        fallbackUrl.search = ''
+        fallbackUrl.searchParams.set('error', 'forbidden')
+
+        return redirectWithCookies(fallbackUrl)
+      }
     }
 
-    const minimumRoleLevel = requiredRoleLevel(pathname)
-    if (minimumRoleLevel !== null && role.level < minimumRoleLevel) {
-      const fallbackUrl = request.nextUrl.clone()
-      fallbackUrl.pathname = '/tasks'
-      fallbackUrl.search = ''
-      fallbackUrl.searchParams.set('error', 'forbidden')
-      const response = NextResponse.redirect(fallbackUrl)
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        response.cookies.set(cookie)
-      })
-      return response
+    if (user && pathname === '/login') {
+      const dashboardUrl = request.nextUrl.clone()
+      dashboardUrl.pathname = '/dashboard'
+      dashboardUrl.search = ''
+
+      return redirectWithCookies(dashboardUrl)
     }
+
+    return supabaseResponse
+  } catch (error) {
+    console.error(
+      'Supabase session middleware error:',
+      error instanceof Error ? error.message : 'Unknown error',
+    )
+
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
-
-  if (user && pathname === '/login') {
-    // Sudah login tapi membuka /login → redirect ke dashboard
-    const dashboardUrl = request.nextUrl.clone()
-    dashboardUrl.pathname = '/dashboard'
-    const response = NextResponse.redirect(dashboardUrl)
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      response.cookies.set(cookie)
-    })
-    return response
-  }
-
-  return supabaseResponse
 }
