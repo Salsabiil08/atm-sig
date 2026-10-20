@@ -30,6 +30,12 @@ type TargetUser = {
   status: 'aktif' | 'nonaktif'
 }
 
+function getDatabaseErrorCode(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null || !('code' in error)) return null
+  const code = (error as { code?: unknown }).code
+  return typeof code === 'string' ? code : null
+}
+
 function recordAdminConfigurationError(error: unknown): UserActionResult | null {
   if (!(error instanceof AdminConfigurationError)) return null
   return {
@@ -101,7 +107,7 @@ async function writeAuditLog(
     new_value: newValue,
   })
 
-  if (error) throw new Error('Gagal mencatat perubahan user pada audit log.')
+  if (error) throw error
 }
 
 type ValidatedAssignment = {
@@ -338,6 +344,7 @@ export async function updateUserName(input: unknown): Promise<UserActionResult> 
     revalidatePath('/users')
     return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
+
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }
@@ -404,6 +411,18 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
 
+  const [{ data: adminActor, error: adminActorError }, { data: adminTarget, error: adminTargetError }] =
+    await Promise.all([
+      admin.from('users').select('id').eq('id', actor.id).maybeSingle(),
+      admin.from('users').select('id').eq('id', target.id).maybeSingle(),
+    ])
+  if (adminActorError || adminTargetError) {
+    return { ok: false, error: 'Database server gagal memeriksa user. Periksa konfigurasi Supabase lalu restart aplikasi.' }
+  }
+  if (!adminActor || !adminTarget) {
+    return { ok: false, error: 'Database server tidak cocok dengan daftar user. Periksa konfigurasi Supabase lalu restart aplikasi.' }
+  }
+
   const assignmentResult = await validateUserAssignment(admin, validated)
   if ('error' in assignmentResult) return { ok: false, error: assignmentResult.error }
   const { assignment } = assignmentResult
@@ -421,12 +440,16 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     org_unit_id: assignment.orgUnitId,
     supervisor_id: assignment.supervisorId,
   }
-  const { error: updateError } = await admin
+  const { data: updatedTarget, error: updateError } = await admin
     .from('users')
     .update(assignmentUpdate)
     .eq('id', target.id)
+    .select('id')
+    .maybeSingle()
 
-  if (updateError) return { ok: false, error: 'Role dan penempatan user tidak dapat diperbarui.' }
+  if (updateError || !updatedTarget) {
+    return { ok: false, error: 'Role dan penempatan user tidak dapat diperbarui. Periksa konfigurasi database server.' }
+  }
 
   try {
     await writeAuditLog(
@@ -445,7 +468,7 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
         supervisorId: assignment.supervisorId,
       }),
     )
-  } catch {
+  } catch (error) {
     const { error: rollbackError } = await admin
       .from('users')
       .update({
@@ -460,7 +483,11 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
         error: 'Audit gagal dan penempatan user tidak dapat dipulihkan. Hubungi administrator.',
       }
     }
-    return { ok: false, error: 'Perubahan role dibatalkan karena audit log gagal.' }
+    const code = getDatabaseErrorCode(error)
+    return {
+      ok: false,
+      error: `Perubahan role dibatalkan karena audit log gagal${code ? ` (kode database ${code})` : ''}.`,
+    }
   }
 
   revalidatePath('/users')
