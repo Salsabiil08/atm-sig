@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warna brand ATM - merah SIG (mengacu Stitch mockup: #d92d20) */
+  --color-brand:        #D92D20;
+  --color-brand-dark:   #B42318;
+  --color-brand-hover:  #c0281c;
+  --color-brand-light:  #FEF2F2;
+  --color-brand-muted:  rgba(217, 45, 32, 0.1);
+
+  /* Latar belakang */
+  --color-bg-app:     #F8FAFC;
+  --color-bg-card:    #FFFFFF;
+  --color-bg-sidebar: #FFFFFF;
+  --color-bg-header:  #D92D20;
+
+  /* Border */
+  --color-border:     #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* Teks */
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #94A3B8;
+  --color-text-on-brand:  #FFFFFF;
+
+  /* Status task */
+  --color-todo:        #6B7280;
+  --color-todo-bg:     #F3F4F6;
+  --color-inprogress:  #2563EB;
+  --color-inprogress-bg: #EFF6FF;
+  --color-blocked:     #DC2626;
+  --color-blocked-bg:  #FEF2F2;
+  --color-review:      #7C3AED;
+  --color-review-bg:   #F5F3FF;
+  --color-revisi:      #D97706;
+  --color-revisi-bg:   #FFFBEB;
+  --color-done:        #16A34A;
+  --color-done-bg:     #F0FDF4;
+
+  /* Prioritas */
+  --color-priority-tinggi:  #DC2626;
+  --color-priority-sedang:  #D97706;
+  --color-priority-rendah:  #16A34A;
+
+  /* Layout */
+  --header-height:  3.5rem;    /* 56px */
+  --sidebar-width:  14rem;     /* 224px = w-56 */
+  --content-padding: 2rem;
+
+  /* Shadows */
+  --shadow-sm:   0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Font */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar tipis */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* Focus ring global */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
 }

@@ -1,0 +1,1 @@
+Buat Change Request baru dari `docs/change-requests/CR-0000-template.md` untuk ide/usulan yang diberikan, dengan status "Diusulkan". Jangan mengerjakan usulan itu dan jangan mengubah scope. Hubungkan ke tujuan di `docs/00-project-charter.md`.

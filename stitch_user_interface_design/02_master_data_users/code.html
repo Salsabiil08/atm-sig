@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Master Data Users - Accounting Task Manager</title>
+<!-- Tailwind CSS v3 CDN with forms and container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#cb2b25',
+              crimson: '#bd241f',
+              lightRed: '#fce8e8',
+              activeBg: '#fbe9e9'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-styles">
+    /* Base font settings and custom subtle scrollbar */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style data-purpose="table-layout">
+    /* Ensure clean row borders and padding alignment */
+    .user-table th {
+      letter-spacing: 0.05em;
+    }
+    .user-table td, .user-table th {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#fbfbfb]">
+<!-- BEGIN: MainHeader -->
+<header class="w-full bg-[#cb2a25] text-white h-[62px] px-6 flex items-center justify-between shrink-0 shadow-sm" data-purpose="app-header">
+<!-- Brand / Logo Area -->
+<div class="flex items-center space-x-3.5">
+<div class="bg-white text-[#cb2a25] font-bold text-xs px-2.5 py-1 rounded-[6px] tracking-wide shadow-sm" data-purpose="brand-badge">
+        ATM
+      </div>
+<h1 class="text-[17px] font-medium tracking-tight">Accounting Task Manager</h1>
+</div>
+<!-- Header Right Side: Date & User Profile -->
+<div class="flex items-center space-x-5">
+<!-- Date Chip -->
+<div class="bg-[#b7221d] text-white text-xs px-4 py-1.5 rounded-full font-normal tracking-wide shadow-inner" data-purpose="current-date">
+        Jum, 16 Okt 2026
+      </div>
+<!-- User Info & Avatar -->
+<div class="flex items-center space-x-3 cursor-pointer select-none" data-purpose="user-profile">
+<div class="text-right leading-tight">
+<div class="text-sm font-semibold tracking-tight">Admin</div>
+<div class="text-[11px] text-red-100 font-light">Super Admin</div>
+</div>
+<div class="w-9 h-9 rounded-full bg-[#e8a329] text-white flex items-center justify-center font-semibold text-xs tracking-wider shadow-sm">
+          AD
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: ContentLayoutContainer -->
+<div class="flex flex-1 w-full overflow-hidden">
+<!-- BEGIN: LeftSidebar -->
+<aside class="w-[230px] bg-white border-r border-gray-200 flex flex-col shrink-0 select-none" data-purpose="sidebar-navigation">
+<nav class="py-4 space-y-0.5 font-medium text-[13.5px]">
+<!-- Dashboard -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+          Dashboard
+        </a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3 20v-5m6 5v-9m6 5V4m6 16V9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Task -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Task
+        </a>
+<!-- Kanban -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Kanban
+        </a>
+<!-- Timeline -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Timeline
+        </a>
+<!-- Approval -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Approval
+        </a>
+<!-- Notifikasi -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Master Data (Active item) -->
+<a class="flex items-center px-6 py-2.5 text-[#cb2b25] bg-[#faeaea] font-semibold border-r-4 border-[#cb2b25] transition-colors" data-purpose="active-menu-item" href="#">
+<svg class="w-5 h-5 mr-3 text-[#cb2b25]" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Master Data
+        </a>
+<!-- Laporan -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-8 py-7 overflow-y-auto" data-purpose="master-data-container">
+<!-- Top Action Bar & Page Title -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-6 gap-4" data-purpose="page-header-actions">
+<!-- Title and Subtitle -->
+<div>
+<h2 class="text-xl font-bold text-gray-900 tracking-tight">MASTER DATA USERS</h2>
+<p class="text-xs text-gray-500 mt-1">Kelola user, role, dan penempatan unit / section</p>
+</div>
+<!-- Controls: Search Input, Filter Button, Add User Button -->
+<div class="flex items-center space-x-3">
+<!-- Search Box -->
+<div class="relative w-64 md:w-72">
+<input class="w-full text-xs text-gray-700 bg-white border border-gray-300 rounded-md px-3.5 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder-gray-400 shadow-sm" data-purpose="search-input" placeholder="Search" type="text"/>
+</div>
+<!-- Filter Button -->
+<button class="px-5 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm transition-colors" data-purpose="filter-button" type="button">
+            Filter
+          </button>
+<!-- Add User Button -->
+<button class="px-5 py-2 text-xs font-medium text-white bg-[#111827] rounded-md hover:bg-black shadow-sm transition-colors flex items-center" data-purpose="add-user-button" type="button">
+            Add User
+          </button>
+</div>
+</div>
+<!-- Users Table Card -->
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm" data-purpose="table-card">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse user-table">
+<thead>
+<tr class="border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase bg-white">
+<th class="py-4 px-6 w-16 text-left" scope="col">NO</th>
+<th class="py-4 px-6 text-left" scope="col">NAMA</th>
+<th class="py-4 px-6 text-left" scope="col">EMAIL</th>
+<th class="py-4 px-6 text-left" scope="col">ROLE</th>
+<th class="py-4 px-6 text-left" scope="col">UNIT / SECTION</th>
+<th class="py-4 px-6 text-left" scope="col">STATUS</th>
+<th class="py-4 px-6 text-center w-28" scope="col">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 text-[13px] text-gray-700 font-normal">
+<!-- Row 1: Rina -->
+<tr class="hover:bg-gray-50/60 transition-colors">
+<td class="py-4 px-6 text-gray-500">1</td>
+<td class="py-4 px-6 font-bold text-gray-900">Rina</td>
+<td class="py-4 px-6 text-gray-600">rina@company.id</td>
+<td class="py-4 px-6 text-gray-700">SM Accounting</td>
+<td class="py-4 px-6 text-gray-700">Unit of Accounting</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-medium bg-[#def7ec] text-[#03543f]">
+                    Active
+                  </span>
+</td>
+<td class="py-4 px-6 text-center">
+<button class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-normal text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors" type="button">
+                    Actions <span class="ml-1.5 text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Maya -->
+<tr class="hover:bg-gray-50/60 transition-colors">
+<td class="py-4 px-6 text-gray-500">2</td>
+<td class="py-4 px-6 font-bold text-gray-900">Maya</td>
+<td class="py-4 px-6 text-gray-600">maya@company.id</td>
+<td class="py-4 px-6 text-gray-700">Manager</td>
+<td class="py-4 px-6 text-gray-700">Reconciliation</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-medium bg-[#def7ec] text-[#03543f]">
+                    Active
+                  </span>
+</td>
+<td class="py-4 px-6 text-center">
+<button class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-normal text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors" type="button">
+                    Actions <span class="ml-1.5 text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Sari -->
+<tr class="hover:bg-gray-50/60 transition-colors">
+<td class="py-4 px-6 text-gray-500">3</td>
+<td class="py-4 px-6 font-bold text-gray-900">Sari</td>
+<td class="py-4 px-6 text-gray-600">sari@company.id</td>
+<td class="py-4 px-6 text-gray-700">Staff/PIC</td>
+<td class="py-4 px-6 text-gray-700">Reconciliation</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-medium bg-[#def7ec] text-[#03543f]">
+                    Active
+                  </span>
+</td>
+<td class="py-4 px-6 text-center">
+<button class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-normal text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors" type="button">
+                    Actions <span class="ml-1.5 text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Agus -->
+<tr class="hover:bg-gray-50/60 transition-colors">
+<td class="py-4 px-6 text-gray-500">4</td>
+<td class="py-4 px-6 font-bold text-gray-900">Agus</td>
+<td class="py-4 px-6 text-gray-600">agus@company.id</td>
+<td class="py-4 px-6 text-gray-700">Staff/PIC</td>
+<td class="py-4 px-6 text-gray-700">Financial Accounting</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-medium bg-[#def7ec] text-[#03543f]">
+                    Active
+                  </span>
+</td>
+<td class="py-4 px-6 text-center">
+<button class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-normal text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors" type="button">
+                    Actions <span class="ml-1.5 text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Rudi -->
+<tr class="hover:bg-gray-50/60 transition-colors">
+<td class="py-4 px-6 text-gray-500">5</td>
+<td class="py-4 px-6 font-bold text-gray-900">Rudi</td>
+<td class="py-4 px-6 text-gray-600">rudi@company.id</td>
+<td class="py-4 px-6 text-gray-700">Spectator</td>
+<td class="py-4 px-6 text-gray-500">-</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-medium bg-[#fef08a] text-[#854d0e]">
+                    Menunggu role
+                  </span>
+</td>
+<td class="py-4 px-6 text-center">
+<button class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-normal text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors" type="button">
+                    Actions <span class="ml-1.5 text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- END: Users Table Card -->
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: ContentLayoutContainer -->
+</body></html>

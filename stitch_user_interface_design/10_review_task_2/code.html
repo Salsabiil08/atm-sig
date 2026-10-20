@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATM - Accounting Task Manager - Review Task</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#dc2626',
+              darkRed: '#b91c1c',
+              lightRed: '#fef2f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f5f8] text-gray-800 antialiased min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#d92d20] h-14 flex items-center justify-between px-6 shrink-0 text-white z-10 shadow-sm" data-purpose="top-navigation-bar">
+<!-- Left: Brand Logo & Application Title -->
+<div class="flex items-center space-x-3">
+<div class="bg-white text-[#d92d20] font-bold text-xs px-2 py-0.5 rounded tracking-wide">
+        ATM
+      </div>
+<h1 class="text-base font-semibold tracking-normal text-white">
+        Accounting Task Manager
+      </h1>
+</div>
+<!-- Right: Date Indicator & User Profile -->
+<div class="flex items-center space-x-4">
+<div class="bg-[#b42318] text-white/95 text-xs font-medium px-3 py-1 rounded-md">
+        Jum, 16 Okt 2026
+      </div>
+<div class="flex items-center space-x-2.5 pl-2">
+<div class="text-right leading-tight">
+<div class="text-xs font-semibold text-white">Maya</div>
+<div class="text-[11px] text-white/80 font-normal">Manager</div>
+</div>
+<!-- Avatar Circle -->
+<div class="w-8 h-8 rounded-full bg-[#f79009] flex items-center justify-center text-white text-xs font-bold border border-white/20 shadow-sm">
+          MY
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- Body Content: Sidebar + Main Workspace -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: LeftSidebar -->
+<aside class="w-56 bg-white border-r border-gray-200 flex flex-col shrink-0 py-4" data-purpose="main-sidebar">
+<nav class="space-y-0.5">
+<!-- Dashboard -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<rect height="7" rx="1" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1" width="7" x="3" y="14"></rect>
+</svg>
+          Dashboard
+        </a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<line x1="18" x2="18" y1="20" y2="10"></line>
+<line x1="12" x2="12" y1="20" y2="4"></line>
+<line x1="6" x2="6" y1="20" y2="14"></line>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Task (Active state) -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-[#d92d20] bg-[#fef3f2] border-l-[3px] border-[#d92d20] transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-[#d92d20] stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Task
+        </a>
+<!-- Kanban -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<rect height="16" rx="1" width="6" x="4" y="4"></rect>
+<rect height="10" rx="1" width="6" x="14" y="4"></rect>
+</svg>
+          Kanban
+        </a>
+<!-- Timeline -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<line x1="4" x2="16" y1="6" y2="6"></line>
+<line x1="8" x2="20" y1="12" y2="12"></line>
+<line x1="4" x2="14" y1="18" y2="18"></line>
+</svg>
+          Timeline
+        </a>
+<!-- Approval -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="9 12 11 14 15 10"></polyline>
+</svg>
+          Approval
+        </a>
+<!-- Notifikasi -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Master Data -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<ellipse cx="12" cy="5" rx="8" ry="3"></ellipse>
+<path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"></path>
+<path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"></path>
+
+          Master Data
+        </a>
+<!-- Laporan -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3.5 text-gray-400 stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="16" x2="8" y1="13" y2="13"></line>
+<line x1="16" x2="8" y1="17" y2="17"></line>
+<polyline points="10 9 9 9 8 9"></polyline>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 p-8 overflow-y-auto" data-purpose="review-task-container">
+<!-- Top Title and Status Badge -->
+<div class="flex items-center space-x-3 mb-5">
+<h2 class="text-lg font-bold text-gray-900 tracking-tight">REVIEW TASK</h2>
+<span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-[#ece9fe] text-[#7a5af8]">
+          Waiting Review
+        </span>
+</div>
+<!-- Main Review Card -->
+<div class="bg-white rounded-lg border border-gray-200/90 shadow-sm p-7 max-w-5xl" data-purpose="task-review-card">
+<!-- Header Key Information Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 pb-6 border-b border-gray-100">
+<!-- Task Title -->
+<div>
+<span class="block text-[11px] font-semibold text-gray-400 tracking-wider uppercase mb-1">TASK</span>
+<div class="text-sm font-bold text-gray-900">Rekap verifikasi mingguan</div>
+</div>
+<!-- PIC -->
+<div>
+<span class="block text-[11px] font-semibold text-gray-400 tracking-wider uppercase mb-1">PIC</span>
+<div class="text-sm font-bold text-gray-900">Wulan</div>
+</div>
+<!-- Tenggat -->
+<div>
+<span class="block text-[11px] font-semibold text-gray-400 tracking-wider uppercase mb-1">TENGGAT</span>
+<div class="text-sm font-bold text-gray-900">20 Okt 2026</div>
+</div>
+<!-- Progress Bar & Value -->
+<div>
+<span class="block text-[11px] font-semibold text-gray-400 tracking-wider uppercase mb-1">PROGRESS</span>
+<div class="flex items-center space-x-2.5 mt-1.5">
+<div class="w-20 bg-gray-200 rounded-full h-2 overflow-hidden">
+<div class="bg-[#12b76a] h-2 rounded-full w-full"></div>
+</div>
+<span class="text-xs font-bold text-gray-900">100% <span class="text-xs font-normal text-gray-500">(WBS 4/4)</span></span>
+</div>
+</div>
+</div>
+<!-- Evidence Section -->
+<div class="pt-6 pb-6 border-b border-gray-100" data-purpose="evidence-section">
+<h3 class="text-sm font-bold text-gray-900 mb-3.5">Evidence</h3>
+<div class="space-y-3">
+<!-- Item 1 -->
+<div class="flex items-center justify-between text-xs py-0.5">
+<div class="evidence-item flex items-center space-x-2.5 cursor-pointer select-none group" data-checked="true">
+<div class="checkbox-indicator w-4 h-4 rounded bg-[#12b76a] border border-[#12b76a] flex items-center justify-center text-white shrink-0 transition-all duration-150 group-hover:ring-2 group-hover:ring-emerald-200">
+<svg class="w-3 h-3 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<span class="text-gray-800 font-medium group-hover:text-gray-900 transition-colors">Rekap verifikasi minggu ke-3 (PDF)</span>
+</div>
+<a class="text-[#2e90fa] hover:text-[#1570ef] font-medium transition-colors" href="#">
+                rekap_mg3.pdf
+              </a>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between text-xs py-0.5">
+<div class="evidence-item flex items-center space-x-2.5 cursor-pointer select-none group" data-checked="true">
+<div class="checkbox-indicator w-4 h-4 rounded bg-[#12b76a] border border-[#12b76a] flex items-center justify-center text-white shrink-0 transition-all duration-150 group-hover:ring-2 group-hover:ring-emerald-200">
+<svg class="w-3 h-3 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<span class="text-gray-800 font-medium group-hover:text-gray-900 transition-colors">Approval verifikasi (screenshot)</span>
+</div>
+<a class="text-[#2e90fa] hover:text-[#1570ef] font-medium transition-colors" href="#">
+                approval_ver.png
+              </a>
+</div>
+</div>
+</div>
+<!-- Komentar Reviewer Section -->
+<div class="pt-6 pb-2" data-purpose="reviewer-comment-section">
+<label class="block text-xs font-bold text-gray-900 mb-2" for="komentar">
+            Komentar reviewer
+          </label>
+<textarea class="w-full rounded-md border border-gray-300 p-3 text-xs text-gray-800 placeholder-gray-400 focus:border-[#d92d20] focus:ring-1 focus:ring-[#d92d20] outline-none transition duration-150 resize-none shadow-none" id="komentar" placeholder="Tulis komentar..." rows="3"></textarea>
+<p class="text-[11px] text-gray-500 mt-1.5">
+            Opsional untuk Approve, wajib untuk Reject (Revisi)
+          </p>
+</div>
+<!-- Action Buttons Footer -->
+<div class="mt-8 flex justify-end items-center space-x-3" data-purpose="action-buttons-group">
+<!-- Discard Button -->
+<button class="px-5 py-2 border border-gray-300 rounded-md text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-none" type="button">
+            Discard
+          </button>
+<!-- Reject (Revisi) Button -->
+<button class="px-5 py-2 border border-[#d92d20] rounded-md text-xs font-semibold text-[#d92d20] bg-white hover:bg-[#fef3f2] transition-colors shadow-none" type="button">
+            Reject (Revisi)
+          </button>
+<!-- Approve (Done) Button -->
+<button class="px-5 py-2 rounded-md text-xs font-semibold text-white bg-[#12b76a] hover:bg-[#039855] transition-colors shadow-sm" type="button">
+            Approve (Done)
+          </button>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const evidenceItems = document.querySelectorAll('.evidence-item');
+    const checkmarkSvg = `<svg class="w-3 h-3 stroke-current stroke-2 fill-none" viewbox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+    evidenceItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const indicator = item.querySelector('.checkbox-indicator');
+        const isChecked = item.getAttribute('data-checked') === 'true';
+        const nextState = !isChecked;
+        item.setAttribute('data-checked', nextState ? 'true' : 'false');
+
+        if (nextState) {
+          // Checked state: vibrant green square with crisp white checkmark SVG
+          indicator.className = 'checkbox-indicator w-4 h-4 rounded bg-[#12b76a] border border-[#12b76a] flex items-center justify-center text-white shrink-0 transition-all duration-150 group-hover:ring-2 group-hover:ring-emerald-200';
+          indicator.innerHTML = checkmarkSvg;
+        } else {
+          // Unchecked state: empty bordered square checkbox (rounded-md border-gray-300)
+          indicator.className = 'checkbox-indicator w-4 h-4 rounded border border-gray-300 bg-white flex items-center justify-center text-transparent shrink-0 transition-all duration-150 group-hover:border-gray-400 group-hover:ring-2 group-hover:ring-gray-100';
+          indicator.innerHTML = '';
+        }
+      });
+    });
+  });
+</script>
+</body></html>

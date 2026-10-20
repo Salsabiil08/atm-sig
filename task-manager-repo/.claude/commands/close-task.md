@@ -1,0 +1,1 @@
+Tutup task aktif: (1) verifikasi `docs/09-definition-of-done.md` satu per satu, (2) jalankan `/check-scope`, (3) jalankan subagent `docs-sync`, (4) laporkan task berikutnya dari backlog tanpa memulainya.

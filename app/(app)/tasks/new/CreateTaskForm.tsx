@@ -1,0 +1,184 @@
+'use client'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition, type FormEvent } from 'react'
+import { createTask } from '@/lib/tasks/actions'
+import type { TaskCreationOptions } from '@/lib/tasks/queries'
+
+type Props = TaskCreationOptions & { currentUserRoleLevel: number }
+
+const inputClass = 'mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600'
+
+function canAssignOwner(
+  owner: TaskCreationOptions['owners'][number],
+  section: TaskCreationOptions['sections'][number],
+  currentUserRoleLevel: number,
+) {
+  if (owner.roleLevel >= 5) return currentUserRoleLevel >= 5
+  if (owner.roleLevel === 4) return owner.orgUnitId === section.parentId
+  return owner.orgUnitId === section.id
+}
+
+function toJakartaTimestamp(date: string) {
+  return new Date(`${date}T00:00:00+07:00`).toISOString()
+}
+
+export default function CreateTaskForm({
+  sections,
+  owners,
+  currentUserRoleLevel,
+}: Props) {
+  const router = useRouter()
+  const [sectionId, setSectionId] = useState(String(sections[0]?.id ?? ''))
+  const [ownerId, setOwnerId] = useState('')
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+  const section = sections.find((item) => String(item.id) === sectionId)
+  const eligibleOwners = section
+    ? owners.filter((owner) => canAssignOwner(owner, section, currentUserRoleLevel))
+    : []
+  const selectedOwner = eligibleOwners.find((owner) => owner.id === ownerId) ?? eligibleOwners[0]
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    if (!section || !selectedOwner) {
+      setError('Pilih section dan PIC yang memiliki reviewer aktif.')
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+    const title = String(formData.get('title') ?? '')
+    const startDate = String(formData.get('startDate') ?? '')
+    const dueDate = String(formData.get('dueDate') ?? '')
+    const priority = String(formData.get('priority') ?? '')
+
+    startTransition(async () => {
+      const result = await createTask({
+        title,
+        ownerId: selectedOwner.id,
+        reviewerId: selectedOwner.reviewerId,
+        orgUnitId: section.id,
+        parentTaskId: null,
+        priority: priority as 'rendah' | 'sedang' | 'tinggi',
+        startDate: toJakartaTimestamp(startDate),
+        dueDate: toJakartaTimestamp(dueDate),
+      })
+
+      if ('error' in result && result.error) {
+        setError(result.error)
+        return
+      }
+      if (!('data' in result) || !result.data) {
+        setError('Task tidak berhasil dibuat. Silakan coba lagi.')
+        return
+      }
+      router.push(`/tasks/${result.data.id}`)
+      router.refresh()
+    })
+  }
+
+  return (
+    <section className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-5">
+        <Link href="/tasks" className="text-sm font-medium text-red-700 hover:underline">
+          ← Kembali ke daftar task
+        </Link>
+        <h1 className="mt-3 text-xl font-bold tracking-tight text-slate-900">BUAT TASK BARU</h1>
+        <p className="mt-1 text-sm text-slate-500">Isi PIC, section, prioritas, dan timeline task.</p>
+      </div>
+
+      {sections.length === 0 ? (
+        <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Tidak ada section dalam cakupan Anda yang dapat dipilih untuk task baru.
+        </p>
+      ) : (
+        <form onSubmit={submit} className="grid gap-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <label className="text-sm font-medium text-slate-700">
+            Judul task
+            <input className={inputClass} name="title" required maxLength={200} />
+          </label>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <label className="text-sm font-medium text-slate-700">
+              Section
+              <select
+                className={inputClass}
+                value={sectionId}
+                onChange={(event) => {
+                  setSectionId(event.target.value)
+                  setOwnerId('')
+                }}
+                required
+              >
+                {sections.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              PIC
+              <select
+                className={inputClass}
+                value={selectedOwner?.id ?? ''}
+                onChange={(event) => setOwnerId(event.target.value)}
+                required
+                disabled={eligibleOwners.length === 0}
+              >
+                {eligibleOwners.length === 0
+                  ? <option value="">Tidak ada PIC yang dapat dipilih</option>
+                  : eligibleOwners.map((owner) => (
+                    <option key={owner.id} value={owner.id}>{owner.name}</option>
+                  ))}
+              </select>
+            </label>
+          </div>
+
+          {selectedOwner && (
+            <p className="-mt-3 text-xs text-slate-500">
+              Reviewer: {selectedOwner.reviewerName ?? 'Tidak diperlukan untuk task GM/Super Admin'}
+            </p>
+          )}
+
+          <div className="grid gap-5 sm:grid-cols-3">
+            <label className="text-sm font-medium text-slate-700">
+              Prioritas
+              <select className={inputClass} name="priority" defaultValue="sedang">
+                <option value="rendah">Rendah</option>
+                <option value="sedang">Sedang</option>
+                <option value="tinggi">Tinggi</option>
+              </select>
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              Tanggal mulai
+              <input className={inputClass} type="date" name="startDate" required />
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              Tenggat
+              <input className={inputClass} type="date" name="dueDate" required />
+            </label>
+          </div>
+
+          {eligibleOwners.length === 0 && (
+            <p role="alert" className="text-sm text-amber-800">
+              Section ini belum memiliki PIC dengan reviewer aktif yang sesuai.
+            </p>
+          )}
+          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+
+          <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-4">
+            <Link href="/tasks" className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              Batal
+            </Link>
+            <button
+              type="submit"
+              disabled={isPending || eligibleOwners.length === 0}
+              className="min-h-11 rounded-lg bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending ? 'Menyimpan…' : 'Buat Task'}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
+  )
+}

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATM - Accounting Task Manager</title>
+<!-- Tailwind CSS CDN with forms and container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#dc2626',
+              darkRed: '#b91c1c',
+              bannerBg: '#fff9db',
+              bannerBorder: '#fce38a',
+              bannerText: '#7d4a00'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scroll-and-table">
+    /* Subtle scrollbar and custom borders if needed */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#d92d20] text-white h-14 flex items-center justify-between px-6 select-none shrink-0 shadow-sm" data-purpose="top-navigation-bar">
+<!-- Left Logo & Application Title -->
+<div class="flex items-center space-x-3">
+<div class="bg-white text-[#d92d20] font-bold text-xs px-2.5 py-1 rounded tracking-wide shadow-sm flex items-center justify-center">
+        ATM
+      </div>
+<h1 class="text-base font-semibold tracking-normal text-white">Accounting Task Manager</h1>
+</div>
+<!-- Right Date & User Profile -->
+<div class="flex items-center space-x-5">
+<!-- Calendar Date Pill -->
+<div class="bg-[#b42318] bg-opacity-70 text-xs px-3.5 py-1.5 rounded-md font-medium text-red-50">
+        Jum, 16 Okt 2026
+      </div>
+<!-- User Information -->
+<div class="flex items-center space-x-3">
+<div class="text-right leading-tight">
+<p class="text-xs font-bold text-white">Rina</p>
+<p class="text-[11px] text-red-200">SM Accounting</p>
+</div>
+<!-- Avatar Badge -->
+<div class="w-8 h-8 rounded-full bg-[#f59e0b] text-white flex items-center justify-center font-bold text-xs shadow">
+          RN
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainLayoutWrapper -->
+<div class="flex flex-1 overflow-hidden" data-purpose="content-layout">
+<!-- BEGIN: SidebarNav -->
+<aside class="w-56 bg-white border-r border-slate-200 flex flex-col shrink-0 select-none py-2" data-purpose="sidebar-menu">
+<nav class="space-y-1">
+<!-- Item: Dashboard (Active) -->
+<a class="flex items-center space-x-3 px-5 py-2.5 bg-red-50 text-[#d92d20] font-semibold text-sm border-l-4 border-[#d92d20] transition-colors" href="#">
+<!-- Icon: Dashboard Grid -->
+<svg class="w-4 h-4 text-[#d92d20]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+<span>Dashboard</span>
+</a>
+<!-- Item: Kinerja & Job Load -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Chart Bar -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Kinerja &amp; Job Load</span>
+</a>
+<!-- Item: Task -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Task / Check Clipboard -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Task</span>
+</a>
+<!-- Item: Kanban -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Kanban Column Layout -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m6 10a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2v10a2 2 0 002 2h2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Kanban</span>
+</a>
+<!-- Item: Timeline -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Timeline Bars -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Timeline</span>
+</a>
+<!-- Item: Approval -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Check Circle -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Approval</span>
+</a>
+<!-- Item: Notifikasi -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Bell -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Notifikasi</span>
+</a>
+<!-- Item: Master Data -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Database / Storage -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Master Data</span>
+</a>
+<!-- Item: Laporan -->
+<a class="flex items-center space-x-3 px-5 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-sm font-normal transition-colors" href="#">
+<!-- Icon: Document Report -->
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Laporan</span>
+</a>
+</nav>
+</aside>
+<!-- END: SidebarNav -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 overflow-y-auto px-8 py-6" data-purpose="dashboard-main-view">
+<!-- Top Title and Filter Row -->
+<section class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-5 gap-4" data-purpose="page-title-and-filters">
+<div>
+<h2 class="text-xl font-bold tracking-tight text-slate-900 uppercase">Dashboard</h2>
+<p class="text-xs text-slate-500 mt-0.5">Ringkasan task Department of Accounting</p>
+</div>
+<!-- Filter Dropdowns -->
+<div class="flex items-center space-x-3">
+<!-- Filter: Per struktur -->
+<div class="relative">
+<button class="inline-flex items-center justify-between bg-white border border-slate-300 rounded-lg px-3.5 py-1.5 text-xs text-slate-700 shadow-sm hover:border-slate-400 focus:outline-none min-w-[170px]" type="button">
+<span>Per struktur: <span class="font-normal text-slate-800">Semua</span></span>
+<svg class="w-4 h-4 text-slate-400 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- Filter: Periode -->
+<div class="relative">
+<button class="inline-flex items-center justify-between bg-white border border-slate-300 rounded-lg px-3.5 py-1.5 text-xs text-slate-700 shadow-sm hover:border-slate-400 focus:outline-none min-w-[100px]" type="button">
+<span>Periode</span>
+<svg class="w-4 h-4 text-slate-400 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+</section>
+<!-- Warning Alert Banner -->
+<section class="mb-6" data-purpose="notification-banner">
+<div class="bg-[#fef9c3] border border-[#fde047] rounded-lg px-4 py-3 flex items-center space-x-3 shadow-xs">
+<!-- Exclamation / Warning Icon inside yellow badge -->
+<div class="w-5 h-5 rounded-full bg-[#eab308] text-white flex items-center justify-center shrink-0">
+<span class="text-xs font-bold leading-none">!</span>
+</div>
+<p class="text-xs text-[#854d0e] font-medium leading-relaxed">
+            3 task Staff/PIC melewati checkpoint dengan progress tertinggal, 1 task sudah lewat tenggat.
+          </p>
+</div>
+</section>
+<!-- Metrics Cards Grid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-7" data-purpose="summary-metrics">
+<!-- Metric 1: Total Task -->
+<div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+<p class="text-xs text-slate-500 font-medium mb-1">Total Task</p>
+<p class="text-3xl font-bold text-slate-800">24</p>
+</div>
+<!-- Metric 2: Tertinggal -->
+<div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+<p class="text-xs text-slate-500 font-medium mb-1">Tertinggal</p>
+<p class="text-3xl font-bold text-[#ea580c]">3</p>
+</div>
+<!-- Metric 3: Blocked -->
+<div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+<p class="text-xs text-slate-500 font-medium mb-1">Blocked</p>
+<p class="text-3xl font-bold text-[#dc2626]">2</p>
+</div>
+<!-- Metric 4: Menunggu Review -->
+<div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+<p class="text-xs text-slate-500 font-medium mb-1">Menunggu Review</p>
+<p class="text-3xl font-bold text-[#7c3aed]">4</p>
+</div>
+<!-- Metric 5: Pengajuan Deadline -->
+<div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+<p class="text-xs text-slate-500 font-medium mb-1">Pengajuan Deadline</p>
+<p class="text-3xl font-bold text-[#2563eb]">2</p>
+</div>
+</section>
+<!-- Task Perlu Perhatian Section -->
+<section class="mt-2" data-purpose="attention-task-list">
+<h3 class="text-sm font-bold text-slate-800 mb-3 tracking-normal">Task Perlu Perhatian</h3>
+<!-- Table Container -->
+<div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="border-b border-slate-200 text-[11px] font-semibold text-slate-400 tracking-wider">
+<th class="py-3 px-4 font-semibold" scope="col">TASK</th>
+<th class="py-3 px-4 font-semibold" scope="col">PIC</th>
+<th class="py-3 px-4 font-semibold" scope="col">TENGGAT</th>
+<th class="py-3 px-4 font-semibold" scope="col">WAKTU BERJALAN</th>
+<th class="py-3 px-4 font-semibold" scope="col">PROGRESS</th>
+<th class="py-3 px-4 font-semibold text-right sm:text-left" scope="col">STATUS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-slate-700">
+<!-- Row 1: Verifikasi tagihan vendor batch 3 -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                  Verifikasi tagihan vendor batch 3
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  Dimas
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  13 Okt
+                </td>
+<td class="py-3.5 px-4 whitespace-nowrap">
+<span class="inline-block bg-[#fee2e2] text-[#dc2626] text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
+                    Lewat
+                  </span>
+</td>
+<td class="py-3.5 px-4 whitespace-nowrap">
+<div class="flex items-center space-x-3 w-40">
+<div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#dc2626] h-1.5 rounded-full" style="width: 30%"></div>
+</div>
+<span class="text-xs text-slate-700 font-medium">30%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 whitespace-nowrap text-right sm:text-left">
+<span class="inline-block bg-[#e0f2fe] text-[#0284c7] text-[11px] font-medium px-3 py-1 rounded-full">
+                    In progress
+                  </span>
+</td>
+</tr>
+<!-- Row 2: Jurnal penyesuaian akhir bulan -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                  Jurnal penyesuaian akhir bulan
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  Agus
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  16 Okt
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  90%
+                </td>
+<td class="py-3.5 px-4 whitespace-nowrap">
+<div class="flex items-center space-x-3 w-40">
+<div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#f59e0b] h-1.5 rounded-full" style="width: 20%"></div>
+</div>
+<span class="text-xs text-slate-700 font-medium">20%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 whitespace-nowrap text-right sm:text-left">
+<span class="inline-block bg-[#fee2e2] text-[#ef4444] text-[11px] font-medium px-3 py-1 rounded-full">
+                    Blocked
+                  </span>
+</td>
+</tr>
+<!-- Row 3: Rekonsiliasi bank September -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                  Rekonsiliasi bank September
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  Sari
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  15 Okt
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  80%
+                </td>
+<td class="py-3.5 px-4 whitespace-nowrap">
+<div class="flex items-center space-x-3 w-40">
+<div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#f59e0b] h-1.5 rounded-full" style="width: 40%"></div>
+</div>
+<span class="text-xs text-slate-700 font-medium">40%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 whitespace-nowrap text-right sm:text-left">
+<span class="inline-block bg-[#e0f2fe] text-[#0284c7] text-[11px] font-medium px-3 py-1 rounded-full">
+                    In progress
+                  </span>
+</td>
+</tr>
+<!-- Row 4: Rekap verifikasi mingguan -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                  Rekap verifikasi mingguan
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  Wulan
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  20 Okt
+                </td>
+<td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+                  40%
+                </td>
+<td class="py-3.5 px-4 whitespace-nowrap">
+<div class="flex items-center space-x-3 w-40">
+<div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#10b981] h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<span class="text-xs text-slate-700 font-medium">100%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 whitespace-nowrap text-right sm:text-left">
+<span class="inline-block bg-[#ede9fe] text-[#8b5cf6] text-[11px] font-medium px-3 py-1 rounded-full">
+                    Review
+                  </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- END: MainContentArea -->
+</div>
+<!-- END: MainLayoutWrapper -->
+</body></html>

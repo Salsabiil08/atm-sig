@@ -1,0 +1,1 @@
+Baca `tasks/CURRENT.md` dan `tasks/BACKLOG.md`. Tampilkan: milestone aktif, task aktif, ID FR/BR terkait beserta acceptance criteria dari `docs/02-requirements.md`, pertanyaan terbuka yang relevan, dan hal yang DILARANG untuk task ini. Jangan mulai mengerjakan hal di luar task aktif.

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Accounting Task Manager - DAFTAR TASK</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#D32F2F',
+              'red-dark': '#B71C1C',
+              'red-light': '#FDE8E8',
+              'badge-red': '#DC2626'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="custom-overrides">
+    /* Subtle custom borders and scroll tuning */
+    body {
+      background-color: #F8FAFC;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="font-sans antialiased text-slate-800 min-h-screen flex flex-col bg-[#F9FAFB]">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#D32F2F] text-white h-16 flex items-center justify-between px-6 shrink-0 shadow-sm z-20">
+<!-- Brand / Logo Area -->
+<div class="flex items-center space-x-3">
+<div class="bg-white text-[#D32F2F] font-bold text-xs px-2.5 py-1 rounded tracking-wide shadow-sm flex items-center justify-center">
+        ATM
+      </div>
+<span class="text-base font-semibold tracking-normal text-white">Accounting Task Manager</span>
+</div>
+<!-- User & Date Area -->
+<div class="flex items-center space-x-4">
+<div class="bg-[#B72222] text-xs font-medium text-white px-3 py-1.5 rounded-md flex items-center">
+        Jum, 16 Okt 2026
+      </div>
+<div class="flex items-center space-x-2.5 pl-2 cursor-pointer">
+<div class="text-right leading-tight">
+<div class="text-xs font-bold text-white leading-none">Maya</div>
+<div class="text-[10px] text-red-100 font-normal leading-tight">Manager</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-[#EAB308] text-white flex items-center justify-center text-xs font-semibold shadow-inner">
+          MY
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- Outer Body Container -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: Sidebar -->
+<aside class="w-56 bg-white border-r border-slate-200 flex flex-col shrink-0 select-none py-4">
+<nav class="flex flex-col space-y-0.5 px-2">
+<!-- Dashboard -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Dashboard
+        </a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Task (Active Item) -->
+<a class="flex items-center px-4 py-2.5 text-xs font-semibold text-[#D32F2F] bg-[#FDEDED] rounded-r-md -ml-2 pl-6 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-[#D32F2F]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Task
+        </a>
+<!-- Kanban -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Kanban
+        </a>
+<!-- Timeline -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Timeline
+        </a>
+<!-- Approval -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Approval
+        </a>
+<!-- Notifikasi -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Master Data -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Master Data
+        </a>
+<!-- Laporan -->
+<a class="flex items-center px-4 py-2.5 text-xs font-medium text-slate-600 rounded-md hover:bg-slate-50 transition-colors" href="#">
+<svg class="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 overflow-y-auto px-8 py-6 bg-[#FAFAFA]" data-purpose="task-management-dashboard">
+<!-- Top Title Bar and Action Button -->
+<div class="flex items-center justify-between mb-5">
+<div>
+<h1 class="text-xl font-bold text-slate-900 tracking-tight">DAFTAR TASK</h1>
+<p class="text-xs text-slate-500 mt-0.5">Pantau seluruh task sesuai kewenangan role</p>
+</div>
+<button class="inline-flex items-center justify-center bg-[#D32F2F] hover:bg-[#B71C1C] text-white text-xs font-semibold px-4 py-2 rounded-md shadow-sm transition-colors" type="button">
+          + Buat Task
+        </button>
+</div>
+<!-- BEGIN: FilterBar -->
+<div class="flex flex-wrap items-center gap-3 mb-6" data-purpose="table-filter-bar">
+<!-- Kategori Filter -->
+<div class="relative">
+<select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs rounded-md pl-3 pr-8 py-2 w-36 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 cursor-pointer shadow-sm">
+<option>Kategori</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+<!-- Section Filter -->
+<div class="relative">
+<select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs rounded-md pl-3 pr-8 py-2 w-36 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 cursor-pointer shadow-sm">
+<option>Section</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+<!-- Status Filter -->
+<div class="relative">
+<select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs rounded-md pl-3 pr-8 py-2 w-36 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 cursor-pointer shadow-sm">
+<option>Status</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+<!-- PIC Filter -->
+<div class="relative">
+<select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs rounded-md pl-3 pr-8 py-2 w-36 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 cursor-pointer shadow-sm">
+<option>PIC</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+<!-- Periode Filter -->
+<div class="relative">
+<select class="appearance-none bg-white border border-slate-200 text-slate-700 text-xs rounded-md pl-3 pr-8 py-2 w-36 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 cursor-pointer shadow-sm">
+<option>Periode</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+<!-- END: FilterBar -->
+<!-- BEGIN: TaskTable -->
+<div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm" data-purpose="task-table-wrapper">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="task-table">
+<thead>
+<tr class="border-b border-slate-100 bg-[#FCFCFD]">
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">TASK</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">KATEGORI</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">PIC</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">SECTION</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">TENGGAT</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">STATUS</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider" scope="col">PROGRESS</th>
+<th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center" scope="col">AKSI</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-xs">
+<!-- Row 1: Verifikasi tagihan vendor b.3 -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-900 leading-normal">
+                  Verifikasi tagihan vendor b.3
+                </td>
+<td class="py-3.5 px-4 text-slate-600">Verifikasi</td>
+<td class="py-3.5 px-4 text-slate-600">Dimas</td>
+<td class="py-3.5 px-4 text-slate-600">Verification 1</td>
+<td class="py-3.5 px-4 text-slate-600">13 Okt</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-600">
+                    In progress
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center space-x-3">
+<div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-[#D32F2F] h-1.5 rounded-full" style="width: 30%"></div>
+</div>
+<span class="text-xs text-slate-600 font-medium">30%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 px-3 py-1 rounded text-xs font-normal transition-colors" type="button">
+                    Detail
+                  </button>
+</td>
+</tr>
+<!-- Row 2: Rekonsiliasi bank September -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-900 leading-normal">
+                  Rekonsiliasi bank September
+                </td>
+<td class="py-3.5 px-4 text-slate-600">Rekonsiliasi</td>
+<td class="py-3.5 px-4 text-slate-600">Sari</td>
+<td class="py-3.5 px-4 text-slate-600">Reconciliation</td>
+<td class="py-3.5 px-4 text-slate-600">15 Okt</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-600">
+                    In progress
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center space-x-3">
+<div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-[#D32F2F] h-1.5 rounded-full" style="width: 40%"></div>
+</div>
+<span class="text-xs text-slate-600 font-medium">40%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 px-3 py-1 rounded text-xs font-normal transition-colors" type="button">
+                    Detail
+                  </button>
+</td>
+</tr>
+<!-- Row 3: Jurnal penyesuaian akhir bulan -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-900 leading-normal">
+                  Jurnal penyesuaian akhir bulan
+                </td>
+<td class="py-3.5 px-4 text-slate-600">Jurnal</td>
+<td class="py-3.5 px-4 text-slate-600">Agus</td>
+<td class="py-3.5 px-4 text-slate-600">Financial Acc.</td>
+<td class="py-3.5 px-4 text-slate-600">16 Okt</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-100 text-rose-600">
+                    Blocked
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center space-x-3">
+<div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-[#D32F2F] h-1.5 rounded-full" style="width: 20%"></div>
+</div>
+<span class="text-xs text-slate-600 font-medium">20%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 px-3 py-1 rounded text-xs font-normal transition-colors" type="button">
+                    Detail
+                  </button>
+</td>
+</tr>
+<!-- Row 4: Rekap verifikasi mingguan -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-900 leading-normal">
+                  Rekap verifikasi mingguan
+                </td>
+<td class="py-3.5 px-4 text-slate-600">Verifikasi</td>
+<td class="py-3.5 px-4 text-slate-600">Wulan</td>
+<td class="py-3.5 px-4 text-slate-600">Verification 2</td>
+<td class="py-3.5 px-4 text-slate-600">20 Okt</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-purple-100 text-purple-600">
+                    Review
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center space-x-3">
+<div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<span class="text-xs text-slate-600 font-medium">100%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 px-3 py-1 rounded text-xs font-normal transition-colors" type="button">
+                    Detail
+                  </button>
+</td>
+</tr>
+<!-- Row 5: Alokasi biaya produksi Q3 -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-semibold text-slate-900 leading-normal">
+                  Alokasi biaya produksi Q3
+                </td>
+<td class="py-3.5 px-4 text-slate-600">Biaya</td>
+<td class="py-3.5 px-4 text-slate-600">Bayu</td>
+<td class="py-3.5 px-4 text-slate-600">Cost Accounting</td>
+<td class="py-3.5 px-4 text-slate-600">24 Okt</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600">
+                    To do
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center space-x-3">
+<div class="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-slate-300 h-1.5 rounded-full" style="width: 0%"></div>
+</div>
+<span class="text-xs text-slate-600 font-medium">0%</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 px-3 py-1 rounded text-xs font-normal transition-colors" type="button">
+                    Detail
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- END: TaskTable -->
+</main>
+<!-- END: MainContent -->
+</div>
+</body></html>

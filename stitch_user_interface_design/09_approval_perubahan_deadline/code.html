@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Approval Perubahan Deadline - Accounting Task Manager</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#D32F2F',
+              darkRed: '#B71C1C',
+              lightRed: '#FDECEC',
+              pillYellowBg: '#FEF3C7',
+              pillYellowText: '#92400E',
+              pillGreenBg: '#DCFCE7',
+              pillGreenText: '#15803D',
+              btnGreen: '#059669',
+              btnGreenHover: '#047857'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #FAFAFA;
+      color: #333333;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#FBFBFB]">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#D32F2F] text-white h-16 flex items-center justify-between px-6 shadow-sm flex-shrink-0" data-purpose="app-header">
+<!-- Brand Logo and App Name -->
+<div class="flex items-center space-x-3">
+<div class="bg-white text-[#D32F2F] font-bold px-2.5 py-1 rounded text-sm tracking-wider shadow-sm flex items-center justify-center">
+        ATM
+      </div>
+<h1 class="text-lg font-semibold tracking-normal text-white">Accounting Task Manager</h1>
+</div>
+<!-- Header Right Side: Date & User Profile -->
+<div class="flex items-center space-x-6">
+<!-- Current Date -->
+<div class="text-xs text-white/90 font-normal">
+        Jum, 16 Okt 2026
+      </div>
+<!-- User Profile Info -->
+<div class="flex items-center space-x-3">
+<div class="text-right leading-tight">
+<div class="font-semibold text-sm text-white">Rina</div>
+<div class="text-[11px] text-white/80">SM Accounting</div>
+</div>
+<!-- User Avatar Circle -->
+<div class="w-10 h-10 rounded-full bg-[#E58929] flex items-center justify-center text-white font-medium text-sm shadow-inner">
+          RN
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: BodyContainer -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: LeftSidebar -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 py-4" data-purpose="navigation-sidebar">
+<nav class="space-x-0 space-y-1">
+<!-- Navigation Item: Dashboard -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+          Dashboard
+        </a>
+<!-- Navigation Item: Kinerja & Job Load -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3 20v-4m6 4v-8m6 4V4m6 16v-6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Navigation Item: Task -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Task
+        </a>
+<!-- Navigation Item: Kanban -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<rect height="16" rx="1" width="6" x="4" y="4"></rect>
+<rect height="10" rx="1" width="6" x="14" y="4"></rect>
+</svg>
+          Kanban
+        </a>
+<!-- Navigation Item: Timeline -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Timeline
+        </a>
+<!-- Navigation Item: Approval (Active) -->
+<a class="flex items-center px-6 py-2.5 text-sm font-semibold bg-[#FDECEC] text-[#D32F2F] border-l-4 border-[#D32F2F] transition-colors" data-purpose="active-menu-item" href="#">
+<svg class="w-5 h-5 mr-3 text-[#D32F2F] stroke-current fill-none" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Approval
+        </a>
+<!-- Navigation Item: Notifikasi -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Navigation Item: Master Data -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M21 17c0 1.66-4 3-9 3s-9-1.34-9-3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Master Data
+        </a>
+<!-- Navigation Item: Laporan -->
+<a class="flex items-center px-6 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3.5 text-gray-400 stroke-current fill-none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 p-8 overflow-y-auto" data-purpose="approval-management-view">
+<!-- Section Title & Description -->
+<section class="mb-6" data-purpose="page-heading">
+<h2 class="text-xl font-bold tracking-tight text-gray-900 uppercase">Approval Perubahan Deadline</h2>
+<p class="text-sm text-gray-500 mt-1">Pengajuan perubahan deadline dari Staff/PIC</p>
+</section>
+<!-- BEGIN: ApprovalTableSection -->
+<section class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6" data-purpose="deadline-approval-table-container">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs sm:text-sm border-collapse" id="approval-table">
+<thead>
+<tr class="border-b border-gray-200 bg-white text-gray-500 font-semibold tracking-wider text-[11px] uppercase">
+<th class="py-4 px-6 font-semibold" scope="col">Task</th>
+<th class="py-4 px-6 font-semibold" scope="col">PIC</th>
+<th class="py-4 px-6 font-semibold" scope="col">Deadline Lama</th>
+<th class="py-4 px-6 font-semibold" scope="col">Deadline Baru</th>
+<th class="py-4 px-6 font-semibold" scope="col">Alasan</th>
+<th class="py-4 px-6 font-semibold" scope="col">Status</th>
+<th class="py-4 px-6 font-semibold" scope="col">Aksi</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 text-gray-700">
+<!-- Row 1: Rekonsiliasi bank September -->
+<tr class="hover:bg-gray-50/50 transition-colors">
+<td class="py-4 px-6 font-medium text-gray-900">
+                  Rekonsiliasi bank September
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Sari
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  15 Okt
+                </td>
+<td class="py-4 px-6 font-bold text-gray-900">
+                  17 Okt
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Menunggu data Treasury
+                </td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#FEF3C7] text-[#92400E]">
+                    Menunggu
+                  </span>
+</td>
+<td class="py-4 px-6">
+<div class="flex items-center space-x-2">
+<button class="px-3.5 py-1.5 text-xs font-medium text-[#D32F2F] bg-white border border-[#D32F2F] rounded hover:bg-red-50 transition-colors" type="button">
+                      Reject
+                    </button>
+<button class="px-3.5 py-1.5 text-xs font-medium text-white bg-[#059669] rounded hover:bg-[#047857] transition-colors shadow-sm" type="button">
+                      Approve
+                    </button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Jurnal penyesuaian akhir bln -->
+<tr class="hover:bg-gray-50/50 transition-colors">
+<td class="py-4 px-6 font-medium text-gray-900">
+                  Jurnal penyesuaian akhir bln
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Agus
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  16 Okt
+                </td>
+<td class="py-4 px-6 font-bold text-gray-900">
+                  19 Okt
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Menunggu approval kas
+                </td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#FEF3C7] text-[#92400E]">
+                    Menunggu
+                  </span>
+</td>
+<td class="py-4 px-6">
+<div class="flex items-center space-x-2">
+<button class="px-3.5 py-1.5 text-xs font-medium text-[#D32F2F] bg-white border border-[#D32F2F] rounded hover:bg-red-50 transition-colors" type="button">
+                      Reject
+                    </button>
+<button class="px-3.5 py-1.5 text-xs font-medium text-white bg-[#059669] rounded hover:bg-[#047857] transition-colors shadow-sm" type="button">
+                      Approve
+                    </button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Verifikasi tagihan vendor b.3 -->
+<tr class="hover:bg-gray-50/50 transition-colors">
+<td class="py-4 px-6 font-medium text-gray-900">
+                  Verifikasi tagihan vendor b.3
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Dimas
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  13 Okt
+                </td>
+<td class="py-4 px-6 font-bold text-gray-900">
+                  14 Okt
+                </td>
+<td class="py-4 px-6 text-gray-600">
+                  Revisi dokumen vendor
+                </td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#DCFCE7] text-[#15803D]">
+                    Disetujui
+                  </span>
+</td>
+<td class="py-4 px-6 text-gray-500 font-medium">
+                  -
+                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- END: ApprovalTableSection -->
+<!-- BEGIN: InfoNoteBanner -->
+<aside class="w-full bg-white border border-gray-200 rounded-lg p-3 text-xs text-gray-500" data-purpose="audit-log-info">
+        Approver: SM, GM, atau Super Admin. Keputusan dan waktu persetujuan tercatat di audit log.
+      </aside>
+<!-- END: InfoNoteBanner -->
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: BodyContainer -->
+</body></html>

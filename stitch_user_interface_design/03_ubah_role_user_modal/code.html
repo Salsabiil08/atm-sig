@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATM - Accounting Task Manager | Master Data Users</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#B8292F',
+              dark: '#111827',
+              muted: '#6B7280'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="custom-scrollbars">
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800 min-h-screen relative overflow-hidden">
+<!-- BEGIN: TopHeader -->
+<header class="bg-[#B8292F] text-white h-14 px-6 flex items-center justify-between shadow-sm relative z-10" data-purpose="top-navigation">
+<!-- Brand Info -->
+<div class="flex items-center space-x-3">
+<span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded tracking-wide uppercase">ATM</span>
+<h1 class="text-base font-semibold tracking-wide">Accounting Task Manager</h1>
+</div>
+<!-- User & Date Profile Info -->
+<div class="flex items-center space-x-4">
+<span class="text-xs bg-black/10 px-3 py-1.5 rounded text-white/90 font-medium">Jum, 16 Okt 2026</span>
+<div class="flex items-center space-x-2 text-right">
+<div class="leading-tight">
+<div class="text-xs font-bold text-white">Admin</div>
+<div class="text-[10px] text-white/70">Super Admin</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-[#8A7942] text-white font-medium flex items-center justify-center text-xs shadow-inner">
+          AD
+        </div>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainLayout -->
+<div class="flex h-[calc(100vh-3.5rem)]">
+<!-- BEGIN: Sidebar -->
+<aside class="w-60 bg-white border-r border-gray-200 flex flex-col py-4 select-none shrink-0" data-purpose="main-sidebar">
+<nav class="space-y-0.5 px-3">
+<!-- Dashboard -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Dashboard</span>
+</a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Kinerja &amp; Job Load</span>
+</a>
+<!-- Task -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Task</span>
+</a>
+<!-- Kanban -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Kanban</span>
+</a>
+<!-- Timeline -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Timeline</span>
+</a>
+<!-- Approval -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Approval</span>
+</a>
+<!-- Notifikasi -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Notifikasi</span>
+</a>
+<!-- Master Data (Active Item) -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-[#B8292F] bg-red-50 text-sm font-semibold" href="#">
+<svg class="w-4 h-4 text-[#B8292F]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Master Data</span>
+</a>
+<!-- Laporan -->
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-50 text-sm font-medium" href="#">
+<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Laporan</span>
+</a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 p-8 overflow-y-auto" data-purpose="users-master-content">
+<!-- Title & Search Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-6 gap-4">
+<div>
+<h2 class="text-xl font-bold text-gray-900 tracking-tight">MASTER DATA USERS</h2>
+<p class="text-xs text-gray-500 mt-0.5">Kelola user, role, dan penempatan unit / section</p>
+</div>
+<!-- Filter and Action Bar -->
+<div class="flex items-center space-x-3">
+<div class="relative">
+<input class="w-64 h-9 px-3 text-xs bg-white border border-gray-300 rounded focus:ring-1 focus:ring-gray-400 focus:outline-none placeholder-gray-400" placeholder="Search" type="text"/>
+</div>
+<button class="h-9 px-4 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+            Filter
+          </button>
+<button class="h-9 px-4 text-xs font-medium text-white bg-gray-900 rounded hover:bg-gray-800">
+            Add User
+          </button>
+</div>
+</div>
+<!-- Master Data Table Container -->
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse text-xs">
+<thead>
+<tr class="border-b border-gray-200 text-gray-500 uppercase text-[11px] font-semibold tracking-wider">
+<th class="py-3 px-4 w-12 text-center">NO</th>
+<th class="py-3 px-4">NAMA</th>
+<th class="py-3 px-4">EMAIL</th>
+<th class="py-3 px-4">ROLE</th>
+<th class="py-3 px-4">UNIT / SECTION</th>
+<th class="py-3 px-4 text-center">STATUS</th>
+<th class="py-3 px-4 text-center">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 text-gray-700">
+<!-- Row 1 -->
+<tr>
+<td class="py-3 px-4 text-center text-gray-400">1</td>
+<td class="py-3 px-4 font-semibold text-gray-900">Rina</td>
+<td class="py-3 px-4 text-gray-500">rina@company.id</td>
+<td class="py-3 px-4">SM Accounting</td>
+<td class="py-3 px-4">Unit of Accounting</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Active</span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50 inline-flex items-center space-x-1">
+<span>Actions</span>
+<span class="text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr>
+<td class="py-3 px-4 text-center text-gray-400">2</td>
+<td class="py-3 px-4 font-semibold text-gray-900">Maya</td>
+<td class="py-3 px-4 text-gray-500">maya@company.id</td>
+<td class="py-3 px-4">Manager</td>
+<td class="py-3 px-4">Cost Accounting</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Active</span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50 inline-flex items-center space-x-1">
+<span>Actions</span>
+<span class="text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr>
+<td class="py-3 px-4 text-center text-gray-400">3</td>
+<td class="py-3 px-4 font-semibold text-gray-900">Sari</td>
+<td class="py-3 px-4 text-gray-500">sari@company.id</td>
+<td class="py-3 px-4">Supervisor</td>
+<td class="py-3 px-4">Tax Accounting</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Active</span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50 inline-flex items-center space-x-1">
+<span>Actions</span>
+<span class="text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr>
+<td class="py-3 px-4 text-center text-gray-400">4</td>
+<td class="py-3 px-4 font-semibold text-gray-900">Agus</td>
+<td class="py-3 px-4 text-gray-500">agus@company.id</td>
+<td class="py-3 px-4">Staff/PIC</td>
+<td class="py-3 px-4">General Accounting</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">Active</span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50 inline-flex items-center space-x-1">
+<span>Actions</span>
+<span class="text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr>
+<td class="py-3 px-4 text-center text-gray-400">5</td>
+<td class="py-3 px-4 font-semibold text-gray-900">Rudi</td>
+<td class="py-3 px-4 text-gray-500">rudi@company.id</td>
+<td class="py-3 px-4">Staff/PIC</td>
+<td class="py-3 px-4">Cost Accounting</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-800">Menunggu role</span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-50 inline-flex items-center space-x-1">
+<span>Actions</span>
+<span class="text-[9px]">▼</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: MainLayout -->
+<!-- BEGIN: ModalOverlayBackdrop -->
+<div class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-[1px]" data-purpose="modal-backdrop">
+<!-- BEGIN: EditRoleModalDialog -->
+<div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100" data-purpose="edit-role-modal">
+<!-- Modal Header -->
+<div class="px-6 pt-6 pb-2 relative">
+<button aria-label="Close dialog" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<h3 class="text-base font-bold text-gray-900">Ubah Role User (oleh Admin)</h3>
+<p class="text-xs text-gray-500 mt-1">Tentukan role dan penempatan unit / section</p>
+</div>
+<!-- Modal Body Form -->
+<div class="px-6 py-4 space-y-4">
+<!-- Field 1: Nama (Disabled) -->
+<div>
+<label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama</label>
+<input class="w-full text-xs px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 focus:outline-none cursor-not-allowed select-none" disabled="" type="text" value="Rudi"/>
+</div>
+<!-- Field 2: Role* (Dropdown) -->
+<div>
+<label class="block text-xs font-semibold text-gray-700 mb-1.5">
+            Role<span class="text-red-500">*</span>
+</label>
+<div class="relative">
+<select class="w-full appearance-none text-xs px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 pr-8">
+<option selected="">Staff/PIC</option>
+<option>Supervisor</option>
+<option>Manager</option>
+<option>SM Accounting</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Field 3: Unit* (Dropdown) -->
+<div>
+<label class="block text-xs font-semibold text-gray-700 mb-1.5">
+            Unit<span class="text-red-500">*</span>
+</label>
+<div class="relative">
+<select class="w-full appearance-none text-xs px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 pr-8">
+<option selected="">Unit of Accounting</option>
+<option>Unit of Finance</option>
+<option>Unit of Internal Audit</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Field 4: Section* (Dropdown) -->
+<div>
+<label class="block text-xs font-semibold text-gray-700 mb-1.5">
+            Section<span class="text-red-500">*</span>
+</label>
+<div class="relative">
+<select class="w-full appearance-none text-xs px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 pr-8">
+<option selected="">Cost Accounting</option>
+<option>Tax Accounting</option>
+<option>General Accounting</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Helper Note Box -->
+<div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+<p class="text-[11px] text-gray-500 leading-normal">
+            Satu user hanya satu role. Perubahan role dicatat di audit log.
+          </p>
+</div>
+</div>
+<!-- Modal Actions (Footer) -->
+<div class="px-6 py-4 bg-white flex justify-end items-center space-x-2.5">
+<button class="px-5 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm" type="button">
+          Discard
+        </button>
+<button class="px-5 py-2 text-xs font-medium text-white bg-black rounded-lg hover:bg-gray-900 transition-colors shadow-sm" type="button">
+          Save
+        </button>
+</div>
+</div>
+<!-- END: EditRoleModalDialog -->
+</div>
+<!-- END: ModalOverlayBackdrop -->
+</body></html>

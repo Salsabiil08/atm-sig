@@ -1,0 +1,1 @@
+Jalankan subagent `scope-guardian` terhadap perubahan saat ini. Lalu, sesuai area yang disentuh, jalankan juga `rbac-reviewer`, `rules-verifier`, atau `data-model-reviewer`. Ringkas semua VERDICT. Jika ada DRIFT/FAIL, jangan lanjut menutup task; perbaiki atau catat ke `docs/open-questions.md`.

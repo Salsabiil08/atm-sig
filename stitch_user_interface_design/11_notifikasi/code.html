@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATM - Accounting Task Manager - Notifikasi</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#D32F2F',
+              darkRed: '#B71C1C',
+              badgeRed: '#B72B2B',
+              activeBg: '#FDECEC',
+              activeBar: '#D32F2F',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: CustomStyles -->
+<style data-purpose="typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style data-purpose="custom-scroll">
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 3px;
+    }
+  </style>
+<!-- END: CustomStyles -->
+</head>
+<body class="bg-[#F8F9FA] text-gray-800 antialiased min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="bg-[#D32F2F] text-white h-14 px-6 flex items-center justify-between shadow-sm z-20 flex-shrink-0" data-purpose="main-header">
+<!-- Brand / App Logo & Name -->
+<div class="flex items-center space-x-3">
+<div class="bg-white text-[#D32F2F] text-xs font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
+        ATM
+      </div>
+<span class="font-semibold text-base tracking-normal">Accounting Task Manager</span>
+</div>
+<!-- Right Header items: Date & Profile -->
+<div class="flex items-center space-x-6 text-sm">
+<div class="bg-[#B72B2B] text-white/95 text-xs font-medium px-3.5 py-1.5 rounded-md">
+        Jum, 16 Okt 2026
+      </div>
+<div class="flex items-center space-x-2.5">
+<div class="text-right leading-tight">
+<div class="font-semibold text-xs text-white">Maya</div>
+<div class="text-[11px] text-white/80">Manager</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-[#E5A93C] text-white text-xs font-bold flex items-center justify-center shadow-inner">
+          MY
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: SidebarNav -->
+<aside class="w-60 bg-white border-r border-gray-200 flex flex-col py-3 flex-shrink-0" data-purpose="sidebar-navigation">
+<nav class="space-y-0.5 px-0">
+<!-- Dashboard -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+          Dashboard
+        </a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3 20h18M6 20V10M12 20V4M18 20v8" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Task -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Task
+        </a>
+<!-- Kanban -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 4v16m6-16v16M4 4h16v16H4V4z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Kanban
+        </a>
+<!-- Timeline -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Timeline
+        </a>
+<!-- Approval -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Approval
+        </a>
+<!-- Notifikasi (Active) -->
+<a class="relative flex items-center px-6 py-2.5 bg-[#FDECEC] text-[#D32F2F] text-sm font-medium" href="#">
+<!-- Active bar indicator on left -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#D32F2F]"></div>
+<svg class="w-5 h-5 mr-3 text-[#D32F2F] stroke-current" fill="none" stroke-width="2" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Master Data -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Master Data
+        </a>
+<!-- Laporan -->
+<a class="flex items-center px-6 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm font-medium transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-400 stroke-current" fill="none" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: SidebarNav -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 overflow-y-auto px-8 py-7" data-purpose="main-content-area">
+<!-- Title & Actions Bar -->
+<div class="flex items-start justify-between mb-5">
+<div>
+<h1 class="text-xl font-bold tracking-tight text-gray-900 uppercase">NOTIFIKASI</h1>
+<p class="text-xs text-gray-500 mt-1 font-normal">Tampilan: Manager (atasan langsung PIC)</p>
+</div>
+<button class="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-lg shadow-sm transition-all focus:outline-none" type="button">
+          Tandai semua dibaca
+        </button>
+</div>
+<!-- BEGIN: NotificationCardList -->
+<div class="bg-white rounded-xl border border-gray-200/90 shadow-sm overflow-hidden" data-purpose="notification-list">
+<!-- Item 1: Sari menanggapi reminder (Unread) -->
+<div class="flex items-center justify-between px-6 py-4 bg-[#FFF8F8] border-b border-gray-100 hover:bg-[#FFF2F2]/60 transition-colors">
+<div class="flex items-center space-x-4">
+<!-- Icon: Green check -->
+<div class="w-9 h-9 rounded-full bg-[#D1FADF] flex items-center justify-center flex-shrink-0">
+<svg class="w-5 h-5 text-[#12B76A]" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Notification details -->
+<div class="text-xs">
+<span class="font-bold text-gray-900">Sari menanggapi reminder</span>
+<p class="text-gray-500 font-normal mt-0.5">Rekonsiliasi bank September: masih on track.</p>
+</div>
+</div>
+<!-- Time & Unread Indicator -->
+<div class="flex items-center space-x-3">
+<span class="text-xs text-gray-500 font-normal">25 menit lalu</span>
+<span class="w-2 h-2 rounded-full bg-[#E53935] flex-shrink-0"></span>
+</div>
+</div>
+<!-- Item 2: Progress diperbarui: Jurnal penyesuaian (Unread) -->
+<div class="flex items-center justify-between px-6 py-4 bg-[#FFF8F8] border-b border-gray-100 hover:bg-[#FFF2F2]/60 transition-colors">
+<div class="flex items-center space-x-4">
+<!-- Icon: Blue counter-clockwise reload/progress -->
+<div class="w-9 h-9 rounded-full bg-[#E0EAFF] flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4 text-[#444CE7]" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M3 10h10a5 5 0 015 5v1a5 5 0 01-5 5H6" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M7 6L3 10l4 4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Notification details -->
+<div class="text-xs">
+<span class="font-bold text-gray-900">Progress diperbarui: Jurnal penyesuaian</span>
+<p class="text-gray-500 font-normal mt-0.5">Agus memperbarui progress menjadi 20%.</p>
+</div>
+</div>
+<!-- Time & Unread Indicator -->
+<div class="flex items-center space-x-3">
+<span class="text-xs text-gray-500 font-normal">1 jam lalu</span>
+<span class="w-2 h-2 rounded-full bg-[#E53935] flex-shrink-0"></span>
+</div>
+</div>
+<!-- Item 3: Pengajuan perubahan deadline (Read) -->
+<div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 hover:bg-gray-50/70 transition-colors">
+<div class="flex items-center space-x-4">
+<!-- Icon: Orange gear/clock -->
+<div class="w-9 h-9 rounded-full bg-[#FEF0C7] flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4 text-[#D97706]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Notification details -->
+<div class="text-xs">
+<span class="font-bold text-gray-900">Pengajuan perubahan deadline</span>
+<p class="text-gray-500 font-normal mt-0.5">Sari mengajukan Rekonsiliasi bank September: 15 Okt menjadi 17 Okt.</p>
+</div>
+</div>
+<!-- Time -->
+<div class="flex items-center space-x-3">
+<span class="text-xs text-gray-500 font-normal">2 jam lalu</span>
+</div>
+</div>
+<!-- Item 4: Pengajuan perubahan deadline (Read) -->
+<div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 hover:bg-gray-50/70 transition-colors">
+<div class="flex items-center space-x-4">
+<!-- Icon: Orange gear/clock -->
+<div class="w-9 h-9 rounded-full bg-[#FEF0C7] flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4 text-[#D97706]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Notification details -->
+<div class="text-xs">
+<span class="font-bold text-gray-900">Pengajuan perubahan deadline</span>
+<p class="text-gray-500 font-normal mt-0.5">Agus mengajukan Jurnal penyesuaian akhir bulan: 16 Okt menjadi 19 Okt.</p>
+</div>
+</div>
+<!-- Time -->
+<div class="flex items-center space-x-3">
+<span class="text-xs text-gray-500 font-normal">3 jam lalu</span>
+</div>
+</div>
+<!-- Item 5: Progress diperbarui: Verifikasi tagihan vendor b.3 (Read) -->
+<div class="flex items-center justify-between px-6 py-4 bg-white hover:bg-gray-50/70 transition-colors">
+<div class="flex items-center space-x-4">
+<!-- Icon: Blue counter-clockwise reload/progress -->
+<div class="w-9 h-9 rounded-full bg-[#E0EAFF] flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4 text-[#444CE7]" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M3 10h10a5 5 0 015 5v1a5 5 0 01-5 5H6" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M7 6L3 10l4 4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Notification details -->
+<div class="text-xs">
+<span class="font-bold text-gray-900">Progress diperbarui: Verifikasi tagihan vendor b.3</span>
+<p class="text-gray-500 font-normal mt-0.5">Dimas memperbarui progress menjadi 30%.</p>
+</div>
+</div>
+<!-- Time -->
+<div class="flex items-center space-x-3">
+<span class="text-xs text-gray-500 font-normal">Kemarin</span>
+</div>
+</div>
+</div>
+<!-- END: NotificationCardList -->
+</main>
+<!-- END: MainContent -->
+</div>
+</body></html>

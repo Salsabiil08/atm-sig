@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATM - Accounting Task Manager</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#B91C1C',
+              darkRed: '#991B1B',
+              crimson: '#C5221F',
+              accent: '#E02424',
+              softPink: '#FEE2E2',
+              warningBg: '#FEF3C7',
+              warningBorder: '#FDE68A',
+              warningText: '#92400E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom utility styles -->
+<style data-purpose="custom-layout">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-[#F8F9FA] text-gray-800 h-screen w-screen overflow-hidden flex flex-col relative select-none">
+<!-- BEGIN: TopBar -->
+<header class="bg-[#B91C1C] text-white h-14 px-6 flex items-center justify-between z-10 shrink-0">
+<!-- Brand identity -->
+<div class="flex items-center space-x-3">
+<span class="bg-[#E2E8F0] text-[#B91C1C] text-xs font-black px-2 py-1 rounded tracking-wide shadow-sm">ATM</span>
+<h1 class="text-base font-semibold tracking-normal text-white">Accounting Task Manager</h1>
+</div>
+<!-- User & Date info -->
+<div class="flex items-center space-x-5">
+<div class="bg-[#991B1B] text-xs font-medium px-3.5 py-1.5 rounded-md text-red-100">
+        Jum, 16 Okt 2026
+      </div>
+<div class="flex items-center space-x-3 pl-2">
+<div class="text-right leading-tight">
+<p class="text-xs font-bold text-white">Sari</p>
+<p class="text-[11px] text-red-200">Staff/PIC</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-[#A3A25D] text-white flex items-center justify-center font-bold text-xs ring-2 ring-red-400">
+          SR
+        </div>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: Sidebar -->
+<aside class="w-60 bg-white border-r border-gray-200 flex flex-col py-4 shrink-0">
+<nav class="space-y-1">
+<!-- Dashboard -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<rect height="7" rx="1.5" stroke-width="2" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" stroke-width="2" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" stroke-width="2" width="7" x="3" y="14"></rect>
+<rect height="7" rx="1.5" stroke-width="2" width="7" x="14" y="14"></rect>
+</svg>
+          Dashboard
+        </a>
+<!-- Kinerja & Job Load -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Kinerja &amp; Job Load
+        </a>
+<!-- Task (Active) -->
+<a class="flex items-center px-6 py-2.5 text-sm font-semibold text-[#B91C1C] bg-red-50/60 border-l-4 border-[#B91C1C]" href="#">
+<svg class="w-5 h-5 mr-3 text-[#B91C1C]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Task
+        </a>
+<!-- Kanban -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Kanban
+        </a>
+<!-- Timeline -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h10M4 18h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Timeline
+        </a>
+<!-- Approval -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9" stroke-width="2"></circle>
+<path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Approval
+        </a>
+<!-- Notifikasi -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Notifikasi
+        </a>
+<!-- Master Data -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<ellipse cx="12" cy="5" rx="8" ry="3" stroke-width="2"></ellipse>
+<path d="M4 5v6c0 1.657 3.582 3 8 3s8-1.343 8-3V5m-16 9v5c0 1.657 3.582 3 8 3s8-1.343 8-3v-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Master Data
+        </a>
+<!-- Laporan -->
+<a class="flex items-center px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors" href="#">
+<svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Laporan
+        </a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+<!-- Header detail task -->
+<section class="space-y-1" data-purpose="task-header">
+<div class="flex items-center space-x-3">
+<h2 class="text-2xl font-bold text-gray-900 tracking-tight">Rekonsiliasi bank September</h2>
+<span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">In progress</span>
+</div>
+<p class="text-xs text-gray-500">
+          Kategori: Rekonsiliasi <span class="mx-1">|</span> Reconciliation, Unit of Accounting
+        </p>
+</section>
+<!-- Reminder Banner -->
+<section class="bg-[#F8EFE0] border border-[#ECD9BD] rounded-lg p-3.5 flex items-center justify-between" data-purpose="reminder-banner">
+<div class="text-xs font-semibold text-[#8C5D23]">
+          Reminder 80% waktu berjalan. Progress 40%. Masih on track?
+        </div>
+<div class="flex items-center space-x-2.5">
+<button class="bg-[#1B704C] hover:bg-[#165a3d] text-white text-xs font-medium px-4 py-1.5 rounded-md transition-colors">
+            Masih on track
+          </button>
+<button class="border border-[#DC2626] text-[#DC2626] bg-[#FFF5F5] hover:bg-red-50 text-xs font-medium px-4 py-1.5 rounded-md transition-colors">
+            Butuh support
+          </button>
+</div>
+</section>
+<!-- Meta Info Box (PIC, Diberi oleh, Tenggat, etc.) -->
+<section class="border border-gray-200 bg-white rounded-lg p-4 grid grid-cols-5 gap-4" data-purpose="task-metadata">
+<div>
+<span class="text-[11px] font-bold text-gray-400 block uppercase">PIC</span>
+<span class="text-sm font-semibold text-gray-800">Sari</span>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 block uppercase">DIBERI OLEH</span>
+<span class="text-sm font-semibold text-gray-800">Budi Santoso</span>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 block uppercase">TENGGAT</span>
+<span class="text-sm font-semibold text-gray-800">15 Okt 2026</span>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 block uppercase">REVIEWER</span>
+<span class="text-sm font-semibold text-gray-800">Agus Pratama</span>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 block uppercase">PROGRESS</span>
+<div class="flex items-center space-x-2 mt-1">
+<div class="w-20 bg-gray-200 h-2 rounded-full overflow-hidden">
+<div class="bg-red-600 h-full w-[40%]"></div>
+</div>
+<span class="text-xs font-bold text-gray-800">40%</span>
+<span class="text-[11px] text-gray-400">(2 dari 5 WBS)</span>
+</div>
+</div>
+</section>
+<!-- Two-column sections (WBS & Support) -->
+<div class="grid grid-cols-2 gap-6">
+<!-- WBS & Timeline Card -->
+<section class="border border-gray-200 bg-white rounded-lg p-5 space-y-4" data-purpose="wbs-card">
+<h3 class="font-bold text-sm text-gray-900">WBS dan Timeline</h3>
+<div class="space-y-3">
+<div class="flex items-center space-x-3">
+<span class="w-4 h-4 bg-emerald-600 text-white rounded flex items-center justify-center text-xs">✓</span>
+<span class="text-xs line-through text-gray-400">Tarik mutasi rekening</span>
+</div>
+<div class="flex items-center space-x-3">
+<span class="w-4 h-4 bg-emerald-600 text-white rounded flex items-center justify-center text-xs">✓</span>
+<span class="text-xs line-through text-gray-400">Rekap transaksi bank</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-4 h-4 border border-gray-300 rounded"></div>
+<span class="text-xs text-gray-700">Cocokkan dengan buku besar</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-4 h-4 border border-gray-300 rounded"></div>
+<span class="text-xs text-gray-700">Analisis selisih</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-4 h-4 border border-gray-300 rounded"></div>
+<span class="text-xs text-gray-700">Susun laporan rekonsiliasi</span>
+</div>
+</div>
+</section>
+<!-- Support yang dibutuhkan Card -->
+<section class="border border-gray-200 bg-white rounded-lg p-5 space-y-4" data-purpose="support-card">
+<h3 class="font-bold text-sm text-gray-900">Support yang dibutuhkan</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between py-1">
+<span class="text-xs text-gray-700">Data mutasi rekening</span>
+<span class="bg-green-100 text-green-700 text-[11px] font-semibold px-2 py-0.5 rounded">Diberikan</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="text-xs text-gray-700">Persetujuan jurnal selisih kas</span>
+<span class="bg-amber-100 text-amber-700 text-[11px] font-semibold px-2 py-0.5 rounded">Diminta</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Evidence Wajib Card -->
+<section class="border border-gray-200 bg-white rounded-lg p-5 space-y-4" data-purpose="evidence-card">
+<h3 class="font-bold text-sm text-gray-900">Evidence wajib <span class="font-normal text-gray-500 text-xs">(1 dari 2)</span></h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between py-1">
+<span class="text-xs text-gray-700">Dokumen laporan rekonsiliasi (PDF)</span>
+<span class="text-xs text-gray-400">Belum diunggah</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="text-xs text-gray-700">Screenshot saldo akhir</span>
+<button class="border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-medium px-4 py-1.5 rounded transition-colors">
+              Unggah
+            </button>
+</div>
+</div>
+</section>
+<!-- Bottom action bar on background -->
+<footer class="flex items-center justify-between pt-4 border-t border-gray-100 text-xs text-gray-400" data-purpose="background-actions">
+<p>Progress dihitung dari penyelesaian WBS dan evidence wajib terunggah.</p>
+<div class="flex items-center space-x-3">
+<button class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-md font-medium">Ajukan perubahan deadline</button>
+<button class="border border-red-300 text-red-600 bg-red-50 px-4 py-2 rounded-md font-medium">Butuh support</button>
+<button class="border border-gray-200 bg-gray-100 text-gray-400 px-4 py-2 rounded-md font-medium" disabled="">Ajukan review</button>
+</div>
+</footer>
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- BEGIN: ModalBackdropAndDialog -->
+<!-- Dimmed Background Overlay -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center p-4 z-50 transition-opacity">
+<!-- Modal Container -->
+<div class="bg-white rounded-xl shadow-2xl w-full max-w-[540px] overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150" data-purpose="modal-container">
+<!-- Modal Header -->
+<div class="px-7 pt-6 pb-2 flex items-start justify-between" data-purpose="modal-header">
+<div>
+<h3 class="text-lg font-bold text-gray-900 tracking-tight">Ajukan Perubahan Deadline</h3>
+<p class="text-xs text-gray-500 mt-1">Rekonsiliasi bank September</p>
+</div>
+<!-- Close button (x) -->
+<button aria-label="Close" class="text-gray-400 hover:text-gray-600 transition-colors p-1 -mr-2 -mt-1 rounded-full" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Modal Body (Form Fields) -->
+<div class="px-7 py-4 space-y-4" data-purpose="modal-body">
+<!-- Field 1: Deadline saat ini (Disabled) -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold text-gray-700">Deadline saat ini</label>
+<input class="w-full bg-[#F3F4F6] text-gray-700 text-xs px-3.5 py-2.5 rounded-md border border-gray-200 cursor-not-allowed select-none focus:outline-none" disabled="" type="text" value="15 Okt 2026"/>
+</div>
+<!-- Field 2: Deadline baru* -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold text-gray-700">
+            Deadline baru<span class="text-red-500 font-bold">*</span>
+</label>
+<div class="relative flex items-center">
+<input class="w-full bg-white text-gray-800 text-xs px-3.5 py-2.5 rounded-md border border-gray-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 pr-10" type="text" value="17 Okt 2026"/>
+<!-- Calendar Icon with tiny '17' indicator -->
+<div class="absolute right-3.5 pointer-events-none flex items-center justify-center text-red-600">
+<div class="relative flex items-center justify-center">
+<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span class="absolute top-[8px] text-[7px] font-bold text-red-600 leading-none">17</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Field 3: Alasan* -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold text-gray-700">
+            Alasan<span class="text-red-500 font-bold">*</span>
+</label>
+<textarea class="w-full bg-white text-gray-800 text-xs px-3.5 py-2.5 rounded-md border border-gray-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 resize-none leading-relaxed" rows="3">Menunggu data mutasi dari Treasury</textarea>
+</div>
+<!-- Helper note -->
+<div class="bg-[#F8F9FA] rounded-md px-3.5 py-2.5 border border-gray-100">
+<p class="text-[11px] text-gray-500 leading-snug">
+            Diajukan ke atasan. Deadline baru berlaku setelah disetujui SM/GM/Super Admin.
+          </p>
+</div>
+</div>
+<!-- Modal Footer (Actions) -->
+<div class="px-7 pt-2 pb-6 flex items-center justify-end space-x-3" data-purpose="modal-footer">
+<!-- Discard Button -->
+<button class="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm focus:outline-none" type="button">
+          Discard
+        </button>
+<!-- Kirim Button -->
+<button class="bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-semibold px-6 py-2.5 rounded-lg shadow-sm transition-colors focus:outline-none" type="button">
+          Kirim
+        </button>
+</div>
+</div>
+</div>
+<!-- END: ModalBackdropAndDialog -->
+</body></html>
