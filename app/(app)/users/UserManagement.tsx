@@ -116,6 +116,13 @@ export default function UserManagement({
         router.refresh()
         return true
       }
+      if (result.error.startsWith('User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.')) {
+        setError('Daftar user sudah berubah. Daftar dimuat ulang; pilih user kembali untuk melanjutkan.')
+        setEditingUser(null)
+        setAssignmentUser(null)
+        router.refresh()
+        return false
+      }
       setError(result.error)
       return false
     } catch {
