@@ -39,11 +39,13 @@ function recordAdminConfigurationError(error: unknown): UserActionResult | null 
 }
 
 async function getTargetUser(
-  admin: ReturnType<typeof createAdminClient>,
   userId: string,
   email?: string,
 ): Promise<TargetUser | null> {
-  const { data, error } = await admin
+  // Read through the signed-in session, just like the users page. The admin
+  // client remains reserved for privileged writes and audit logging.
+  const supabase = await createClient()
+  const { data, error } = await supabase
     .from('users')
     .select('id, name, role_id, org_unit_id, supervisor_id, status')
     .eq('id', userId)
@@ -53,20 +55,13 @@ async function getTargetUser(
   if (data || !email) return data
 
   const normalizedEmail = email.trim().toLowerCase()
-  const { data: emailMatch, error: emailError } = await admin
+  const { data: emailMatch, error: emailError } = await supabase
     .from('users')
     .select('id, name, role_id, org_unit_id, supervisor_id, status')
     .eq('email', normalizedEmail)
     .maybeSingle()
 
   if (emailError) throw new Error('Gagal membaca profil user.')
-  if (!emailMatch) return null
-
-  const { data: authResult, error: authError } = await admin.auth.admin.getUserById(emailMatch.id)
-  if (authError || !authResult.user?.email || authResult.user.email.toLowerCase() !== normalizedEmail) {
-    return null
-  }
-
   return emailMatch
 }
 
@@ -338,10 +333,10 @@ export async function updateUserName(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId, validated.email)
+  const target = await getTargetUser(validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
+    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
@@ -403,10 +398,10 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId, validated.email)
+  const target = await getTargetUser(validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
+    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
 
   const assignmentResult = await validateUserAssignment(admin, validated)
@@ -492,10 +487,10 @@ export async function proposeUserRoleChange(input: unknown): Promise<UserActionR
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId, validated.email)
+  const target = await getTargetUser(validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
+    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengusulkan perubahan untuk user ini.' }
@@ -596,7 +591,7 @@ export async function decideUserRoleChange(input: unknown): Promise<UserActionRe
   if (requestError) return { ok: false, error: 'Gagal membaca usulan perubahan role.' }
   if (!request) return { ok: false, error: 'Usulan tidak ditemukan atau sudah diproses.' }
 
-  const target = await getTargetUser(admin, request.target_user_id)
+  const target = await getTargetUser(request.target_user_id)
   if (!target) return { ok: false, error: 'User tujuan usulan tidak ditemukan.' }
 
   if (validated.decision === 'approved') {
@@ -704,10 +699,10 @@ export async function updateUserStatus(input: unknown): Promise<UserActionResult
     }
   }
 
-  const target = await getTargetUser(admin, validated.userId, validated.email)
+  const target = await getTargetUser(validated.userId, validated.email)
   if (!target) {
     revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ditemukan oleh server berdasarkan ID maupun email. Pastikan server memakai project Supabase yang sama dengan halaman.' }
+    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
   }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
