@@ -156,7 +156,7 @@ export async function getPendingRoleChangeRequests(): Promise<PendingRoleChangeR
   return requests.map((request) => ({
     id: request.id,
     targetUserId: request.target_user_id,
-    targetName: userNames.get(request.target_user_id) ?? 'User tidak ditemukan',
+    targetName: userNames.get(request.target_user_id) ?? 'User tidak ditemukan e',
     requesterName: userNames.get(request.requested_by) ?? 'GM tidak ditemukan',
     roleName: roleNames.get(request.requested_role_id) ?? 'Role tidak ditemukan',
     orgUnitName: unitNames.get(request.requested_org_unit_id) ?? 'Penempatan tidak ditemukan',
