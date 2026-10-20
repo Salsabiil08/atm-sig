@@ -678,7 +678,7 @@ export async function updateUserStatus(input: unknown): Promise<UserActionResult
   }
 
   const target = await getTargetUser(admin, validated.userId)
-  if (!target) return { ok: false, error: 'User tidak ditemukan.' }
+  if (!target) return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }
