@@ -321,7 +321,10 @@ export async function updateUserName(input: unknown): Promise<UserActionResult> 
   }
 
   const target = await getTargetUser(admin, validated.userId)
-  if (!target) return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  if (!target) {
+    revalidatePath('/users')
+    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }
@@ -383,7 +386,10 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
   }
 
   const target = await getTargetUser(admin, validated.userId)
-  if (!target) return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  if (!target) {
+    revalidatePath('/users')
+    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  }
 
   const assignmentResult = await validateUserAssignment(admin, validated)
   if ('error' in assignmentResult) return { ok: false, error: assignmentResult.error }
@@ -469,7 +475,10 @@ export async function proposeUserRoleChange(input: unknown): Promise<UserActionR
   }
 
   const target = await getTargetUser(admin, validated.userId)
-  if (!target) return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  if (!target) {
+    revalidatePath('/users')
+    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengusulkan perubahan untuk user ini.' }
   }
@@ -678,7 +687,10 @@ export async function updateUserStatus(input: unknown): Promise<UserActionResult
   }
 
   const target = await getTargetUser(admin, validated.userId)
-  if (!target) return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  if (!target) {
+    revalidatePath('/users')
+    return { ok: false, error: 'User tidak ditemukan. Daftar user mungkin sudah kedaluwarsa.' }
+  }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }
