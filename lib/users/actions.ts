@@ -47,8 +47,7 @@ async function getTargetUser(
     .select('id, name, role_id, org_unit_id, supervisor_id, status')
     .eq('id', userId)
     .maybeSingle()
-  alert(userId)
-  console.log(userId)
+
   if (error) throw new Error('Gagal membaca profil user.')
   return data
 }
