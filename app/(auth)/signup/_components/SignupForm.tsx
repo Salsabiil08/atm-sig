@@ -6,10 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 // Memetakan error Supabase Auth ke pesan yang bisa ditindaklanjuti.
 // Sengaja tidak membedakan "email sudah terdaftar" agar tidak membocorkan akun.
 function signupErrorMessage(error: { code?: string; status?: number; message?: string }): string {
-  if (error.status !== undefined && error.status >= 500) {
-    return 'Server Supabase gagal menyimpan akun. Administrator perlu memeriksa log Auth/Database dan profil user lama dengan email ini.'
-  }
-
   switch (error.code) {
     case 'over_email_send_rate_limit':
       return 'Batas pengiriman email konfirmasi tercapai. Tunggu sekitar satu jam lalu coba lagi, atau hubungi administrator untuk memasang SMTP khusus.'
@@ -23,7 +19,7 @@ function signupErrorMessage(error: { code?: string; status?: number; message?: s
     case 'email_provider_disabled':
       return 'Pendaftaran sedang dinonaktifkan di konfigurasi Supabase. Hubungi administrator.'
     case 'unexpected_failure':
-      return 'Server gagal membuat akun. Administrator perlu memeriksa trigger pembuatan profil dan kemungkinan profil lama dengan email ini.'
+      return 'Server gagal membuat akun (kemungkinan database belum lengkap). Hubungi administrator.'
     default:
       return 'Pendaftaran belum dapat diproses. Periksa data dan coba lagi.'
   }
@@ -54,8 +50,7 @@ export default function SignupForm() {
 
     setBusy(true)
     try {
-      const callbackBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || window.location.origin
-      const callbackUrl = new URL('/auth/confirm', callbackBaseUrl)
+      const callbackUrl = new URL('/auth/confirm', window.location.origin)
       callbackUrl.searchParams.set('next', 'email-confirmed')
       const supabase = createClient()
       const { data, error: signupError } = await supabase.auth.signUp({
@@ -69,9 +64,11 @@ export default function SignupForm() {
 
       if (signupError) {
         // Detail teknis hanya ke console browser untuk debugging (tanpa data pengguna).
-        console.error(
-          `[signup] gagal (HTTP ${signupError.status ?? 'unknown'}, code ${signupError.code ?? 'unknown'}): ${signupError.message ?? 'tanpa pesan'}`,
-        )
+        console.error('[signup] gagal', {
+          code: signupError.code,
+          status: signupError.status,
+          message: signupError.message,
+        })
         setError(signupErrorMessage(signupError))
         return
       }

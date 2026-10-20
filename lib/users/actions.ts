@@ -30,12 +30,6 @@ type TargetUser = {
   status: 'aktif' | 'nonaktif'
 }
 
-function getDatabaseErrorCode(error: unknown): string | null {
-  if (typeof error !== 'object' || error === null || !('code' in error)) return null
-  const code = (error as { code?: unknown }).code
-  return typeof code === 'string' ? code : null
-}
-
 function recordAdminConfigurationError(error: unknown): UserActionResult | null {
   if (!(error instanceof AdminConfigurationError)) return null
   return {
@@ -45,30 +39,17 @@ function recordAdminConfigurationError(error: unknown): UserActionResult | null 
 }
 
 async function getTargetUser(
+  admin: ReturnType<typeof createAdminClient>,
   userId: string,
-  email?: string,
 ): Promise<TargetUser | null> {
-  // Read through the signed-in session, just like the users page. The admin
-  // client remains reserved for privileged writes and audit logging.
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('users')
     .select('id, name, role_id, org_unit_id, supervisor_id, status')
     .eq('id', userId)
     .maybeSingle()
 
   if (error) throw new Error('Gagal membaca profil user.')
-  if (data || !email) return data
-
-  const normalizedEmail = email.trim().toLowerCase()
-  const { data: emailMatch, error: emailError } = await supabase
-    .from('users')
-    .select('id, name, role_id, org_unit_id, supervisor_id, status')
-    .eq('email', normalizedEmail)
-    .maybeSingle()
-
-  if (emailError) throw new Error('Gagal membaca profil user.')
-  return emailMatch
+  return data
 }
 
 async function isAuthorizedTarget(
@@ -107,7 +88,7 @@ async function writeAuditLog(
     new_value: newValue,
   })
 
-  if (error) throw error
+  if (error) throw new Error('Gagal mencatat perubahan user pada audit log.')
 }
 
 type ValidatedAssignment = {
@@ -339,12 +320,8 @@ export async function updateUserName(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(validated.userId, validated.email)
-  if (!target) {
-    revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
-  }
-
+  const target = await getTargetUser(admin, validated.userId)
+  if (!target) return { ok: false, error: 'User tidak ditemukan.' }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }
@@ -405,23 +382,8 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     }
   }
 
-  const target = await getTargetUser(validated.userId, validated.email)
-  if (!target) {
-    revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
-  }
-
-  const [{ data: adminActor, error: adminActorError }, { data: adminTarget, error: adminTargetError }] =
-    await Promise.all([
-      admin.from('users').select('id').eq('id', actor.id).maybeSingle(),
-      admin.from('users').select('id').eq('id', target.id).maybeSingle(),
-    ])
-  if (adminActorError || adminTargetError) {
-    return { ok: false, error: 'Database server gagal memeriksa user. Periksa konfigurasi Supabase lalu restart aplikasi.' }
-  }
-  if (!adminActor || !adminTarget) {
-    return { ok: false, error: 'Database server tidak cocok dengan daftar user. Periksa konfigurasi Supabase lalu restart aplikasi.' }
-  }
+  const target = await getTargetUser(admin, validated.userId)
+  if (!target) return { ok: false, error: 'User tidak ditemukan.' }
 
   const assignmentResult = await validateUserAssignment(admin, validated)
   if ('error' in assignmentResult) return { ok: false, error: assignmentResult.error }
@@ -440,16 +402,12 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
     org_unit_id: assignment.orgUnitId,
     supervisor_id: assignment.supervisorId,
   }
-  const { data: updatedTarget, error: updateError } = await admin
+  const { error: updateError } = await admin
     .from('users')
     .update(assignmentUpdate)
     .eq('id', target.id)
-    .select('id')
-    .maybeSingle()
 
-  if (updateError || !updatedTarget) {
-    return { ok: false, error: 'Role dan penempatan user tidak dapat diperbarui. Periksa konfigurasi database server.' }
-  }
+  if (updateError) return { ok: false, error: 'Role dan penempatan user tidak dapat diperbarui.' }
 
   try {
     await writeAuditLog(
@@ -468,7 +426,7 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
         supervisorId: assignment.supervisorId,
       }),
     )
-  } catch (error) {
+  } catch {
     const { error: rollbackError } = await admin
       .from('users')
       .update({
@@ -483,11 +441,7 @@ export async function assignUserRole(input: unknown): Promise<UserActionResult> 
         error: 'Audit gagal dan penempatan user tidak dapat dipulihkan. Hubungi administrator.',
       }
     }
-    const code = getDatabaseErrorCode(error)
-    return {
-      ok: false,
-      error: `Perubahan role dibatalkan karena audit log gagal${code ? ` (kode database ${code})` : ''}.`,
-    }
+    return { ok: false, error: 'Perubahan role dibatalkan karena audit log gagal.' }
   }
 
   revalidatePath('/users')
@@ -514,11 +468,8 @@ export async function proposeUserRoleChange(input: unknown): Promise<UserActionR
     }
   }
 
-  const target = await getTargetUser(validated.userId, validated.email)
-  if (!target) {
-    revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
-  }
+  const target = await getTargetUser(admin, validated.userId)
+  if (!target) return { ok: false, error: 'User tidak ditemukan.' }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengusulkan perubahan untuk user ini.' }
   }
@@ -618,7 +569,7 @@ export async function decideUserRoleChange(input: unknown): Promise<UserActionRe
   if (requestError) return { ok: false, error: 'Gagal membaca usulan perubahan role.' }
   if (!request) return { ok: false, error: 'Usulan tidak ditemukan atau sudah diproses.' }
 
-  const target = await getTargetUser(request.target_user_id)
+  const target = await getTargetUser(admin, request.target_user_id)
   if (!target) return { ok: false, error: 'User tujuan usulan tidak ditemukan.' }
 
   if (validated.decision === 'approved') {
@@ -726,11 +677,8 @@ export async function updateUserStatus(input: unknown): Promise<UserActionResult
     }
   }
 
-  const target = await getTargetUser(validated.userId, validated.email)
-  if (!target) {
-    revalidatePath('/users')
-    return { ok: false, error: 'Profil user tidak ada di daftar terbaru. Muat ulang halaman Master Data Users.' }
-  }
+  const target = await getTargetUser(admin, validated.userId)
+  if (!target) return { ok: false, error: 'User tidak ditemukan.' }
   if (!(await isAuthorizedTarget(target, actor, admin))) {
     return { ok: false, error: 'Anda tidak berwenang mengubah user ini.' }
   }

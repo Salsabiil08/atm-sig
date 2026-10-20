@@ -140,7 +140,7 @@ export default function UserManagement({
     event.preventDefault()
     if (!editingUser) return
     const succeeded = await finishAction(
-      updateUserName({ userId: editingUser.id, name: editedName, email: editingUser.email }),
+      updateUserName({ userId: editingUser.id, name: editedName }),
     )
     if (succeeded) setEditingUser(null)
   }
@@ -151,7 +151,6 @@ export default function UserManagement({
 
     const assignment = {
       userId: assignmentUser.id,
-      email: assignmentUser.email,
       roleId: Number(assignmentRoleId),
       orgUnitId: Number(assignmentOrgUnitId),
       supervisorId: assignmentSupervisorId || null,
@@ -171,7 +170,7 @@ export default function UserManagement({
     const verb = nextStatus === 'nonaktif' ? 'menonaktifkan' : 'mengaktifkan kembali'
     if (!window.confirm(`Yakin ingin ${verb} ${user.name}?`)) return
 
-    await finishAction(updateUserStatus({ userId: user.id, email: user.email, status: nextStatus }))
+    await finishAction(updateUserStatus({ userId: user.id, status: nextStatus }))
   }
 
   return (
