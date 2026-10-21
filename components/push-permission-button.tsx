@@ -18,24 +18,26 @@ async function getActiveRegistration(): Promise<ServiceWorkerRegistration> {
   const worker = registration.installing ?? registration.waiting ?? registration.active
   if (!worker) throw new Error('Service Worker belum ditemukan. Muat ulang halaman lalu coba lagi.')
   if (worker.state === 'activated') return registration
+  // Capture the non-null worker in a separate binding for async callbacks.
+  const activeCandidate: ServiceWorker = worker
 
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
-      worker.removeEventListener('statechange', onStateChange)
+      activeCandidate.removeEventListener('statechange', onStateChange)
       reject(new Error('Aktivasi Service Worker terlalu lama. Muat ulang halaman dan coba lagi.'))
     }, 15000)
     function onStateChange() {
-      if (worker.state === 'activated') {
+      if (activeCandidate.state === 'activated') {
         clearTimeout(timeout)
-        worker.removeEventListener('statechange', onStateChange)
+        activeCandidate.removeEventListener('statechange', onStateChange)
         resolve()
-      } else if (worker.state === 'redundant') {
+      } else if (activeCandidate.state === 'redundant') {
         clearTimeout(timeout)
-        worker.removeEventListener('statechange', onStateChange)
+        activeCandidate.removeEventListener('statechange', onStateChange)
         reject(new Error('Service Worker gagal diaktifkan. Muat ulang halaman.'))
       }
     }
-    worker.addEventListener('statechange', onStateChange)
+    activeCandidate.addEventListener('statechange', onStateChange)
     onStateChange()
   })
   return registration
