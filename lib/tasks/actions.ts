@@ -287,7 +287,6 @@ export async function createTask(input: CreateTaskInput) {
     }
   }
 
-  await writeAuditLog(user.id, 'create', `tasks:${data.id}`, null, task.title)
   revalidatePath('/tasks')
   revalidatePath('/dashboard')
 
@@ -341,13 +340,6 @@ export async function updateTask(input: UpdateTaskInput) {
   if (error) return { error: 'Gagal memperbarui task.' }
   if (!updatedTask) return { error: 'Akses ditolak: task berada di luar cakupan Anda.' }
 
-  await writeAuditLog(
-    user.id,
-    'update',
-    `tasks:${input.taskId}`,
-    JSON.stringify(previousTask),
-    JSON.stringify(task),
-  )
   revalidatePath(`/tasks/${input.taskId}`)
   revalidatePath('/tasks')
   revalidatePath('/kanban')
@@ -415,7 +407,6 @@ export async function deleteTask(taskId: string) {
   }
   if (!deletedTask) return { error: 'Akses ditolak: task berada di luar cakupan Anda.' }
 
-  await writeAuditLog(user.id, 'delete', `tasks:${taskId}`, task.title, null)
   revalidatePath('/tasks')
   revalidatePath('/dashboard')
 
@@ -531,7 +522,6 @@ export async function updateTaskStatus(input: UpdateStatusInput) {
     }
   }
 
-  const oldStatus = task.status
   const completedAt = input.status === 'Done' ? new Date().toISOString() : null
 
   const updateData: Database['public']['Tables']['tasks']['Update'] = {
@@ -549,7 +539,6 @@ export async function updateTaskStatus(input: UpdateStatusInput) {
   if (error) return { error: 'Gagal memperbarui status task.' }
   if (!updatedTask) return { error: 'Akses ditolak: task berada di luar cakupan Anda.' }
 
-  await writeAuditLog(user.id, 'update_status', `tasks:${input.taskId}`, oldStatus, input.status)
   revalidatePath(`/tasks/${input.taskId}`)
   revalidatePath('/tasks')
   revalidatePath('/dashboard')
@@ -585,7 +574,6 @@ export async function reviewTask(input: ReviewTaskInput) {
     return { error: 'Review ditolak atau gagal. Pastikan Anda reviewer task dan task berstatus Review.' }
   }
 
-  await writeAuditLog(user.id, 'review_task', `tasks:${input.taskId}`, 'Review', input.decision)
   revalidatePath(`/tasks/${input.taskId}`)
   revalidatePath('/tasks')
   revalidatePath('/dashboard')
