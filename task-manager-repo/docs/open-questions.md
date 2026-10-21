@@ -5,6 +5,8 @@ Agent wajib menambah baris di sini (bukan menebak) saat menemukan ambiguitas. Pe
 ## Terbuka
 | ID | Pertanyaan | Dampak | Status |
 |---|---|---|---|
+| OQ-18 | Apakah D-01 dalam laporan audit (PIC boleh membuat task hanya untuk dirinya dengan reviewer atasan langsung) telah disahkan pemilik proyek? | FR-020/021, BR-070; mengubah role yang boleh membuat task dan aturan owner/reviewer | Menunggu konfirmasi pemilik; belum tercatat di decision log |
+| OQ-19 | Apakah D-02 dalam laporan audit (deadline berlaku sampai akhir hari WIB) telah disahkan pemilik proyek, termasuk dampak terhadap timestamp task yang sudah tersimpan? | BR-036; mengubah overdue, reminder, serta tanggal yang disimpan dan ditampilkan | Menunggu konfirmasi pemilik; belum tercatat di decision log |
 | OQ-01 | Stack teknologi apa yang dipakai? | Semua milestone (ADR-0001) | Terbuka |
 | OQ-05 | Template task rutin: apakah juga membuat task otomatis berkala? | FR-100, CR-0003 | Terjawab: termasuk pembuatan otomatis berkala; CR-0003 disetujui |
 | OQ-10 | Batas ukuran/jenis file evidence dan masa simpan | FR-024, NFR-005 | Sebagian terjawab: implementasi membatasi 20 MB dan PDF/JPG/PNG/CSV; masa simpan belum diputuskan |

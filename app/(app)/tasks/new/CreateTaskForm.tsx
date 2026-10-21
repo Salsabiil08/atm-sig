@@ -32,6 +32,10 @@ export default function CreateTaskForm({
   const router = useRouter()
   const [sectionId, setSectionId] = useState(String(sections[0]?.id ?? ''))
   const [ownerId, setOwnerId] = useState('')
+  const [evidenceRequirements, setEvidenceRequirements] = useState<Array<{
+    description: string
+    mandatory: boolean
+  }>>([])
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const section = sections.find((item) => String(item.id) === sectionId)
@@ -64,6 +68,9 @@ export default function CreateTaskForm({
         priority: priority as 'rendah' | 'sedang' | 'tinggi',
         startDate: toJakartaTimestamp(startDate),
         dueDate: toJakartaTimestamp(dueDate),
+        evidenceRequirements: evidenceRequirements
+          .map(({ description, mandatory }) => ({ description: description.trim(), mandatory }))
+          .filter(({ description }) => description.length > 0),
       })
 
       if ('error' in result && result.error) {
@@ -157,6 +164,53 @@ export default function CreateTaskForm({
               <input className={inputClass} type="date" name="dueDate" required />
             </label>
           </div>
+
+          <fieldset className="grid gap-3 border-t border-slate-100 pt-4">
+            <legend className="text-sm font-semibold text-slate-800">Evidence yang dibutuhkan</legend>
+            <p className="text-sm text-slate-500">
+              PIC perlu melampirkan evidence wajib sebelum task dapat dikirim untuk review.
+            </p>
+            {evidenceRequirements.map((requirement, index) => (
+              <div key={index} className="grid gap-3 rounded-lg border border-slate-200 p-3 sm:grid-cols-[1fr_auto_auto] sm:items-center">
+                <label className="text-sm font-medium text-slate-700">
+                  Deskripsi evidence
+                  <input
+                    className={inputClass}
+                    value={requirement.description}
+                    maxLength={200}
+                    onChange={(event) => setEvidenceRequirements((current) => current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, description: event.target.value } : item,
+                    ))}
+                  />
+                </label>
+                <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={requirement.mandatory}
+                    onChange={(event) => setEvidenceRequirements((current) => current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, mandatory: event.target.checked } : item,
+                    ))}
+                  />
+                  Wajib
+                </label>
+                <button
+                  type="button"
+                  className="min-h-11 rounded-lg px-3 text-sm font-medium text-red-700 hover:bg-red-50"
+                  onClick={() => setEvidenceRequirements((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  aria-label={`Hapus kebutuhan evidence ${index + 1}`}
+                >
+                  Hapus
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="min-h-11 justify-self-start rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              onClick={() => setEvidenceRequirements((current) => [...current, { description: '', mandatory: true }])}
+            >
+              Tambah kebutuhan evidence
+            </button>
+          </fieldset>
 
           {eligibleOwners.length === 0 && (
             <p role="alert" className="text-sm text-amber-800">

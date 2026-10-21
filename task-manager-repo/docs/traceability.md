@@ -40,6 +40,8 @@ Perbarui kolom Status setiap kali task selesai. Status: Belum | Berjalan | Seles
 | 3.2.8 Audit log | FR-092 | M1 logging, M5 UI | Selesai |
 | 5 Mapping Role | FR-004 | M1 | Selesai |
 | 5 Mapping Role | NFR-001..002 | M1 | Selesai |
+| Pembatasan hak eksekusi fungsi SECURITY DEFINER | NFR-001, NFR-003 | M6 | Berjalan |
+| Editor kebutuhan evidence pada form pembuatan task | FR-023 | M6 | Berjalan |
 | 5 Mapping Role | NFR-003 | M1 | Selesai |
 | S-5 Hak akses role melalui API | Uji matriks role baca/tulis/buat | M1 | Selesai |
 | 07 Layar 1–3: login dan manajemen user/role | FR-001..FR-005 | M1 | Selesai |
