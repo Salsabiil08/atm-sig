@@ -33,15 +33,7 @@ export async function deliverPendingPush(limit = 50) {
     let reason: string | null = null
     try {
       // Generic lock-screen content deliberately does not expose sensitive task data.
-      await webpush.sendNotification({
-        endpoint: item.endpoint,
-        keys: { p256dh: item.p256dh, auth: item.auth_secret },
-      }, JSON.stringify({
-        title: 'Accounting Task Manager',
-        body: 'Ada notifikasi baru untuk Anda.',
-        url: '/notifications',
-        tag: item.notification_id,
-      }), { TTL: 3600 })
+      await sendVapidPush(item.endpoint, publicKey, privateKey, subject)
       success = true
     } catch (cause) {
       const status = (cause as { statusCode?: number }).statusCode
