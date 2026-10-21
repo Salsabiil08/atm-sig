@@ -26,7 +26,7 @@ type Props = {
   currentUserId: string
   currentUserRoleLevel: number
   supportRecipients: TaskSupportRecipient[]
-  reassignmentOptions: TaskCreationOptions['owners']
+  reassignmentOptions?: TaskCreationOptions['owners']
 }
 
 type ActionResult = { data: { success?: boolean; url?: string; reassignmentId?: string } } | { error: string }
@@ -60,7 +60,7 @@ export default function TaskDetailClient({
   currentUserId,
   currentUserRoleLevel,
   supportRecipients,
-  reassignmentOptions,
+  reassignmentOptions = [],
 }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
