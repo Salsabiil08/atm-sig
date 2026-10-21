@@ -7,6 +7,40 @@ function decodeVapidKey(key: string) {
   return Uint8Array.from(atob(normalized), char => char.charCodeAt(0))
 }
 
+/**
+ * register() may return an installing/waiting worker. PushManager.subscribe()
+ * requires an ACTIVE worker, so wait for activation before subscribing.
+ */
+async function getActiveRegistration(): Promise<ServiceWorkerRegistration> {
+  const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  if (registration.active?.state === 'activated') return registration
+
+  const worker = registration.installing ?? registration.waiting ?? registration.active
+  if (!worker) throw new Error('Service Worker belum ditemukan. Muat ulang halaman lalu coba lagi.')
+  if (worker.state === 'activated') return registration
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      worker.removeEventListener('statechange', onStateChange)
+      reject(new Error('Aktivasi Service Worker terlalu lama. Muat ulang halaman dan coba lagi.'))
+    }, 15000)
+    function onStateChange() {
+      if (worker.state === 'activated') {
+        clearTimeout(timeout)
+        worker.removeEventListener('statechange', onStateChange)
+        resolve()
+      } else if (worker.state === 'redundant') {
+        clearTimeout(timeout)
+        worker.removeEventListener('statechange', onStateChange)
+        reject(new Error('Service Worker gagal diaktifkan. Muat ulang halaman.'))
+      }
+    }
+    worker.addEventListener('statechange', onStateChange)
+    onStateChange()
+  })
+  return registration
+}
+
 type State = 'checking' | 'unsupported' | 'blocked' | 'not-subscribed' | 'subscribed' | 'error'
 
 export default function PushPermissionButton() {
@@ -27,7 +61,7 @@ export default function PushPermissionButton() {
         return
       }
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js')
+        const registration = await getActiveRegistration()
         const subscription = await registration.pushManager.getSubscription()
         if (cancelled) return
         setState(subscription ? 'subscribed' : 'not-subscribed')
@@ -63,7 +97,7 @@ export default function PushPermissionButton() {
         setMessage('Izin notifikasi ditolak. Aktifkan izin notifikasi ATM di pengaturan Android.')
         return
       }
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      const registration = await getActiveRegistration()
       let subscription = await registration.pushManager.getSubscription()
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
@@ -97,7 +131,7 @@ export default function PushPermissionButton() {
       return
     }
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      const registration = await getActiveRegistration()
       await registration.showNotification('Tes notifikasi ATM', {
         body: 'Jika pesan ini muncul di panel Android, izin dan service worker berfungsi.',
         icon: '/icon.svg',
@@ -114,7 +148,7 @@ export default function PushPermissionButton() {
     if (busy || !('serviceWorker' in navigator)) return
     setBusy(true)
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      const registration = await getActiveRegistration()
       const subscription = await registration.pushManager.getSubscription()
       if (subscription) {
         const response = await fetch('/api/push/subscription', {
