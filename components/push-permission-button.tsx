@@ -91,6 +91,25 @@ export default function PushPermissionButton() {
     }
   }
 
+  async function testLocalNotification() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      setMessage('Izinkan notifikasi di Android terlebih dahulu sebelum mencoba tes lokal.')
+      return
+    }
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js')
+      await registration.showNotification('Tes notifikasi ATM', {
+        body: 'Jika pesan ini muncul di panel Android, izin dan service worker berfungsi.',
+        icon: '/icon.svg',
+        tag: 'atm-local-test',
+      })
+      setMessage('Tes lokal telah diminta. Periksa panel notifikasi Android. Tes ini tidak menggunakan Supabase atau VAPID.')
+    } catch (error) {
+      setState('error')
+      setMessage('Tes notifikasi lokal gagal: ' + (error instanceof Error ? error.message : 'kesalahan browser'))
+    }
+  }
+
   async function unsubscribe() {
     if (busy || !('serviceWorker' in navigator)) return
     setBusy(true)
@@ -126,6 +145,11 @@ export default function PushPermissionButton() {
           onClick={subscribe}
           className="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50">
           {busy ? 'Memproses…' : 'Aktifkan notifikasi perangkat'}
+        </button>
+        <button type="button" disabled={busy || state === 'unsupported'}
+          onClick={testLocalNotification}
+          className="rounded-md border border-blue-300 px-4 py-2 text-sm font-medium text-blue-800 hover:bg-blue-50 disabled:opacity-50">
+          Tes notifikasi Android
         </button>
         <button type="button" disabled={busy || state === 'unsupported'}
           onClick={unsubscribe}
