@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { deliverPendingPush } from '@/lib/push/server'
 
-export async function POST(request: Request) {
+async function processPushCron(request: Request) {
   const secret = process.env.CRON_SECRET
   const token = request.headers.get('authorization')?.replace(/^Bearer /, '') ?? ''
   if (!secret || Buffer.byteLength(token) !== Buffer.byteLength(secret) ||
@@ -16,3 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Push delivery failed' }, { status: 500 })
   }
 }
+
+// Vercel Cron invokes GET; authenticated manual jobs may use POST.
+export const GET = processPushCron
+export const POST = processPushCron
