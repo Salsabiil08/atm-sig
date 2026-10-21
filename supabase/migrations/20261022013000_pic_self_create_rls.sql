@@ -29,3 +29,19 @@ WITH CHECK (
     )
   )
 );
+
+-- Allow a PIC to define evidence requirements ONLY for their own task,
+-- without giving PICs permission to modify evidence requirements on other tasks.
+DROP POLICY IF EXISTS evidence_requirements_pic_insert ON public.evidence_requirements;
+CREATE POLICY evidence_requirements_pic_insert
+ON public.evidence_requirements FOR INSERT TO authenticated
+WITH CHECK (
+  public.get_my_role_level() = 2
+  AND EXISTS (
+    SELECT 1 FROM public.tasks t
+    WHERE t.id = evidence_requirements.task_id
+      AND t.owner_id = (SELECT auth.uid())
+      AND t.assigner_id = (SELECT auth.uid())
+      AND t.org_unit_id = public.get_my_org_unit_id()
+  )
+);
