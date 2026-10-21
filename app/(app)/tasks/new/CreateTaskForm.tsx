@@ -6,7 +6,7 @@ import { useState, useTransition, type FormEvent } from 'react'
 import { createTask } from '@/lib/tasks/actions'
 import type { TaskCreationOptions } from '@/lib/tasks/queries'
 
-type Props = TaskCreationOptions & { currentUserRoleLevel: number }
+type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string }
 
 const inputClass = 'mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600'
 
@@ -20,14 +20,15 @@ function canAssignOwner(
   return owner.orgUnitId === section.id
 }
 
-function toJakartaTimestamp(date: string) {
-  return new Date(`${date}T00:00:00+07:00`).toISOString()
+function toJakartaTimestamp(date: string, endOfDay = false) {
+  return new Date(`${date}T${endOfDay ? '23:59:59.999' : '00:00:00'}+07:00`).toISOString()
 }
 
 export default function CreateTaskForm({
   sections,
   owners,
   currentUserRoleLevel,
+  currentUserId,
 }: Props) {
   const router = useRouter()
   const [sectionId, setSectionId] = useState(String(sections[0]?.id ?? ''))
@@ -40,7 +41,7 @@ export default function CreateTaskForm({
   const [isPending, startTransition] = useTransition()
   const section = sections.find((item) => String(item.id) === sectionId)
   const eligibleOwners = section
-    ? owners.filter((owner) => canAssignOwner(owner, section, currentUserRoleLevel))
+    ? owners.filter((owner) => (currentUserRoleLevel !== 2 || owner.id === currentUserId) && canAssignOwner(owner, section, currentUserRoleLevel))
     : []
   const selectedOwner = eligibleOwners.find((owner) => owner.id === ownerId) ?? eligibleOwners[0]
 
@@ -67,7 +68,7 @@ export default function CreateTaskForm({
         parentTaskId: null,
         priority: priority as 'rendah' | 'sedang' | 'tinggi',
         startDate: toJakartaTimestamp(startDate),
-        dueDate: toJakartaTimestamp(dueDate),
+        dueDate: toJakartaTimestamp(dueDate, true),
         evidenceRequirements: evidenceRequirements
           .map(({ description, mandatory }) => ({ description: description.trim(), mandatory }))
           .filter(({ description }) => description.length > 0),
@@ -129,7 +130,7 @@ export default function CreateTaskForm({
                 value={selectedOwner?.id ?? ''}
                 onChange={(event) => setOwnerId(event.target.value)}
                 required
-                disabled={eligibleOwners.length === 0}
+                disabled={eligibleOwners.length === 0 || currentUserRoleLevel === 2}
               >
                 {eligibleOwners.length === 0
                   ? <option value="">Tidak ada PIC yang dapat dipilih</option>
