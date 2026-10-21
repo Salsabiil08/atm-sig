@@ -111,7 +111,7 @@ export default async function TasksPage({
             {total} task ditemukan
           </p>
         </div>
-        {user.roleLevel >= 3 && (
+        {user.roleLevel >= 2 && (
           <Link
             href="/tasks/new"
             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-sm transition"
