@@ -1,5 +1,5 @@
 import 'server-only'
-import webpush from 'web-push'
+import { sendVapidPush } from './vapid'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 type ClaimedDelivery = {
@@ -16,7 +16,6 @@ export async function deliverPendingPush(limit = 50) {
   const privateKey = process.env.VAPID_PRIVATE_KEY
   const subject = process.env.VAPID_SUBJECT
   if (!publicKey || !privateKey || !subject) throw new Error('VAPID belum dikonfigurasi')
-  webpush.setVapidDetails(subject, publicKey, privateKey)
 
   const db = createAdminClient()
   const { data, error } = await db.rpc('claim_push_deliveries' as never, {
