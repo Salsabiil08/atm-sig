@@ -4,10 +4,11 @@ import { updateSession } from '@/lib/supabase/middleware'
 
 // NFR-001 — Refresh session Supabase
 export async function proxy(request: NextRequest) {
-  // Machine-to-machine push delivery is authenticated in its route handler
+  // Machine-to-machine scheduler endpoints verify CRON_SECRET themselves
   // with CRON_SECRET. Cookie-based session redirects would turn POST into
   // /login and prevent the queue from ever being processed.
-  if (request.nextUrl.pathname === '/api/cron/push') {
+  if (request.nextUrl.pathname === '/api/cron/push' ||
+      request.nextUrl.pathname === '/api/cron/reminders') {
     const { NextResponse } = await import('next/server')
     return NextResponse.next()
   }
