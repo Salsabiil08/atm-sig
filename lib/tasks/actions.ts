@@ -224,15 +224,19 @@ async function validateReviewerAssignment(
 
 /**
  * FR-020 — Buat task baru.
- * Hanya Manager (3), SM (4), GM (5), Super Admin (6) yang bisa membuat task.
+ * PIC (2) boleh membuat task untuk dirinya sendiri; Manager+ mengikuti scope.
  */
 export async function createTask(input: CreateTaskInput) {
   const user = await getSessionUser()
-  requireRole(user, ROLES.MANAGER)
+  requireRole(user, ROLES.STAFF)
 
   const validation = validateTaskDetails(input)
   if (!validation.ok) return { error: validation.error }
   const task = validation.data
+  if (user.roleLevel === 2 && (
+    task.ownerId !== user.id || task.orgUnitId !== user.orgUnitId ||
+    task.reviewerId !== user.supervisorId || !task.reviewerId || task.parentTaskId !== null
+  )) return { error: 'PIC hanya dapat membuat task pribadi dalam section sendiri dengan reviewer atasan langsung.' }
   const evidenceValidation = validateEvidenceRequirements(input.evidenceRequirements)
   if (!evidenceValidation.ok) return { error: evidenceValidation.error }
 
