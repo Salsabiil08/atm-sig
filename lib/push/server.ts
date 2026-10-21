@@ -12,7 +12,7 @@ export async function deliverPendingPush(limit = 50) {
   webpush.setVapidDetails(subject, publicKey, privateKey)
   const db = createAdminClient()
   // Server-side admin access: subscription secrets never reach browser APIs.
-  const { data: notices, error } = await db.from('notifications').select('*').order('created_at', { ascending: false }).limit(limit)
+  const { data: notices, error } = await db.from('notifications').select('*').order('sent_at', { ascending: false }).limit(limit)
   if (error) throw error
   let sent = 0, failed = 0
   for (const notice of notices ?? []) {
@@ -30,7 +30,8 @@ export async function deliverPendingPush(limit = 50) {
       })
       try {
         await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_secret } }, payload, { TTL: 3600 })
-        await db.from('push_deliveries' as never).insert({ notification_id: notice.id, subscription_id: sub.id } as never)
+        const { error: recordError } = await db.from('push_deliveries' as never).insert({ notification_id: notice.id, subscription_id: sub.id } as never)
+        if (recordError) throw recordError
         sent++
       } catch (e) {
         const status = (e as { statusCode?: number }).statusCode
