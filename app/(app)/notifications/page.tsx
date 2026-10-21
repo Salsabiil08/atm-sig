@@ -5,6 +5,7 @@ import {
   getUnreadNotificationCount,
 } from '@/lib/notifications/queries'
 import NotificationInbox from './NotificationInbox'
+import PushPermissionButton from '@/components/push-permission-button'
 
 export const metadata: Metadata = { title: 'Notifikasi' }
 
@@ -40,5 +41,5 @@ export default async function NotificationsPage() {
     )
   }
 
-  return <NotificationInbox {...initialData} />
+  return <section className="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6"><div className="rounded-xl border border-slate-200 bg-white p-4"><h2 className="mb-2 font-semibold">Notifikasi perangkat</h2><PushPermissionButton /></div><NotificationInbox {...initialData} /></section>
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import PwaRegistration from '@/components/pwa-registration'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
       <body className="h-full bg-gray-50 text-gray-900 antialiased">
+        <PwaRegistration />
         {children}
       </body>
     </html>
