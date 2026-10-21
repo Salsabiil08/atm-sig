@@ -10,12 +10,13 @@ import {
   getTaskEvidenceDownloadUrl,
   markSupportProvided,
   requestDeadlineChange,
+  reassignTask,
   updateTaskStartDate,
   updateTaskProgress,
   updateTaskStatus,
   uploadTaskEvidence,
 } from '@/lib/tasks/actions'
-import type { TaskDetail, TaskSupportRecipient } from '@/lib/tasks/queries'
+import type { TaskCreationOptions, TaskDetail, TaskSupportRecipient } from '@/lib/tasks/queries'
 import { TASK_STATUSES } from '@/lib/constants/rbac'
 import { isAllowedTaskStatusTransition } from '@/lib/tasks/status'
 import { PriorityBadge, ProgressBar, StatusBadge } from '../../_components/ui/Badges'
@@ -25,9 +26,10 @@ type Props = {
   currentUserId: string
   currentUserRoleLevel: number
   supportRecipients: TaskSupportRecipient[]
+  reassignmentOptions: TaskCreationOptions['owners']
 }
 
-type ActionResult = { data: { success?: boolean; url?: string } } | { error: string }
+type ActionResult = { data: { success?: boolean; url?: string; reassignmentId?: string } } | { error: string }
 
 const fieldClass =
   'mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600'
@@ -58,6 +60,7 @@ export default function TaskDetailClient({
   currentUserId,
   currentUserRoleLevel,
   supportRecipients,
+  reassignmentOptions,
 }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
@@ -229,6 +232,22 @@ export default function TaskDetailClient({
     }
   }
 
+  function submitReassignment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const newOwnerId = String(data.get('newOwnerId') ?? '')
+    const reason = String(data.get('reason') ?? '').trim()
+    if (!newOwnerId || reason.length < 3) {
+      setFeedback('Pilih PIC tujuan dan isi alasan pemindahan minimal 3 karakter.')
+      return
+    }
+    void runAction(
+      () => reassignTask({ taskId: task.id, newOwnerId, reason }),
+      'Task berhasil dipindahkan dan riwayat pemindahan dicatat.',
+    ).then((result) => { if ('data' in result) form.reset() })
+  }
+
   const completedMandatoryEvidence = task.evidenceRequirements.filter(
     (requirement) => requirement.mandatory && requirement.evidenceFiles.length > 0,
   ).length
@@ -262,6 +281,32 @@ export default function TaskDetailClient({
         >
           {feedback}
         </p>
+      )}
+
+      {currentUserRoleLevel >= 3 && reassignmentOptions.length > 0 && (
+        <section aria-label="Pindah PIC" className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="font-semibold text-slate-900">Pindah PIC Task</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Pemindahan hanya diizinkan dalam cakupan organisasi Anda. Alasan wajib dicatat.
+          </p>
+          <form onSubmit={submitReassignment} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+            <label className="text-sm font-medium text-slate-700">
+              PIC tujuan
+              <select name="newOwnerId" defaultValue="" required className={fieldClass} disabled={busy}>
+                <option value="" disabled>Pilih PIC</option>
+                {reassignmentOptions.map((owner) => (
+                  <option key={owner.id} value={owner.id}>{owner.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              Alasan pemindahan
+              <input name="reason" type="text" minLength={3} maxLength={500} required
+                className={fieldClass} disabled={busy} placeholder="Jelaskan alasan pindah PIC" />
+            </label>
+            <button type="submit" className={buttonClass} disabled={busy}>Pindah PIC</button>
+          </form>
+        </section>
       )}
 
       {task.isOverdue && task.status !== 'Done' && (
