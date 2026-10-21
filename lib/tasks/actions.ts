@@ -228,7 +228,7 @@ async function validateReviewerAssignment(
  */
 export async function createTask(input: CreateTaskInput) {
   const user = await getSessionUser()
-  requireRole(user, ROLES.STAFF)
+  requireRole(user, ROLES.STAFF_PIC)
 
   const validation = validateTaskDetails(input)
   if (!validation.ok) return { error: validation.error }
