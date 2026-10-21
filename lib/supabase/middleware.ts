@@ -88,9 +88,10 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (user) {
+      // Satu query untuk status + level role (relasi users -> roles).
       const { data: profile, error: profileError } = await supabase
         .from('users')
-        .select('status, role_id')
+        .select('status, role:roles!users_role_id_fkey ( level )')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -108,14 +109,10 @@ export async function updateSession(request: NextRequest) {
         return redirectWithCookies(loginUrl)
       }
 
-      const { data: role, error: roleError } = await supabase
-        .from('roles')
-        .select('level')
-        .eq('id', profile.role_id)
-        .maybeSingle()
+      const role = profile.role
 
-      if (roleError || !role) {
-        console.error('Supabase role lookup error:', roleError?.message)
+      if (!role) {
+        console.error('Supabase role lookup error: role relation missing')
 
         await supabase.auth.signOut()
 

@@ -77,10 +77,9 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
 }
 
 export default async function AuditLogPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await getSessionUser()
+  const [user, params] = await Promise.all([getSessionUser(), searchParams])
   requireRole(user, 'Manager')
 
-  const params = await searchParams
   const filters = parseAuditFilters({
     action: singleParam(params.action),
     object: singleParam(params.object),

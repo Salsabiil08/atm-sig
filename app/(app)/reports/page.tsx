@@ -33,9 +33,8 @@ function MetricCard({ label, value }: { label: string; value: string | number })
 }
 
 export default async function ReportsPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await getSessionUser()
+  const [user, params] = await Promise.all([getSessionUser(), searchParams])
   requireRole(user, 'Manager')
-  const params = await searchParams
   const filters = parseReportFilters({
     dateFrom: singleParam(params.from),
     dateTo: singleParam(params.to),

@@ -541,12 +541,56 @@ export async function getTaskDetail(
   const timePct = calcTimePct(t.start_date, t.due_date)
   const isOverdue = isTaskOverdue(t.due_date, t.status, now)
 
+  // Query turunan hanya bergantung pada taskId, jadi dijalankan paralel (setelah
+  // task utama lolos pemeriksaan cakupan di atas). Pemeriksaan error tetap
+  // berurutan seperti sebelumnya agar pesan error tidak berubah.
+  const [
+    wbsResult,
+    progressResult,
+    evidenceResult,
+    commentsResult,
+    supportsResult,
+    deadlineResult,
+  ] = await Promise.all([
+    supabase
+      .from('wbs_items')
+      .select('id, parent_id, title, weight, is_done')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('task_progress_history')
+      .select('id, progress_pct, created_at, user:users!task_progress_history_changed_by_fkey ( name )')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('evidence_requirements')
+      .select(`
+      id, description, mandatory,
+      task_evidence ( id, file_or_link, uploaded_at, uploader:users!task_evidence_uploader_id_fkey ( name ) )
+    `)
+      .eq('task_id', taskId),
+    supabase
+      .from('task_comments')
+      .select('id, body, created_at, user:users!task_comments_user_id_fkey ( id, name )')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('task_supports')
+      .select('id, needed_from_id, description, status, needed_from:users!task_supports_needed_from_id_fkey ( name )')
+      .eq('task_id', taskId),
+    supabase
+      .from('deadline_change_requests')
+      .select(
+        `id, old_due_date, new_due_date, reason, status, decided_at, created_at,
+       requester:users!deadline_change_requests_requested_by_fkey ( name ),
+       approver:users!deadline_change_requests_approver_id_fkey ( name )`
+      )
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false }),
+  ])
+
   // WBS items
-  const { data: wbsData, error: wbsError } = await supabase
-    .from('wbs_items')
-    .select('id, parent_id, title, weight, is_done')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: true })
+  const { data: wbsData, error: wbsError } = wbsResult
   if (wbsError) throw new Error('Gagal memuat daftar WBS task.')
 
   const wbsItems: WbsItem[] = (wbsData ?? []).map((w) => ({
@@ -557,11 +601,7 @@ export async function getTaskDetail(
     isDone: w.is_done,
   }))
 
-  const { data: progressRows, error: progressError } = await supabase
-    .from('task_progress_history')
-    .select('id, progress_pct, created_at, user:users!task_progress_history_changed_by_fkey ( name )')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: false })
+  const { data: progressRows, error: progressError } = progressResult
   if (progressError) throw new Error('Gagal memuat riwayat progress task.')
 
   const progressHistory: ProgressHistory[] = (progressRows ?? []).map((row) => {
@@ -575,13 +615,7 @@ export async function getTaskDetail(
   })
 
   // Evidence requirements + files
-  const { data: evReqs, error: evidenceError } = await supabase
-    .from('evidence_requirements')
-    .select(`
-      id, description, mandatory,
-      task_evidence ( id, file_or_link, uploaded_at, uploader:users!task_evidence_uploader_id_fkey ( name ) )
-    `)
-    .eq('task_id', taskId)
+  const { data: evReqs, error: evidenceError } = evidenceResult
   if (evidenceError) throw new Error('Gagal memuat persyaratan evidence task.')
 
   const evidenceRequirements: EvidenceReq[] = (evReqs ?? []).map((r) => {
@@ -598,11 +632,7 @@ export async function getTaskDetail(
   })
 
   // Comments
-  const { data: commentsData, error: commentsError } = await supabase
-    .from('task_comments')
-    .select('id, body, created_at, user:users!task_comments_user_id_fkey ( id, name )')
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: true })
+  const { data: commentsData, error: commentsError } = commentsResult
   if (commentsError) throw new Error('Gagal memuat komentar task.')
 
   const comments: TaskComment[] = (commentsData ?? []).map((c) => {
@@ -617,10 +647,7 @@ export async function getTaskDetail(
   })
 
   // Support requests
-  const { data: supportsData, error: supportsError } = await supabase
-    .from('task_supports')
-    .select('id, needed_from_id, description, status, needed_from:users!task_supports_needed_from_id_fkey ( name )')
-    .eq('task_id', taskId)
+  const { data: supportsData, error: supportsError } = supportsResult
   if (supportsError) throw new Error('Gagal memuat permintaan support task.')
 
   const supports: TaskSupport[] = (supportsData ?? []).map((s) => {
@@ -635,15 +662,7 @@ export async function getTaskDetail(
   })
 
   // Deadline requests
-  const { data: dlRequests, error: deadlineError } = await supabase
-    .from('deadline_change_requests')
-    .select(
-      `id, old_due_date, new_due_date, reason, status, decided_at, created_at,
-       requester:users!deadline_change_requests_requested_by_fkey ( name ),
-       approver:users!deadline_change_requests_approver_id_fkey ( name )`
-    )
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: false })
+  const { data: dlRequests, error: deadlineError } = deadlineResult
   if (deadlineError) throw new Error('Gagal memuat riwayat perubahan deadline.')
 
   const deadlineRequests: DeadlineRequest[] = (dlRequests ?? []).map((d) => {

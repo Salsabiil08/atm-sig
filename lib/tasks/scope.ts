@@ -1,6 +1,7 @@
 import type { SessionUser } from '@/lib/auth/session'
 import type { Database } from '@/lib/supabase/database.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { cache } from 'react'
 
 export function getVisibleTaskOrgUnitIds(
   user: SessionUser,
@@ -26,7 +27,10 @@ export function getVisibleTaskOrgUnitIds(
   return [...visibleIds]
 }
 
-export async function getTaskScopeFilter(
+// Dimemoize per request: kunci cache adalah referensi (client, user). Karena
+// createClient() dan getSessionUser() sudah dimemoize, query org_units hanya
+// berjalan sekali meski dipanggil banyak fungsi dalam satu halaman.
+export const getTaskScopeFilter = cache(async function getTaskScopeFilter(
   supabase: SupabaseClient<Database>,
   user: SessionUser,
 ): Promise<string | null> {
@@ -48,4 +52,4 @@ export async function getTaskScopeFilter(
     `owner_id.eq.${user.id}`,
     `reviewer_id.eq.${user.id}`,
   ].join(',')
-}
+})

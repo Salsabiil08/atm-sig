@@ -12,10 +12,9 @@ export default async function ReviewTaskPage({
 }: {
   params: Promise<{ taskId: string }>
 }) {
-  const { taskId } = await params
+  const [{ taskId }, user] = await Promise.all([params, getSessionUser()])
   if (!isValidUuid(taskId)) notFound()
 
-  const user = await getSessionUser()
   const task = await getTaskDetail(taskId, user)
   const isAssignedReviewer = task?.reviewerId === user.id
   const isPrivilegedOwner =

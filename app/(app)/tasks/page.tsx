@@ -53,8 +53,7 @@ export default async function TasksPage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  const params = await searchParams
-  const user = await getSessionUser()
+  const [params, user] = await Promise.all([searchParams, getSessionUser()])
 
   const statusFilter = params.status && isValidStatus(params.status) ? params.status : null
   const priorityFilter =

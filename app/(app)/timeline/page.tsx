@@ -17,7 +17,6 @@ function currentMonth() {
 }
 export default async function TimelinePage({ searchParams }: { searchParams: Promise<Params> }) {
   const [params, user] = await Promise.all([searchParams, getSessionUser()])
-  const options = await getTaskFilterOptions(user)
   const monthMatch = params.month?.match(/^(\d{4})-(\d{2})$/)
   const month = monthMatch && Number(monthMatch[1]) >= 1900 && Number(monthMatch[1]) <= 2100
     && Number(monthMatch[2]) >= 1 && Number(monthMatch[2]) <= 12
@@ -28,7 +27,11 @@ export default async function TimelinePage({ searchParams }: { searchParams: Pro
   const parsedSection = params.section && /^\d+$/.test(params.section) ? Number(params.section) : null
   const sectionId = parsedSection && Number.isSafeInteger(parsedSection) && parsedSection > 0 ? parsedSection : null
   const ownerId = params.owner && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(params.owner) ? params.owner : null
-  const { items, total } = await getAllTaskList(user, { ownerId, orgUnitId: sectionId, dateFrom: first, dateTo: last })
+  // Opsi filter dan daftar task independen — jalankan paralel.
+  const [options, { items, total }] = await Promise.all([
+    getTaskFilterOptions(user),
+    getAllTaskList(user, { ownerId, orgUnitId: sectionId, dateFrom: first, dateTo: last }),
+  ])
   const dayCount = getMonthDayCount(month)
   const days = Array.from({ length: dayCount }, (_, index) => index + 1)
   const active = items.filter((task) => task.status !== 'Done')

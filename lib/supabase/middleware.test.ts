@@ -2,16 +2,13 @@ import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { updateSession } from './middleware'
 
-const { getUser, signOut, from, profileResult, roleResult } = vi.hoisted(() => ({
+// Profil dan level role diambil dalam SATU query (relasi users -> roles).
+const { getUser, signOut, from, profileResult } = vi.hoisted(() => ({
   getUser: vi.fn(),
   signOut: vi.fn(),
   from: vi.fn(),
-  profileResult: { data: { status: 'aktif', role_id: 6 }, error: null } as {
-    data: { status: string; role_id: number } | null
-    error: { message: string } | null
-  },
-  roleResult: { data: { level: 6 }, error: null } as {
-    data: { level: number } | null
+  profileResult: { data: { status: 'aktif', role: { level: 6 } }, error: null } as {
+    data: { status: string; role: { level: number } | null } | null
     error: { message: string } | null
   },
 }))
@@ -27,14 +24,12 @@ describe('updateSession (FR-001)', () => {
   beforeEach(() => {
     getUser.mockReset()
     signOut.mockReset().mockResolvedValue({ error: null })
-    profileResult.data = { status: 'aktif', role_id: 6 }
+    profileResult.data = { status: 'aktif', role: { level: 6 } }
     profileResult.error = null
-    roleResult.data = { level: 6 }
-    roleResult.error = null
-    from.mockReset().mockImplementation((table: string) => ({
+    from.mockReset().mockImplementation(() => ({
       select: () => ({
         eq: () => ({
-          single: () => Promise.resolve(table === 'users' ? profileResult : roleResult),
+          maybeSingle: () => Promise.resolve(profileResult),
         }),
       }),
     }))
@@ -64,7 +59,7 @@ describe('updateSession (FR-001)', () => {
 
   it('signs out and redirects an inactive user', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
-    profileResult.data = { status: 'nonaktif', role_id: 6 }
+    profileResult.data = { status: 'nonaktif', role: { level: 6 } }
 
     const response = await updateSession(
       new NextRequest('https://atm.example/tasks'),
@@ -94,7 +89,7 @@ describe('updateSession (FR-001)', () => {
 
   it('redirects roles below Manager away from the dashboard', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
-    roleResult.data = { level: 2 }
+    profileResult.data = { status: 'aktif', role: { level: 2 } }
 
     const response = await updateSession(
       new NextRequest('https://atm.example/dashboard'),
@@ -108,7 +103,7 @@ describe('updateSession (FR-001)', () => {
 
   it('redirects roles below Manager away from performance analytics', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
-    roleResult.data = { level: 2 }
+    profileResult.data = { status: 'aktif', role: { level: 2 } }
 
     const response = await updateSession(
       new NextRequest('https://atm.example/performance'),
@@ -122,7 +117,7 @@ describe('updateSession (FR-001)', () => {
 
   it('redirects roles below SM away from user management', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
-    roleResult.data = { level: 3 }
+    profileResult.data = { status: 'aktif', role: { level: 3 } }
 
     const response = await updateSession(
       new NextRequest('https://atm.example/users'),
@@ -136,8 +131,7 @@ describe('updateSession (FR-001)', () => {
 
   it('fails closed when the profile role cannot be verified', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
-    roleResult.data = null
-    roleResult.error = { message: 'role lookup failed' }
+    profileResult.data = { status: 'aktif', role: null }
 
     const response = await updateSession(
       new NextRequest('https://atm.example/tasks'),
@@ -147,6 +141,18 @@ describe('updateSession (FR-001)', () => {
     expect(response.headers.get('location')).toBe(
       'https://atm.example/login?error=account_unavailable',
     )
+  })
+
+  it('verifies status and role with a single profile query', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'user-id' } } })
+
+    const response = await updateSession(
+      new NextRequest('https://atm.example/tasks'),
+    )
+
+    expect(response.status).toBe(200)
+    expect(from).toHaveBeenCalledTimes(1)
+    expect(from).toHaveBeenCalledWith('users')
   })
 
   it('does not treat other paths beginning with login as public', async () => {

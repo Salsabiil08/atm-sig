@@ -15,10 +15,9 @@ export default async function TaskDetailPage({
 }: {
   params: Promise<{ taskId: string }>
 }) {
-  const { taskId } = await params
+  const [{ taskId }, user] = await Promise.all([params, getSessionUser()])
   if (!isValidUuid(taskId)) notFound()
 
-  const user = await getSessionUser()
   const task = await getTaskDetail(taskId, user)
   if (!task) notFound()
 

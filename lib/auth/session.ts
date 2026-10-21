@@ -4,6 +4,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { ROLE_LEVELS, type RoleName } from '@/lib/constants/rbac'
 import { redirect } from 'next/navigation'
+import { cache } from 'react'
 
 export type SessionUser = {
   id: string
@@ -19,10 +20,14 @@ export type SessionUser = {
  * Mengambil user yang sedang login beserta data role dan org_unit.
  * Jika tidak ada sesi aktif, redirect ke /login.
  *
+ * Dimemoize per request (React cache): layout, halaman, dan fungsi query yang
+ * memanggilnya dalam satu request hanya memicu satu pemeriksaan auth + satu
+ * query profil. Profil dan role diambil dalam satu query (relasi users -> roles).
+ *
  * Gunakan di Server Component:
  *   const user = await getSessionUser()
  */
-export async function getSessionUser(): Promise<SessionUser> {
+export const getSessionUser = cache(async function getSessionUser(): Promise<SessionUser> {
   const supabase = await createClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -33,23 +38,13 @@ export async function getSessionUser(): Promise<SessionUser> {
 
   const { data: profile, error: profileError } = await supabase
     .from('users')
-    .select('id, name, email, role_id, org_unit_id, supervisor_id')
+    .select('id, name, email, org_unit_id, supervisor_id, role:roles!users_role_id_fkey ( name, level )')
     .eq('id', user.id)
     .eq('status', 'aktif')
     .single()
 
-  if (profileError || !profile) {
-    // User ada di auth tapi belum ada profil — arahkan ke halaman setup atau login
-    redirect('/login')
-  }
-
-  const { data: role, error: roleError } = await supabase
-    .from('roles')
-    .select('name, level')
-    .eq('id', profile.role_id)
-    .single()
-
-  if (roleError || !role) {
+  if (profileError || !profile || !profile.role) {
+    // User ada di auth tapi belum ada profil/role yang valid — kembali ke login
     redirect('/login')
   }
 
@@ -57,12 +52,12 @@ export async function getSessionUser(): Promise<SessionUser> {
     id: profile.id,
     email: profile.email,
     name: profile.name,
-    role: role.name as RoleName,
-    roleLevel: role.level,
+    role: profile.role.name as RoleName,
+    roleLevel: profile.role.level,
     orgUnitId: profile.org_unit_id,
     supervisorId: profile.supervisor_id,
   }
-}
+})
 
 /**
  * Guard: memastikan user memiliki level role minimum.

@@ -206,7 +206,16 @@ export async function getDashboardMetrics(user: SessionUser): Promise<DashboardM
     .from('tasks')
     .select('id, status, progress_pct, start_date, due_date, org_unit_id, owner_id, reviewer_id')
   if (scopeFilter) taskQuery = taskQuery.or(scopeFilter)
-  const { data: tasks, error } = await taskQuery
+
+  // Hitung pengajuan deadline yang menunggu (independen dari query task) — paralel.
+  const [{ data: tasks, error }, { count: pendingDeadlines, error: deadlineError }] =
+    await Promise.all([
+      taskQuery,
+      supabase
+        .from('deadline_change_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'Menunggu approval'),
+    ])
 
   if (error) throw new Error('Gagal memuat ringkasan task dashboard.')
   if (!tasks) throw new Error('Data ringkasan task dashboard tidak tersedia.')
@@ -225,11 +234,6 @@ export async function getDashboardMetrics(user: SessionUser): Promise<DashboardM
   const blocked = tasks.filter((t) => t.status === 'Blocked').length
   const menuungguReview = tasks.filter((t) => t.status === 'Review').length
 
-  // Hitung pengajuan deadline yang menunggu
-  const { count: pendingDeadlines, error: deadlineError } = await supabase
-    .from('deadline_change_requests')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'Menunggu approval')
   if (deadlineError) throw new Error('Gagal memuat jumlah pengajuan deadline.')
 
   return {

@@ -29,13 +29,16 @@ export default async function UsersPage() {
   }
 
   const data = await (async () => {
-    const users = await getManagedUsers()
-    const assignmentOptions = user.role === ROLES.SUPER_ADMIN || user.role === ROLES.GM
-      ? await getUserAssignmentOptions()
-      : null
-    const pendingRoleChangeRequests = user.role === ROLES.SUPER_ADMIN
-      ? await getPendingRoleChangeRequests()
-      : []
+    // Tiga sumber data ini independen — jalankan paralel.
+    const [users, assignmentOptions, pendingRoleChangeRequests] = await Promise.all([
+      getManagedUsers(),
+      user.role === ROLES.SUPER_ADMIN || user.role === ROLES.GM
+        ? getUserAssignmentOptions()
+        : Promise.resolve(null),
+      user.role === ROLES.SUPER_ADMIN
+        ? getPendingRoleChangeRequests()
+        : Promise.resolve([]),
+    ])
     return { users, assignmentOptions, pendingRoleChangeRequests }
   })().catch(() => null)
 

@@ -2,11 +2,13 @@ import { ROLE_LEVELS, ROLES } from '@/lib/constants/rbac'
 import type { SessionUser } from '@/lib/auth/session'
 import type { Database } from '@/lib/supabase/database.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { cache } from 'react'
 import { canManageUser, manageableOrgUnitIds } from './permissions'
 
 type UserClient = SupabaseClient<Database>
 
-export async function getManageableOrgUnitIds(
+// Dimemoize per request (kunci = referensi client + user yang sama).
+export const getManageableOrgUnitIds = cache(async function getManageableOrgUnitIds(
   supabase: UserClient,
   user: SessionUser,
 ): Promise<number[]> {
@@ -27,7 +29,7 @@ export async function getManageableOrgUnitIds(
   }
 
   return ids
-}
+})
 
 export async function canManageTargetUser(
   supabase: UserClient,

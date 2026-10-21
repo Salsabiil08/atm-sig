@@ -83,9 +83,23 @@ export async function getTaskMasterData(user: SessionUser): Promise<TaskMasterDa
     }))
 
   const roleIds = [...new Set((usersResult.data ?? []).map((profile) => profile.role_id))]
-  const { data: roles, error: rolesError } = roleIds.length
-    ? await supabase.from('roles').select('id, level').in('id', roleIds)
-    : { data: [], error: null }
+  const sectionIds = sections.map(({ id }) => id)
+
+  // Lookup role dan template saling independen (masing-masing hanya butuh hasil
+  // query sebelumnya) — jalankan paralel.
+  const [rolesResult, templatesResult] = await Promise.all([
+    roleIds.length
+      ? supabase.from('roles').select('id, level').in('id', roleIds)
+      : Promise.resolve({ data: [], error: null }),
+    sectionIds.length
+      ? supabase.from('task_templates')
+          .select('id, org_unit_id, category_id, name, title, priority, owner_id, reviewer_id, recurrence, recurrence_day, start_offset_days, due_offset_days, is_active, next_run_at')
+          .in('org_unit_id', sectionIds)
+          .order('name')
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  const { data: roles, error: rolesError } = rolesResult
   if (rolesError) throw new Error('Gagal memuat role pengguna.')
   const roleLevels = new Map((roles ?? []).map((role) => [role.id, role.level]))
   const people = (usersResult.data ?? []).flatMap((profile) => {
@@ -101,13 +115,7 @@ export async function getTaskMasterData(user: SessionUser): Promise<TaskMasterDa
       : []
   })
 
-  const sectionIds = sections.map(({ id }) => id)
-  const { data: templateRows, error: templatesError } = sectionIds.length
-    ? await supabase.from('task_templates')
-        .select('id, org_unit_id, category_id, name, title, priority, owner_id, reviewer_id, recurrence, recurrence_day, start_offset_days, due_offset_days, is_active, next_run_at')
-        .in('org_unit_id', sectionIds)
-        .order('name')
-    : { data: [], error: null }
+  const { data: templateRows, error: templatesError } = templatesResult
   if (templatesError) throw new Error('Gagal memuat template task.')
 
   return {
