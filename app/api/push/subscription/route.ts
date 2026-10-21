@@ -24,6 +24,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid subscription' }, { status: 400 })
   }
   const db = createAdminClient()
+  const { data: existing } = await db.from('push_subscriptions' as never).select('user_id').eq('endpoint', endpoint).maybeSingle() as unknown as { data: { user_id: string } | null }
+  if (existing && existing.user_id !== user.id) return NextResponse.json({ error: 'Endpoint belongs to another user' }, { status: 409 })
   const { error } = await db.from('push_subscriptions' as never).upsert({
     user_id: user.id, endpoint, p256dh: keys.p256dh, auth_secret: keys.auth,
     updated_at: new Date().toISOString(),
