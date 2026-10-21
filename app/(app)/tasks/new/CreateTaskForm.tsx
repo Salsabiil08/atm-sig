@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition, type FormEvent } from 'react'
 import { createTask } from '@/lib/tasks/actions'
 import type { TaskCreationOptions } from '@/lib/tasks/queries'
+import { toJakartaTimestamp } from '@/lib/tasks/dates'
 
 type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string }
 
@@ -18,10 +19,6 @@ function canAssignOwner(
   if (owner.roleLevel >= 5) return currentUserRoleLevel >= 5
   if (owner.roleLevel === 4) return owner.orgUnitId === section.parentId
   return owner.orgUnitId === section.id
-}
-
-function toJakartaTimestamp(date: string, endOfDay = false) {
-  return new Date(`${date}T${endOfDay ? '23:59:59.999' : '00:00:00'}+07:00`).toISOString()
 }
 
 export default function CreateTaskForm({
