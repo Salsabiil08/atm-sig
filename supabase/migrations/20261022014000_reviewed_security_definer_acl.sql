@@ -26,8 +26,10 @@ BEGIN
       function_record.signature);
     -- These three are intentionally exposed to signed-in users and perform
     -- their own actor/role/scope checks. Do not grant any other definer RPC.
-    IF function_record.function_name = ANY(ARRAY[
-      'review_task', 'reassign_task', 'decide_deadline_change'
+    IF function_record.signature::text = ANY(ARRAY[
+      'review_task(uuid,task_status,text)',
+      'reassign_task(uuid,uuid,text)',
+      'decide_deadline_change(uuid,deadline_request_status)'
     ]) THEN
       EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated',
         function_record.signature);
