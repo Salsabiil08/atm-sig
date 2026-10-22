@@ -28,5 +28,7 @@ jobs:
         run: npm test
       - name: Isolated database migration and RLS regression
         run: node scripts/check-r02-db.mjs
+      - name: Reminder and recurring-template SQL regression
+        run: node scripts/check-reminder-template.mjs
       - name: Build
         run: npm run build
