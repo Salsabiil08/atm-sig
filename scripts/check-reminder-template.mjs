@@ -38,7 +38,7 @@ try {
   ].join('\n'))
   const templates=source('033_task_categories_templates.sql')
   const missed=source('034_task_category_scope_and_missed_runs.sql')
-  const reminder=source('032_notification_reminder_reference.sql')
+  const reminder=source('20261022017000_short_task_wbs_reminder_zero_progress.sql')
   await db.exec(extract(templates,'next_task_template_run'))
   await db.exec(extract(templates,'process_task_template_runs').replace('FUNCTION public.process_task_template_runs(','FUNCTION public.process_task_template_runs_worker('))
   await db.exec(extract(missed,'process_task_template_runs'))
