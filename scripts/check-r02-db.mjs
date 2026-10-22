@@ -127,6 +127,23 @@ try {
     VALUES (gen_random_uuid(),'${task}','Late requirement')`,
     'PIC cannot change evidence requirements after To do')
   await db.exec('RESET ROLE')
+  // If audit insertion fails, the business UPDATE must roll back atomically.
+  await db.exec("ALTER TABLE public.audit_logs ADD CONSTRAINT simulate_audit_failure CHECK (action <> 'update_status')")
+  await db.exec('SET ROLE authenticated')
+  await bad(`UPDATE public.tasks SET status='Done' WHERE id='${task}'`,
+    'audit failure must roll back task status')
+  const taskAfterFailure = await row(`SELECT status FROM public.tasks WHERE id='${task}'`)
+  assert.equal(taskAfterFailure.status, 'In progress')
+  await db.exec('RESET ROLE')
+  await db.exec('ALTER TABLE public.audit_logs DROP CONSTRAINT simulate_audit_failure')
+  // Manager remains allowed to create scoped tasks after PIC RLS extension.
+  await db.exec(`
+    SET app.user_id='${MANAGER}'; SET app.role_level='3'; SET app.org_unit_id='4';
+    SET ROLE authenticated;
+  `)
+  await db.exec(`INSERT INTO public.tasks(id,owner_id,assigner_id,reviewer_id,org_unit_id)
+    VALUES (gen_random_uuid(),'${OTHER}','${MANAGER}','${MANAGER}',4)`)
+  await db.exec('RESET ROLE')
   const actions = await db.query(`SELECT action FROM public.audit_logs ORDER BY created_at`)
   assert.equal(actions.rows.some(r=>r.action==='create'),true)
   assert.equal(actions.rows.some(r=>r.action==='update_status'),true)
