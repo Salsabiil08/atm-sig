@@ -57,6 +57,6 @@ try {
   assert.deepEqual(await check('2026-10-23T04:48:00Z'),[80])
   assert.deepEqual(await check('2026-10-23T14:24:00Z'),[90])
   assert.deepEqual(await check('2026-10-23T14:25:00Z'),[])
-  assert.deepEqual((await run('select type from public.notifications where task_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' order by type')).map(x=>x.type),['reminder_50','reminder_80','reminder_90'])
+  assert.deepEqual((await run("select type from public.notifications where task_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' order by type")).map(x=>x.type),['reminder_50','reminder_80','reminder_90'])
   console.log('PASS actual SQL: 50/80/90 reminders, idempotency, weekly task and next WIB run')
 } finally { await db.close() }
