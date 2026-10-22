@@ -128,7 +128,7 @@ try {
     'PIC cannot change evidence requirements after To do')
   await db.exec('RESET ROLE')
   // If audit insertion fails, the business UPDATE must roll back atomically.
-  await db.exec("ALTER TABLE public.audit_logs ADD CONSTRAINT simulate_audit_failure CHECK (action <> 'update_status')")
+  await db.exec("ALTER TABLE public.audit_logs ADD CONSTRAINT simulate_audit_failure CHECK (action <> 'update_status') NOT VALID")
   await db.exec('SET ROLE authenticated')
   await bad(`UPDATE public.tasks SET status='Done' WHERE id='${task}'`,
     'audit failure must roll back task status')
