@@ -20,7 +20,7 @@ try {
     "CREATE TYPE public.task_priority AS ENUM ('rendah','sedang','tinggi');",
     'CREATE TABLE public.roles(id int PRIMARY KEY,level int NOT NULL);',
     'CREATE TABLE public.org_units(id int PRIMARY KEY,parent_id int);',
-    'CREATE TABLE public.users(id uuid PRIMARY KEY,role_id int,status public.user_status DEFAULT \\'aktif\\',org_unit_id int,supervisor_id uuid,name text,email text);'.replace("\\'","'").replace("\\'","'"),
+    "CREATE TABLE public.users(id uuid PRIMARY KEY,role_id int,status public.user_status DEFAULT 'aktif',org_unit_id int,supervisor_id uuid,name text,email text);",
     'CREATE TABLE public.task_categories(id uuid PRIMARY KEY,is_active bool NOT NULL,org_unit_id int);',
     "CREATE TABLE public.tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),owner_id uuid,assigner_id uuid,reviewer_id uuid,org_unit_id int,category_id uuid,title text,priority public.task_priority DEFAULT 'sedang',status public.task_status DEFAULT 'To do',progress_pct int DEFAULT 0,start_date timestamptz,due_date timestamptz);",
     'CREATE TABLE public.wbs_items(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),task_id uuid,parent_id uuid,weight numeric,is_done boolean);',
