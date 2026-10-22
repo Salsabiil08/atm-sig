@@ -114,12 +114,14 @@ describe('reminder scheduler endpoint', () => {
       headers: { authorization: 'Bearer test-cron-secret' },
     }))
 
-    expect(response.status).toBe(503)
+    expect(response.status).toBe(200)
     await expect(response.json()).resolves.toEqual({
       created: 1,
-      error: 'Kanal email belum dikonfigurasi.',
       taskTemplatesCreated: 2,
       taskTemplatesSkipped: 1,
+      emailsSent: 0,
+      emailFailures: 0,
+      emailStatus: 'not_configured',
     })
     expect(rpc).toHaveBeenCalledTimes(2)
   })
