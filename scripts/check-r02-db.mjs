@@ -14,6 +14,10 @@ const PIC = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 const MANAGER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 const OTHER = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
 const task = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+const SPECTATOR = '11111111-1111-4111-8111-111111111111'
+const SM = '44444444-4444-4444-8444-444444444444'
+const GM = '55555555-5555-4555-8555-555555555555'
+const SUPER = '66666666-6666-4666-8666-666666666666'
 
 try {
   await db.exec(`
@@ -24,8 +28,11 @@ try {
     CREATE TYPE public.task_status AS ENUM ('To do','In progress','Blocked','Review','Revisi','Done');
     CREATE TYPE public.deadline_request_status AS ENUM ('Menunggu approval','Disetujui','Ditolak');
     CREATE TYPE public.user_status AS ENUM ('aktif','nonaktif');
+    CREATE TABLE public.roles (id int PRIMARY KEY, level int NOT NULL);
+    CREATE TABLE public.org_units (id int PRIMARY KEY, parent_id int);
     CREATE TABLE public.users (
-      id uuid PRIMARY KEY, status public.user_status NOT NULL DEFAULT 'aktif',
+      id uuid PRIMARY KEY, role_id int NOT NULL REFERENCES public.roles(id),
+      status public.user_status NOT NULL DEFAULT 'aktif',
       org_unit_id int NOT NULL, supervisor_id uuid
     );
     CREATE TABLE public.tasks (
@@ -53,6 +60,10 @@ try {
       'select nullif(current_setting(''app.org_unit_id'',true),'''')::int';
     CREATE FUNCTION public.can_manage_org_unit(int) RETURNS boolean LANGUAGE sql STABLE AS
       'select get_my_role_level() >= 3 and $1 = get_my_org_unit_id()';
+    CREATE FUNCTION public.can_access_task_scope(int,uuid,uuid) RETURNS boolean LANGUAGE sql STABLE AS
+      'select get_my_role_level() >= 5 or (get_my_role_level() >= 2 and ($1 = get_my_org_unit_id() or $2=auth.uid() or $3=auth.uid()))';
+    CREATE POLICY users_read_all ON public.users FOR SELECT USING (auth.uid() IS NOT NULL);
+    CREATE POLICY org_units_read_all ON public.org_units FOR SELECT USING (true);
     CREATE POLICY tasks_insert ON public.tasks FOR INSERT
       WITH CHECK (get_my_role_level() >= 3 AND can_manage_org_unit(org_unit_id));
     CREATE POLICY tasks_read ON public.tasks FOR SELECT
@@ -68,12 +79,18 @@ try {
     CREATE POLICY evidence_requirements_write ON public.evidence_requirements FOR ALL
       USING (get_my_role_level() >= 3) WITH CHECK (get_my_role_level() >= 3);
     ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE public.org_units ENABLE ROW LEVEL SECURITY;
     ALTER TABLE public.evidence_requirements ENABLE ROW LEVEL SECURITY;
     GRANT USAGE ON SCHEMA public, auth TO authenticated, anon;
     GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
     GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth, public TO authenticated, anon;
-    INSERT INTO public.users(id,org_unit_id,supervisor_id) VALUES
-      ('${PIC}',4,'${MANAGER}'), ('${MANAGER}',4,null), ('${OTHER}',5,null);
+    INSERT INTO public.roles VALUES (1,1),(2,2),(3,3),(4,4),(5,5),(6,6);
+    INSERT INTO public.org_units VALUES (4,null),(5,null);
+    INSERT INTO public.users(id,role_id,org_unit_id,supervisor_id) VALUES
+      ('${PIC}',2,4,'${MANAGER}'), ('${MANAGER}',3,4,null),
+      ('${OTHER}',2,5,null),('${SPECTATOR}',1,4,null),
+      ('${SM}',4,4,null),('${GM}',5,4,null),('${SUPER}',6,4,null);
   `)
   // Simulate exact 29 pre-existing SECURITY DEFINER functions.
   await db.exec(`
@@ -91,6 +108,7 @@ try {
   await migrate('20261022013000_pic_self_create_rls.sql')
   await migrate('20261022014000_reviewed_security_definer_acl.sql')
   await migrate('20261022015000_atomic_task_audit.sql')
+  await migrate('20261022016000_spectator_business_data_rls.sql')
   const exposed = await row(`SELECT count(*)::int AS n
     FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
     WHERE n.nspname='public' AND p.prosecdef
@@ -144,6 +162,27 @@ try {
   await db.exec(`INSERT INTO public.tasks(id,owner_id,assigner_id,reviewer_id,org_unit_id)
     VALUES (gen_random_uuid(),'${OTHER}','${MANAGER}','${MANAGER}',4)`)
   await db.exec('RESET ROLE')
+
+  // Six-role RLS smoke UAT: Spectator, PIC, Manager, SM, GM, Super Admin.
+  // This verifies DB policies, not actual interactive login/review screens.
+  await db.exec(`SET app.user_id='${SPECTATOR}'; SET app.role_level='1'; SET app.org_unit_id='4'; SET ROLE authenticated;`)
+  assert.equal((await row('SELECT count(*)::int n FROM public.users')).n,1,'Spectator can only see self')
+  assert.equal((await row('SELECT count(*)::int n FROM public.tasks')).n,0,'Spectator cannot read tasks')
+  assert.equal((await row('SELECT count(*)::int n FROM public.org_units')).n,0,'Spectator cannot read org master')
+  await bad(`INSERT INTO public.tasks(id,owner_id,assigner_id,reviewer_id,org_unit_id)
+    VALUES(gen_random_uuid(),'${SPECTATOR}','${SPECTATOR}',null,4)`,'Spectator cannot create')
+  await db.exec('RESET ROLE')
+  for (const [roleLevel,userId,expectedName] of [
+    [2,PIC,'PIC'],[3,MANAGER,'Manager'],[4,SM,'SM'],[5,GM,'GM'],[6,SUPER,'Super Admin']
+  ]) {
+    await db.exec(`SET app.user_id='${userId}'; SET app.role_level='${roleLevel}'; SET app.org_unit_id='4'; SET ROLE authenticated;`)
+    assert.ok((await row('SELECT count(*)::int n FROM public.users')).n >= 1,expectedName+' user visibility')
+    assert.ok((await row('SELECT count(*)::int n FROM public.org_units')).n >= 1,expectedName+' org visibility')
+    const count=(await row('SELECT count(*)::int n FROM public.tasks')).n
+    assert.ok(count >= 1,expectedName+' task visibility')
+    await db.exec('RESET ROLE')
+  }
+  console.log('PASS six-role simulated RLS UAT: Spectator isolation, PIC, Manager, SM, GM, Super Admin')
   const actions = await db.query(`SELECT action FROM public.audit_logs ORDER BY created_at`)
   assert.equal(actions.rows.some(r=>r.action==='create'),true)
   assert.equal(actions.rows.some(r=>r.action==='update_status'),true)
