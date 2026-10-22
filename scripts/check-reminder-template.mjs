@@ -58,5 +58,18 @@ try {
   assert.deepEqual(await check('2026-10-23T14:24:00Z'),[90])
   assert.deepEqual(await check('2026-10-23T14:25:00Z'),[])
   assert.deepEqual((await run("select type from public.notifications where task_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' order by type")).map(x=>x.type),['reminder_50','reminder_80','reminder_90'])
-  console.log('PASS actual SQL: 50/80/90 reminders, idempotency, weekly task and next WIB run')
+  // Tasks shorter than 24 hours rely on leaf WBS completion, not progress_pct.
+  const shortId='ffffffff-ffff-4fff-8fff-ffffffffffff'
+  const noWbsId='98765432-9876-4876-8876-987654321098'
+  for(const shortTaskId of [shortId,noWbsId]) {
+    await db.exec("INSERT INTO public.tasks(id,owner_id,assigner_id,reviewer_id,org_unit_id,title,progress_pct,start_date,due_date) VALUES('"+
+      shortTaskId+"','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',4,'Short WBS reminder test',0,'2026-10-25T00:00:00Z','2026-10-25T10:00:00Z')")
+  }
+  await db.exec("INSERT INTO public.wbs_items(id,task_id,parent_id,weight,is_done) VALUES(gen_random_uuid(),'"+shortId+"',NULL,100,false)")
+  const shortCheck=async time=>(await run("SELECT task_id,checkpoint_pct FROM public.process_task_reminder_checkpoints('"+time+"'::timestamptz)")).filter(x=>x.task_id===shortId).map(x=>x.checkpoint_pct).sort((a,b)=>a-b)
+  assert.deepEqual(await shortCheck('2026-10-25T05:00:00Z'),[50],'short task with leaf WBS gets 50%')
+  assert.deepEqual(await shortCheck('2026-10-25T08:00:00Z'),[80],'short task gets 80%')
+  assert.deepEqual(await shortCheck('2026-10-25T09:00:00Z'),[90],'short task gets 90%')
+  assert.equal((await run("SELECT count(*)::int n FROM public.task_reminders WHERE task_id='"+noWbsId+"'"))[0].n,0,'short task without WBS should not generate checkpoint')
+  console.log('PASS actual SQL: 50/80/90 reminders (regular and short WBS), idempotency, weekly task and next WIB run')
 } finally { await db.close() }
