@@ -21,7 +21,6 @@ try {
     CREATE ROLE authenticated;
     CREATE ROLE service_role;
     CREATE SCHEMA auth;
-    CREATE SCHEMA public;
     CREATE TYPE public.task_status AS ENUM ('To do','In progress','Blocked','Review','Revisi','Done');
     CREATE TYPE public.deadline_request_status AS ENUM ('Menunggu approval','Disetujui','Ditolak');
     CREATE TYPE public.user_status AS ENUM ('aktif','nonaktif');
