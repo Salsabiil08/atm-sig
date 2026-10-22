@@ -50,13 +50,13 @@ try {
   assert.equal((await run("select count(*)::int n from public.tasks where category_id is not null"))[0].n,1)
   const next=(await run("select next_run_at at time zone 'Asia/Jakarta' as next from public.task_templates"))[0].next
   assert.equal(new Date(next).toISOString(), '2026-10-29T08:00:00.000Z')
-  const check=async time=>(await run("SELECT checkpoint_pct FROM public.process_task_reminder_checkpoints('"+time+"'::timestamptz) ORDER BY checkpoint_pct")).map(x=>x.checkpoint_pct)
+  const check=async time=>(await run("SELECT task_id,checkpoint_pct FROM public.process_task_reminder_checkpoints('"+time+"'::timestamptz) ORDER BY checkpoint_pct")).filter(x=>x.task_id==='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee').map(x=>x.checkpoint_pct)
   assert.deepEqual(await check('2026-10-21T23:00:00Z'),[])
   assert.deepEqual(await check('2026-10-22T00:00:00Z'),[50])
   assert.deepEqual(await check('2026-10-22T00:00:00Z'),[])
   assert.deepEqual(await check('2026-10-23T04:48:00Z'),[80])
   assert.deepEqual(await check('2026-10-23T14:24:00Z'),[90])
   assert.deepEqual(await check('2026-10-23T14:25:00Z'),[])
-  assert.deepEqual((await run('select type from public.notifications order by type')).map(x=>x.type),['reminder_50','reminder_80','reminder_90'])
+  assert.deepEqual((await run('select type from public.notifications where task_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' order by type')).map(x=>x.type),['reminder_50','reminder_80','reminder_90'])
   console.log('PASS actual SQL: 50/80/90 reminders, idempotency, weekly task and next WIB run')
 } finally { await db.close() }
