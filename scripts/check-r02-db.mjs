@@ -92,7 +92,7 @@ try {
       ('${OTHER}',2,5,null),('${SPECTATOR}',1,4,null),
       ('${SM}',4,4,null),('${GM}',5,4,null),('${SUPER}',6,4,null);
   `)
-  // Simulate exact 29 pre-existing SECURITY DEFINER functions.
+  // Simulate all 33 current Production SECURITY DEFINER functions.
   await db.exec(`
     CREATE FUNCTION public.review_task(uuid,public.task_status,text)
       RETURNS void LANGUAGE sql SECURITY DEFINER AS 'select';
@@ -101,7 +101,7 @@ try {
     CREATE FUNCTION public.decide_deadline_change(uuid,public.deadline_request_status)
       RETURNS void LANGUAGE sql SECURITY DEFINER AS 'select';
   `)
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 30; i++) {
     await db.exec(`CREATE FUNCTION public.internal_rpc_${i}() RETURNS void
       LANGUAGE sql SECURITY DEFINER AS 'select';`)
   }
