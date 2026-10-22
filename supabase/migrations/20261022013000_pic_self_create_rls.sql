@@ -42,6 +42,7 @@ WITH CHECK (
     WHERE t.id = evidence_requirements.task_id
       AND t.owner_id = (SELECT auth.uid())
       AND t.assigner_id = (SELECT auth.uid())
+      AND t.status = 'To do'::public.task_status
       AND t.org_unit_id = public.get_my_org_unit_id()
   )
 );
