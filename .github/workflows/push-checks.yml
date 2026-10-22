@@ -26,5 +26,7 @@ jobs:
         run: npx tsc --noEmit
       - name: Unit tests
         run: npm test
+      - name: Isolated database migration and RLS regression
+        run: node scripts/check-r02-db.mjs
       - name: Build
         run: npm run build
