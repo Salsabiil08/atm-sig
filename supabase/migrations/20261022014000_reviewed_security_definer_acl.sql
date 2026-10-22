@@ -1,4 +1,5 @@
 -- R.02 audit P0: reviewed SECURITY DEFINER execution policy.
+-- Current Production inventory: 29 pre-push functions + 4 push RPC/trigger functions = 33.
 -- This migration is intentionally gated behind six-role negative API tests.
 -- SECURITY DEFINER is privileged; public role grants must not be inherited by anon.
 DO $$
@@ -10,8 +11,8 @@ BEGIN
   FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
   WHERE n.nspname = 'public' AND p.prosecdef AND p.prokind = 'f';
 
-  IF total <> 29 THEN
-    RAISE EXCEPTION 'Unexpected SECURITY DEFINER inventory: %, expected 29. Review before deploying', total;
+  IF total <> 33 THEN
+    RAISE EXCEPTION 'Unexpected SECURITY DEFINER inventory: %, expected 33. Review before deploying', total;
   END IF;
 
   FOR function_record IN
