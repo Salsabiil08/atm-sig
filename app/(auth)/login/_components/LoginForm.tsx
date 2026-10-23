@@ -40,7 +40,7 @@ export default function LoginForm({ initialNotice }: { initialNotice?: string | 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
       {initialNotice && (
         <div
           role="alert"
@@ -67,7 +67,7 @@ export default function LoginForm({ initialNotice }: { initialNotice?: string | 
         <label
           htmlFor="email"
           className="block text-xs font-semibold mb-1.5"
-          style={{ color: '#1e293b' }}
+          style={{ color: 'var(--color-text-primary)' }}
         >
           Email
         </label>
@@ -79,7 +79,7 @@ export default function LoginForm({ initialNotice }: { initialNotice?: string | 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nama@sig.id"
-          className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm
+          className="w-full px-3.5 py-3 sm:py-2.5 border border-gray-300 rounded-lg text-sm
                      text-gray-900 placeholder-gray-400 transition duration-150
                      disabled:bg-gray-50 disabled:text-gray-400"
           style={{
