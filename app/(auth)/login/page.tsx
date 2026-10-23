@@ -4,6 +4,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import ATMWordmark from '@/app/_components/ATMWordmark'
+import ThemeToggle from '@/app/_components/ThemeToggle'
 import LoginForm from './_components/LoginForm'
 
 export const metadata: Metadata = {
@@ -46,10 +47,11 @@ async function LoginNotice({ searchParams }: LoginPageProps) {
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
-    <main className="flex min-h-dvh w-full items-start justify-center bg-white px-5 py-12 sm:items-center sm:px-8 sm:py-10">
+    <main className="atm-login-page relative flex min-h-dvh w-full items-start justify-center bg-white px-4 pb-8 pt-14 sm:items-center sm:px-8 sm:py-10">
+      <div className="absolute right-4 top-3 sm:right-8 sm:top-6"><ThemeToggle /></div>
       <section
         aria-labelledby="login-heading"
-        className="w-full max-w-[460px] bg-white px-2 py-7 sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
+        className="atm-login-card w-full max-w-[460px] bg-white px-2 py-7 sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
       >
         <div className="mb-12 flex justify-center sm:mb-7">
           <ATMWordmark
