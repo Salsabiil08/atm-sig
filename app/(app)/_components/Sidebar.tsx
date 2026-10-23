@@ -153,8 +153,8 @@ export default function Sidebar({ user }: Props) {
                   className={[
                     'flex min-h-10 items-center gap-2 whitespace-nowrap border-b-4 px-3 py-2 text-sm transition-colors md:gap-3 md:border-b-0 md:border-l-4 md:px-5 md:py-2.5',
                     isActive
-                      ? 'border-[var(--color-brand)] bg-red-50 font-semibold text-[var(--color-brand)]'
-                      : 'border-transparent font-normal text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                      ? 'border-[var(--color-brand)] bg-[var(--color-brand-light)] font-semibold text-[var(--color-brand)]'
+                      : 'border-transparent font-normal text-[var(--color-text-secondary)] hover:bg-[var(--color-brand-muted)] hover:text-[var(--color-text-primary)]',
                   ].join(' ')}
                   aria-current={isActive ? 'page' : undefined}
                 >
