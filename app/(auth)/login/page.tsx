@@ -47,17 +47,17 @@ async function LoginNotice({ searchParams }: LoginPageProps) {
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
-    <main className="atm-login-page relative flex min-h-dvh w-full items-start justify-center bg-white px-4 pb-8 pt-14 sm:items-center sm:px-8 sm:py-10">
-      <div className="absolute right-4 top-3 sm:right-8 sm:top-6"><ThemeToggle /></div>
+    <main className="atm-login-page flex min-h-dvh w-full flex-col bg-white px-5 pb-6 pt-3 sm:relative sm:items-center sm:justify-center sm:px-8 sm:py-10">
+      <div className="flex w-full shrink-0 justify-end sm:absolute sm:right-8 sm:top-6 sm:w-auto"><ThemeToggle /></div>
       <section
         aria-labelledby="login-heading"
-        className="atm-login-card w-full max-w-[460px] bg-white px-2 py-7 sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
+        className="atm-login-card mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center bg-white py-5 sm:flex-none sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
       >
-        <div className="mb-12 flex justify-center sm:mb-7">
+        <div className="mb-9 flex justify-center sm:mb-7">
           <ATMWordmark
             variant="dark"
             showSubtitle
-            className="w-[min(76vw,310px)] sm:w-[210px]"
+            className="w-[min(72vw,260px)] sm:w-[210px]"
           />
         </div>
 
@@ -76,11 +76,11 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         </Suspense>
         <LoginForm />
 
-        <div className="mt-6 text-center">
+        <div className="mt-5 text-center">
           <p className="text-xs text-gray-500">
             Login pertama otomatis berstatus Spectator
           </p>
-          <div className="mt-4 flex justify-center gap-4 text-sm">
+          <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             <a href="/signup" className="font-medium text-slate-700 underline underline-offset-4">
               Daftar akun
             </a>
