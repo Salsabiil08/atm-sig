@@ -47,40 +47,39 @@ async function LoginNotice({ searchParams }: LoginPageProps) {
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
-    <main className="atm-login-page relative flex min-h-dvh w-full items-start justify-center bg-white px-4 pb-8 pt-14 sm:items-center sm:px-8 sm:py-10">
-      <div className="absolute right-4 top-3 sm:right-8 sm:top-6"><ThemeToggle /></div>
+    <main className="atm-login-page relative flex min-h-dvh w-full items-center justify-center bg-white px-4 py-20 sm:px-8 sm:py-10">
+      <div className="absolute right-4 top-4 sm:right-8 sm:top-6"><ThemeToggle /></div>
       <section
         aria-labelledby="login-heading"
-        className="atm-login-card w-full max-w-[460px] bg-white px-2 py-7 sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
+        className="atm-login-card mx-auto w-full max-w-[420px] rounded-2xl border border-red-100 bg-white px-5 py-7 shadow-[0_10px_35px_-4px_rgba(230,150,150,0.12)] sm:max-w-[460px] sm:px-10 sm:py-11"
       >
-        <div className="mb-12 flex justify-center sm:mb-7">
+        <div className="mb-5 flex justify-center sm:mb-7">
           <ATMWordmark
             variant="dark"
             showSubtitle
-            className="w-[min(76vw,310px)] sm:w-[210px]"
+            className="w-[min(62vw,205px)] sm:w-[210px]"
           />
         </div>
 
-        <div className="mb-8 hidden text-center sm:block">
-          <h1 id="login-heading" className="text-[26px] font-bold tracking-tight text-gray-900">
+        <div className="mb-6 text-center sm:mb-8">
+          <h1 id="login-heading" className="text-2xl font-bold tracking-tight text-gray-900 sm:text-[26px]">
             Masuk
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+          <p className="mt-2 text-xs leading-relaxed text-gray-500 sm:text-sm">
             Masuk untuk mengelola task Department of Accounting
           </p>
         </div>
-        <h1 className="sr-only sm:hidden">Masuk ke Accounting Task Manager</h1>
 
         <Suspense fallback={null}>
           <LoginNotice searchParams={searchParams} />
         </Suspense>
         <LoginForm />
 
-        <div className="mt-6 text-center">
+        <div className="mt-5 text-center">
           <p className="text-xs text-gray-500">
             Login pertama otomatis berstatus Spectator
           </p>
-          <div className="mt-4 flex justify-center gap-4 text-sm">
+          <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             <a href="/signup" className="font-medium text-slate-700 underline underline-offset-4">
               Daftar akun
             </a>
