@@ -5,6 +5,7 @@
 
 import { type SessionUser } from '@/lib/auth/session'
 import ATMWordmark from '@/app/_components/ATMWordmark'
+import ThemeToggle from '@/app/_components/ThemeToggle'
 import LogoutButton from './LogoutButton'
 
 type Props = { user: SessionUser }
@@ -57,8 +58,9 @@ export default function TopHeader({ user }: Props) {
         <ATMWordmark variant="light" className="w-[96px] sm:w-[116px]" />
       </div>
 
-      {/* Kanan: Tanggal + Info User */}
-      <div className="flex shrink-0 items-center gap-2 sm:gap-5">
+      {/* Kanan: Appearance, tanggal, dan akun */}
+      <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-4">
+        <ThemeToggle onBrand />
         {/* Tanggal */}
         <div
           className="hidden rounded-md px-3.5 py-1.5 text-xs font-medium text-red-50 sm:block"
