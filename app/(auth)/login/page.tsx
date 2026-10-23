@@ -1,9 +1,9 @@
 // FR-001, FR-002 — Halaman login ATM
-// Sesuai Stitch mockup 01_sign_in: layout 2 kolom (brand sidebar kiri + form kanan)
+// Responsive single-column sign-in: mobile full-width, desktop centered card
 
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import BrandLogo from '@/app/_components/BrandLogo'
+import ATMWordmark from '@/app/_components/ATMWordmark'
 import LoginForm from './_components/LoginForm'
 
 export const metadata: Metadata = {
@@ -46,104 +46,45 @@ async function LoginNotice({ searchParams }: LoginPageProps) {
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
-    <main className="min-h-screen w-full flex flex-col md:flex-row bg-[#fafafa]">
-      {/* Kiri: Brand section — gelap dengan dekorasi */}
+    <main className="flex min-h-dvh w-full items-start justify-center bg-white px-5 py-12 sm:items-center sm:px-8 sm:py-10">
       <section
-        className="relative w-full md:w-[48%] min-h-[300px] md:min-h-screen flex flex-col justify-between p-8 sm:p-12 lg:p-16 overflow-hidden"
-        style={{ backgroundColor: '#212325' }}
-        aria-label="Brand ATM"
+        aria-labelledby="login-heading"
+        className="w-full max-w-[460px] bg-white px-2 py-7 sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-[0_10px_35px_-4px_rgba(230,150,150,0.15)]"
       >
-        {/* Garis merah bawah */}
-        <div
-          className="absolute bottom-0 left-0 right-0 z-20"
-          style={{ height: '6px', backgroundColor: '#D32F2F' }}
-        />
-
-        {/* Header brand */}
-        <div className="z-20 relative">
-          <BrandLogo className="h-36 w-40 rounded-xl bg-white object-contain p-1 shadow-md sm:h-40 sm:w-44" priority />
+        <div className="mb-12 flex justify-center sm:mb-7">
+          <ATMWordmark
+            variant="dark"
+            showSubtitle
+            className="w-[min(76vw,310px)] sm:w-[210px]"
+          />
         </div>
 
-        {/* Dekorasi bar chart latar */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-0">
-          {[
-            { h: '14rem', l: '4rem' },
-            { h: '20rem', l: '9rem' },
-            { h: '12rem', l: '14rem' },
-            { h: '24rem', l: '19rem' },
-            { h: '16rem', l: '23.5rem' },
-          ].map((bar, i) => (
-            <div
-              key={i}
-              className="absolute bottom-0 w-16"
-              style={{
-                height: bar.h,
-                left: bar.l,
-                backgroundColor: 'rgba(255,255,255,0.08)',
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Teks brand bawah */}
-        <div className="z-20 relative pt-32 pb-4">
-          <h1
-            className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight"
-            style={{ color: '#FFFFFF' }}
-          >
-            Accounting Task Manager
+        <div className="mb-8 hidden text-center sm:block">
+          <h1 id="login-heading" className="text-[26px] font-bold tracking-tight text-gray-900">
+            Masuk
           </h1>
-          <p className="text-sm font-normal mt-2.5" style={{ color: '#9CA3AF' }}>
-            Department of Accounting
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            Masuk untuk mengelola task Department of Accounting
           </p>
         </div>
-      </section>
+        <h1 className="sr-only sm:hidden">Masuk ke Accounting Task Manager</h1>
 
-      {/* Kanan: Form login */}
-      <section
-        className="w-full md:w-[52%] min-h-screen flex items-center justify-center p-6 sm:p-10 lg:p-16"
-        style={{ backgroundColor: '#fafafa' }}
-      >
-        <div
-          className="w-full max-w-[460px] bg-white rounded-2xl p-8 sm:p-11"
-          style={{
-            boxShadow: '0 10px 35px -4px rgba(230,150,150,0.18)',
-            border: '1px solid #fbdcdc',
-          }}
-        >
-          {/* ATM Badge di atas form */}
-          <div className="flex justify-center mb-4">
-            <BrandLogo className="h-[76px] w-[86px] object-contain sm:h-[88px] sm:w-[100px]" />
-          </div>
+        <Suspense fallback={null}>
+          <LoginNotice searchParams={searchParams} />
+        </Suspense>
+        <LoginForm />
 
-          {/* Header form */}
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-[26px] font-bold text-gray-900 tracking-tight">
-              Masuk
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1.5 font-normal leading-relaxed">
-              Masuk untuk mengelola task Department of Accounting
-            </p>
-          </div>
-
-          <Suspense fallback={null}>
-            <LoginNotice searchParams={searchParams} />
-          </Suspense>
-          <LoginForm />
-
-          {/* Hint bawah */}
-          <div className="text-center mt-6">
-            <p className="text-xs text-gray-500">
-              Login pertama otomatis berstatus Spectator
-            </p>
-            <div className="mt-4 flex justify-center gap-4 text-sm">
-              <a href="/signup" className="font-medium text-slate-700 underline underline-offset-4">
-                Daftar akun
-              </a>
-              <a href="/forgot-password" className="font-medium text-slate-700 underline underline-offset-4">
-                Lupa kata sandi?
-              </a>
-            </div>
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-500">
+            Login pertama otomatis berstatus Spectator
+          </p>
+          <div className="mt-4 flex justify-center gap-4 text-sm">
+            <a href="/signup" className="font-medium text-slate-700 underline underline-offset-4">
+              Daftar akun
+            </a>
+            <a href="/forgot-password" className="font-medium text-slate-700 underline underline-offset-4">
+              Lupa kata sandi?
+            </a>
           </div>
         </div>
       </section>
