@@ -76,3 +76,44 @@ body {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
+
+
+/* Dark theme is opt-in; light remains the default. The selector also covers
+   legacy Tailwind surface utilities until each feature is tokenized. */
+html[data-theme='dark'] {
+  --color-bg-app: #0c111b;
+  --color-bg-card: #17202e;
+  --color-bg-sidebar: #121b28;
+  --color-bg-header: #a81c29;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-brand-light: #381820;
+  --color-brand-muted: rgba(235, 35, 45, 0.22);
+}
+html[data-theme='dark'] body { background: var(--color-bg-app); color: var(--color-text-primary); }
+html[data-theme='dark'] :is(.bg-white,.bg-gray-50,.bg-slate-50,.bg-\[\#fafafa\],.bg-\[var\(--color-bg-card\)\]) {
+  background-color: var(--color-bg-card);
+}
+html[data-theme='dark'] :is(.bg-red-50,.bg-rose-50,.bg-red-100) { background-color: #351b26; }
+html[data-theme='dark'] :is(.bg-slate-100,.bg-gray-100,.bg-gray-50\/60) { background-color: #263244; }
+html[data-theme='dark'] :is(.text-gray-900,.text-slate-900,.text-gray-800,.text-slate-800,.text-slate-700,.text-gray-700,.text-\[\#1e293b\]) { color: #f1f5f9; }
+html[data-theme='dark'] :is(.text-slate-600,.text-gray-600,.text-gray-500,.text-slate-500,.text-slate-400,.text-gray-400) { color: #cbd5e1; }
+html[data-theme='dark'] :is(.border-slate-100,.border-slate-200,.border-gray-200,.border-gray-300,.border-red-100) { border-color: #334155; }
+html[data-theme='dark'] :is(input,select,textarea) {
+  background-color: #202c3d;
+  border-color: #475569;
+  color: #f8fafc;
+}
+html[data-theme='dark'] :is(input,textarea)::placeholder { color: #94a3b8; }
+html[data-theme='dark'] :is(option) { background: #202c3d; color: #f8fafc; }
+html[data-theme='dark'] :is(tr.hover\:bg-slate-50\/60:hover, .hover\:bg-slate-50:hover) { background-color: #263244; }
+html[data-theme='dark'] .atm-wordmark-dark { color: #f8fafc; }
+html[data-theme='dark'] .atm-wordmark-dark .atm-wordmark-accent { fill: #0d0f0c; }
+html[data-theme='dark'] .atm-login-page { background: #0c111b; }
+html[data-theme='dark'] .atm-login-card { background: var(--color-bg-card); border-color: #334155; }
+html[data-theme='dark'] .atm-login-card :is(h1,p,span) { color: inherit; }
+html[data-theme='dark'] .atm-login-card h1 { color: #f8fafc; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
