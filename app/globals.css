@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Warna brand ATM - merah SIG (mengacu Stitch mockup: #d92d20) */
-  --color-brand:        #D92D20;
-  --color-brand-dark:   #B42318;
-  --color-brand-hover:  #c0281c;
-  --color-brand-light:  #FEF2F2;
-  --color-brand-muted:  rgba(217, 45, 32, 0.1);
+  /* Merah logo resmi ATM, diambil dari aksen segitiga sumber: #EB232D */
+  --color-brand:        #EB232D;
+  --color-brand-dark:   #C91925;
+  --color-brand-hover:  #CF1C28;
+  --color-brand-light:  #FFF1F2;
+  --color-brand-muted:  rgba(235, 35, 45, 0.1);
 
   /* Latar belakang */
   --color-bg-app:     #F8FAFC;
   --color-bg-card:    #FFFFFF;
   --color-bg-sidebar: #FFFFFF;
-  --color-bg-header:  #D92D20;
+  --color-bg-header:  #EB232D;
 
   /* Border */
   --color-border:     #E2E8F0;
