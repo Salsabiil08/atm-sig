@@ -4,7 +4,7 @@
 // Header merah SIG dengan logo, nama aplikasi, tanggal, dan info user
 
 import { type SessionUser } from '@/lib/auth/session'
-import BrandLogo from '@/app/_components/BrandLogo'
+import ATMWordmark from '@/app/_components/ATMWordmark'
 import LogoutButton from './LogoutButton'
 
 type Props = { user: SessionUser }
@@ -52,12 +52,9 @@ export default function TopHeader({ user }: Props) {
         height: 'var(--header-height)',
       }}
     >
-      {/* Kiri: Logo + Nama Aplikasi */}
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-        <BrandLogo className="h-11 w-12 shrink-0 rounded-md bg-white object-contain p-0.5 shadow-sm sm:h-12 sm:w-[54px]" priority />
-        <h1 className="truncate text-xs font-semibold tracking-normal text-white sm:text-base">
-          Accounting Task Manager
-        </h1>
+      {/* Wordmark saja: tanpa icon checklist, badge putih, atau teks duplikat. */}
+      <div className="flex min-w-0 shrink-0 items-center">
+        <ATMWordmark variant="light" className="w-[96px] sm:w-[116px]" />
       </div>
 
       {/* Kanan: Tanggal + Info User */}
