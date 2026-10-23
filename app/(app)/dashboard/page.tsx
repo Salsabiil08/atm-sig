@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     metrics.tertinggal > 0 || metrics.blocked > 0
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
       {/* Judul halaman */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-5 gap-4">
         <div>
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
 
       {/* Metric cards */}
       <section
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-7"
+        className="grid grid-cols-1 min-[400px]:grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4 mb-7"
         aria-label="Ringkasan metrics"
       >
         <MetricCard label="Total Task" value={metrics.totalTask} />
@@ -124,8 +124,8 @@ export default async function DashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-            <table className="w-full text-left text-xs border-collapse">
+          <div className="bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+            <table className="w-full min-w-[690px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] font-semibold text-slate-400 tracking-wider">
                   <th className="py-3 px-4 font-semibold" scope="col">TASK</th>
