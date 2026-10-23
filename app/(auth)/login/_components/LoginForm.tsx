@@ -101,7 +101,7 @@ export default function LoginForm({ initialNotice }: { initialNotice?: string | 
         <label
           htmlFor="password"
           className="block text-xs font-semibold mb-1.5"
-          style={{ color: '#1e293b' }}
+          style={{ color: 'var(--color-text-primary)' }}
         >
           Kata Sandi
         </label>
