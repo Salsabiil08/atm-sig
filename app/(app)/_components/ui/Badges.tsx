@@ -21,9 +21,10 @@ type StatusBadgeProps = {
 
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
   const { bg, text, label } = STATUS_STYLES[status]
+  const statusClass = { 'To do': 'todo', 'In progress': 'progress', Blocked: 'blocked', Review: 'review', Revisi: 'revisi', Done: 'done' }[status]
   return (
     <span
-      className={`inline-block text-[11px] font-medium px-3 py-1 rounded-full ${className}`}
+      className={`atm-status-${statusClass} inline-block text-[11px] font-medium px-3 py-1 rounded-full ${className}`}
       style={{ backgroundColor: bg, color: text }}
     >
       {label}
@@ -50,7 +51,7 @@ export function PriorityBadge({ priority, className = '' }: PriorityBadgeProps) 
   const { bg, text, label } = PRIORITY_STYLES[priority]
   return (
     <span
-      className={`inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full ${className}`}
+      className={`atm-priority-${priority} inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full ${className}`}
       style={{ backgroundColor: bg, color: text }}
     >
       {label}
@@ -81,7 +82,7 @@ export function ProgressBar({ value, className = '', showLabel = true }: Progres
     <div className={`flex items-center gap-3 ${className}`}>
       <div className="w-24 bg-slate-100 rounded-full overflow-hidden" style={{ height: '6px' }}>
         <div
-          className="h-full rounded-full transition-all duration-300"
+          className="atm-progress-fill h-full rounded-full"
           style={{ width: `${clamped}%`, backgroundColor: color }}
         />
       </div>
@@ -107,7 +108,7 @@ export function TimeProgress({ timePct, isOverdue, className = '' }: TimeProgres
   if (isOverdue) {
     return (
       <span
-        className={`inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${className}`}
+        className={`atm-overdue inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${className}`}
         style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}
       >
         Lewat
