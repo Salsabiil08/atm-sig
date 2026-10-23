@@ -6,6 +6,7 @@
 import { type SessionUser } from '@/lib/auth/session'
 import ATMWordmark from '@/app/_components/ATMWordmark'
 import ThemeToggle from '@/app/_components/ThemeToggle'
+import JakartaClock from './JakartaClock'
 import LogoutButton from './LogoutButton'
 
 type Props = { user: SessionUser }
@@ -60,6 +61,7 @@ export default function TopHeader({ user }: Props) {
 
       {/* Kanan: Appearance, tanggal, dan akun */}
       <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-4">
+        <JakartaClock />
         <ThemeToggle onBrand />
         {/* Tanggal */}
         <div
