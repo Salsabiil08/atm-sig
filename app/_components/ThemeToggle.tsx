@@ -13,12 +13,17 @@ export default function ThemeToggle({ onBrand = false }: { onBrand?: boolean }) 
   const [choice, setChoice] = useState<ThemeChoice>('system')
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      setChoice(isThemeChoice(stored) ? stored : 'system')
-    } catch {
-      setChoice('system')
-    }
+    // Read persisted preference after hydration without a synchronous
+    // setState in an effect (React lint rule: set-state-in-effect).
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        setChoice(isThemeChoice(stored) ? stored : 'system')
+      } catch {
+        setChoice('system')
+      }
+    })
+    return () => window.cancelAnimationFrame(frame)
   }, [])
 
   useEffect(() => {
