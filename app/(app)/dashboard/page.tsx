@@ -24,11 +24,11 @@ function MetricCard({
   color?: string
 }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+    <div className="atm-interactive atm-appear bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
       <p className="text-xs text-slate-500 font-medium mb-1">{label}</p>
       <p
-        className="text-3xl font-bold"
-        style={{ color: color ?? '#1e293b' }}
+        className="atm-metric-value text-3xl font-bold tabular-nums"
+        style={{ color: color ?? 'var(--color-text-primary)', '--atm-metric-dark': ({ '#ea580c': '#e8cda7', '#dc2626': '#dfafbb', '#7c3aed': '#c7b3da', '#2563eb': '#a6c3df' } as Record<string, string>)[color ?? ''] ?? '#e7eaf0' } as React.CSSProperties}
       >
         {value}
       </p>
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       {showAlert && (
         <section className="mb-6">
           <div
-            className="rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm"
+            className="atm-notice rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm"
             style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047' }}
             role="alert"
           >
@@ -124,7 +124,7 @@ export default async function DashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+          <div className="atm-appear bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
             <table className="w-full min-w-[690px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] font-semibold text-slate-400 tracking-wider">
