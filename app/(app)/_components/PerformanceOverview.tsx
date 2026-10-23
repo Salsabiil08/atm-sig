@@ -16,8 +16,8 @@ function ProgressTrack({ value, label }: { value: number; label: string }) {
       aria-valuenow={value}
     >
       <div
-        className="h-full rounded-full bg-red-600"
-        style={{ width: `${value}%` }}
+        className="atm-progress-fill h-full rounded-full bg-red-600"
+        style={{ width: `${value}%`, '--atm-progress-dark': '#dfafbb' } as React.CSSProperties}
       />
     </div>
   )
@@ -31,7 +31,7 @@ export default function PerformanceOverview({
 
   return (
     <section aria-label="Progress per PIC dan section" className="grid gap-5 lg:grid-cols-2">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="atm-interactive rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">Progress per PIC</h2>
         {owners.length === 0 ? (
           <p className="mt-4 text-sm text-slate-500">Belum ada task aktif dalam cakupan Anda.</p>

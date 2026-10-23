@@ -19,7 +19,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} h-full`}>
+    <html lang="id" className={`${inter.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "(function(){try{var t=localStorage.getItem('atm-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.style.colorScheme=d?'dark':'light'}catch(e){}})()" }} />
+      </head>
       <body className="h-full bg-gray-50 text-gray-900 antialiased">
         <PwaRegistration />
         {children}

@@ -24,11 +24,11 @@ function MetricCard({
   color?: string
 }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+    <div className="atm-interactive atm-appear bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
       <p className="text-xs text-slate-500 font-medium mb-1">{label}</p>
       <p
-        className="text-3xl font-bold"
-        style={{ color: color ?? '#1e293b' }}
+        className="atm-metric-value text-3xl font-bold tabular-nums"
+        style={{ color: color ?? 'var(--color-text-primary)', '--atm-metric-dark': ({ '#ea580c': '#e8cda7', '#dc2626': '#dfafbb', '#7c3aed': '#c7b3da', '#2563eb': '#a6c3df' } as Record<string, string>)[color ?? ''] ?? '#e7eaf0' } as React.CSSProperties}
       >
         {value}
       </p>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     metrics.tertinggal > 0 || metrics.blocked > 0
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
       {/* Judul halaman */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-5 gap-4">
         <div>
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       {showAlert && (
         <section className="mb-6">
           <div
-            className="rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm"
+            className="atm-notice rounded-lg px-4 py-3 flex items-center gap-3 shadow-sm"
             style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047' }}
             role="alert"
           >
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
 
       {/* Metric cards */}
       <section
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-7"
+        className="grid grid-cols-1 min-[400px]:grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4 mb-7"
         aria-label="Ringkasan metrics"
       >
         <MetricCard label="Total Task" value={metrics.totalTask} />
@@ -124,8 +124,8 @@ export default async function DashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-            <table className="w-full text-left text-xs border-collapse">
+          <div className="atm-appear bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+            <table className="w-full min-w-[690px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] font-semibold text-slate-400 tracking-wider">
                   <th className="py-3 px-4 font-semibold" scope="col">TASK</th>

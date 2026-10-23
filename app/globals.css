@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Warna brand ATM - merah SIG (mengacu Stitch mockup: #d92d20) */
-  --color-brand:        #D92D20;
-  --color-brand-dark:   #B42318;
-  --color-brand-hover:  #c0281c;
-  --color-brand-light:  #FEF2F2;
-  --color-brand-muted:  rgba(217, 45, 32, 0.1);
+  /* Merah logo resmi ATM, diambil dari aksen segitiga sumber: #EB232D */
+  --color-brand:        #EB232D;
+  --color-brand-dark:   #C91925;
+  --color-brand-hover:  #CF1C28;
+  --color-brand-light:  #FFF1F2;
+  --color-brand-muted:  rgba(235, 35, 45, 0.1);
 
   /* Latar belakang */
   --color-bg-app:     #F8FAFC;
   --color-bg-card:    #FFFFFF;
   --color-bg-sidebar: #FFFFFF;
-  --color-bg-header:  #D92D20;
+  --color-bg-header:  #EB232D;
 
   /* Border */
   --color-border:     #E2E8F0;
@@ -75,4 +75,91 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
+}
+
+
+/* Dark theme is opt-in; light remains the default. The selector also covers
+   legacy Tailwind surface utilities until each feature is tokenized. */
+html[data-theme='dark'] {
+  --color-bg-app: #121820;
+  --color-bg-card: #1d2630;
+  --color-bg-sidebar: #18212b;
+  --color-bg-header: #a81c29;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text-primary: #e7eaf0;
+  --color-text-secondary: #bec9d2;
+  --color-text-muted: #94a3b8;
+  --color-brand-light: #34232b;
+  --color-brand-muted: rgba(214, 123, 136, 0.13);
+}
+html[data-theme='dark'] body { background: var(--color-bg-app); color: var(--color-text-primary); }
+html[data-theme='dark'] :is(.bg-white,.bg-gray-50,.bg-slate-50,.bg-\[\#fafafa\],.bg-\[var\(--color-bg-card\)\]) {
+  background-color: var(--color-bg-card);
+}
+html[data-theme='dark'] :is(.bg-red-50,.bg-rose-50,.bg-red-100) { background-color: #351b26; }
+html[data-theme='dark'] :is(.bg-slate-100,.bg-gray-100,.bg-gray-50\/60) { background-color: #263244; }
+html[data-theme='dark'] :is(.text-gray-900,.text-slate-900,.text-gray-800,.text-slate-800,.text-slate-700,.text-gray-700,.text-\[\#1e293b\]) { color: #f1f5f9; }
+html[data-theme='dark'] :is(.text-slate-600,.text-gray-600,.text-gray-500,.text-slate-500,.text-slate-400,.text-gray-400) { color: #cbd5e1; }
+html[data-theme='dark'] :is(.border-slate-100,.border-slate-200,.border-gray-200,.border-gray-300,.border-red-100) { border-color: #334155; }
+html[data-theme='dark'] :is(input,select,textarea) {
+  background-color: #28333f;
+  border-color: #475569;
+  color: #f8fafc;
+}
+html[data-theme='dark'] :is(input,textarea)::placeholder { color: #94a3b8; }
+html[data-theme='dark'] :is(option) { background: #28333f; color: #f8fafc; }
+html[data-theme='dark'] :is(tr.hover\:bg-slate-50\/60:hover, .hover\:bg-slate-50:hover) { background-color: #263244; }
+html[data-theme='dark'] .atm-wordmark-dark { color: #f8fafc; }
+html[data-theme='dark'] .atm-wordmark-dark .atm-wordmark-accent { fill: #0d0f0c; }
+html[data-theme='dark'] .atm-login-page { background: #121820; }
+html[data-theme='dark'] .atm-login-card { background: var(--color-bg-card); border-color: #334155; }
+html[data-theme='dark'] .atm-login-card :is(h1,p,span) { color: inherit; }
+html[data-theme='dark'] .atm-login-card h1 { color: #f8fafc; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Atmospheric, restrained UI movement. No loops on task data and no network polling. */
+@keyframes atm-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes atm-sheen { from { transform: translateX(-140%); } to { transform: translateX(320%); } }
+.atm-appear { animation: atm-enter 440ms cubic-bezier(.22,1,.36,1) both; }
+.atm-interactive { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
+@media (hover:hover) and (pointer:fine) {
+  .atm-interactive:hover { transform: translateY(-2px); box-shadow: 0 8px 22px -13px rgba(15,23,42,.28); }
+}
+.atm-interactive:active { transform: translateY(0); }
+.atm-progress-fill { transition: width 650ms cubic-bezier(.22,1,.36,1); position: relative; overflow: hidden; }
+.atm-progress-fill::after { content: ''; position: absolute; inset: 0; width: 35%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent); animation: atm-sheen 7s ease-in-out infinite; }
+.atm-live-indicator { width: 7px; height: 7px; border-radius: 9999px; background: #b5d6c9; box-shadow: 0 0 0 3px rgba(181,214,201,.16); display: inline-block; }
+/* Muted pastel semantic tones for labels and progress; preserve readable text. */
+html[data-theme='dark'] {
+  --atm-pastel-blue: #a6c3df;
+  --atm-pastel-green: #acd5bf;
+  --atm-pastel-yellow: #e8cda7;
+  --atm-pastel-purple: #c7b3da;
+  --atm-pastel-rose: #dfafbb;
+  --atm-pastel-neutral: #c1cbd5;
+}
+html[data-theme='dark'] .atm-status-todo { background: #303841 !important; color: #ccd4de !important; }
+html[data-theme='dark'] .atm-status-progress { background: #24374b !important; color: #b3d0eb !important; }
+html[data-theme='dark'] .atm-status-blocked { background: #422b35 !important; color: #ecc0ca !important; }
+html[data-theme='dark'] .atm-status-review { background: #372d47 !important; color: #d1bee6 !important; }
+html[data-theme='dark'] .atm-status-revisi { background: #41372c !important; color: #ecd4ab !important; }
+html[data-theme='dark'] .atm-status-done { background: #263c34 !important; color: #b8dbc9 !important; }
+html[data-theme='dark'] .atm-priority-rendah { background: #263c34 !important; color: #b8dbc9 !important; }
+html[data-theme='dark'] .atm-priority-sedang { background: #41372c !important; color: #ecd4ab !important; }
+html[data-theme='dark'] .atm-priority-tinggi { background: #422b35 !important; color: #ecc0ca !important; }
+html[data-theme='dark'] .atm-overdue { background: #422b35 !important; color: #ecc0ca !important; }
+html[data-theme='dark'] .atm-metric-value { color: var(--atm-metric-dark, #e7eaf0) !important; }
+html[data-theme='dark'] .atm-progress-fill { background-color: var(--atm-progress-dark, #a6c3df) !important; }
+html[data-theme='dark'] .atm-notice { background: #433d30 !important; border-color: #655c47 !important; }
+html[data-theme='dark'] .atm-notice :is(p,span) { color: #f0d8ad !important; }
+html[data-theme='dark'] .atm-login-page { background: #121820; }
+html[data-theme='dark'] .atm-login-card { background: #1d2630; }
+html[data-theme='dark'] :is(.bg-red-50,.bg-rose-50,.bg-red-100) { background-color: #392c34; }
+html[data-theme='dark'] :is(.bg-slate-100,.bg-gray-100,.bg-gray-50\/60) { background-color: #2c3743; }
+@media (prefers-reduced-motion: reduce) {
+  .atm-appear { animation: none; }
+  .atm-interactive, .atm-progress-fill { transition: none; }
+  .atm-progress-fill::after { animation: none; display: none; }
+  .atm-interactive:hover, .atm-interactive:active { transform: none; }
 }
