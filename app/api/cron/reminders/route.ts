@@ -51,12 +51,17 @@ export async function POST(request: Request) {
   const apiKey = process.env.RESEND_API_KEY
   const fromEmail = process.env.RESEND_FROM_EMAIL
   if (!apiKey || !fromEmail) {
+    // In-app and Android push reminders are independent of email.
+    // Report the disabled email channel explicitly without marking successful
+    // checkpoint/template processing as a failed cron execution.
     return NextResponse.json({
       created,
       taskTemplatesCreated,
       taskTemplatesSkipped,
-      error: 'Kanal email belum dikonfigurasi.',
-    }, { status: 503 })
+      emailsSent: 0,
+      emailFailures: 0,
+      emailStatus: 'not_configured',
+    })
   }
 
   const now = new Date().toISOString()

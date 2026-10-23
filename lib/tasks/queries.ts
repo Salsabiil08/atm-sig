@@ -59,7 +59,7 @@ export type TaskCreationOptions = {
 }
 
 export async function getTaskCreationOptions(user: SessionUser): Promise<TaskCreationOptions> {
-  if (user.roleLevel < 3) {
+  if (user.roleLevel < 2) {
     throw new Error('Role Anda tidak dapat membuat task.')
   }
 
@@ -87,9 +87,10 @@ export async function getTaskCreationOptions(user: SessionUser): Promise<TaskCre
   const units = orgUnits ?? []
   const visibleUnitIds = getVisibleTaskOrgUnitIds(user, units)
   const sections = units
-    .filter((unit) => unit.type === 'section' && visibleUnitIds.includes(unit.id))
+    .filter((unit) => unit.type === 'section' && visibleUnitIds.includes(unit.id) && (user.roleLevel !== 2 || unit.id === user.orgUnitId))
     .map((section) => ({ id: section.id, name: section.name, parentId: section.parent_id }))
   const owners = (profiles ?? []).flatMap<TaskCreationOptions['owners'][number]>((profile) => {
+    if (user.roleLevel === 2 && profile.id !== user.id) return []
     const roleLevel = roleLevels.get(profile.role_id)
     if (roleLevel === undefined || roleLevel < 2 || roleLevel > 6) return []
 

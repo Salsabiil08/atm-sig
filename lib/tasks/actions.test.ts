@@ -188,7 +188,7 @@ describe('Task CRUD actions (FR-020, FR-021)', () => {
     expect(rpc).not.toHaveBeenCalled()
   })
 
-  it('calls the review RPC and audits an approved decision', async () => {
+  it('calls the atomic review RPC without a separate app-side audit write', async () => {
     const result = await reviewTask({
       taskId,
       decision: 'Done',
@@ -201,11 +201,8 @@ describe('Task CRUD actions (FR-020, FR-021)', () => {
       p_decision: 'Done',
       p_comment: 'Sudah sesuai.',
     })
-    expect(auditQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-      action: 'review_task',
-      old_value: 'Review',
-      new_value: 'Done',
-    }))
+    // Audit is now written by the tasks AFTER UPDATE trigger in the same DB transaction.
+    expect(auditQuery.insert).not.toHaveBeenCalled()
   })
 
   it('allows a scoped Manager to perform an ordinary status move on a non-owned task', async () => {
@@ -254,7 +251,7 @@ describe('Task CRUD actions (FR-020, FR-021)', () => {
     ])
   })
 
-  it('updates task details and records the change', async () => {
+  it('updates task details with DB-triggered atomic audit', async () => {
     taskQuery.maybeSingle
       .mockResolvedValueOnce({
         data: { id: taskId, title: 'Old title', owner_id: taskInput.ownerId },
@@ -270,7 +267,7 @@ describe('Task CRUD actions (FR-020, FR-021)', () => {
       owner_id: taskInput.ownerId,
       org_unit_id: taskInput.orgUnitId,
     }))
-    expect(auditQuery.insert).toHaveBeenCalledOnce()
+    expect(auditQuery.insert).not.toHaveBeenCalled()
   })
 
   it('does not update an inaccessible or missing task', async () => {
@@ -308,7 +305,7 @@ describe('Task CRUD actions (FR-020, FR-021)', () => {
     expect(result).toEqual({ data: { success: true } })
     expect(taskQuery.delete).toHaveBeenCalledOnce()
     expect(revalidatePath).toHaveBeenCalledWith('/tasks')
-    expect(auditQuery.insert).toHaveBeenCalledOnce()
+    expect(auditQuery.insert).not.toHaveBeenCalled()
   })
 
   it('rejects malformed task ids before querying Supabase', async () => {

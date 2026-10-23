@@ -26,5 +26,11 @@ jobs:
         run: npx tsc --noEmit
       - name: Unit tests
         run: npm test
+      - name: Isolated database migration and RLS regression
+        run: node scripts/check-r02-db.mjs
+      - name: Reminder and recurring-template SQL regression
+        run: node scripts/check-reminder-template.mjs
+      - name: Six-role review and deadline workflow UAT (isolated DB)
+        run: node scripts/check-six-role-workflows.mjs
       - name: Build
         run: npm run build

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth/session'
 import {
   getTaskDetail,
+  getTaskCreationOptions,
   getTaskSupportRecipients,
 } from '@/lib/tasks/queries'
 import { isValidUuid } from '@/lib/tasks/validation'
@@ -21,8 +22,10 @@ export default async function TaskDetailPage({
   const task = await getTaskDetail(taskId, user)
   if (!task) notFound()
 
-  const supportRecipients =
-    task.ownerId === user.id ? await getTaskSupportRecipients(user.id) : []
+  const [supportRecipients, creationOptions] = await Promise.all([
+    task.ownerId === user.id ? getTaskSupportRecipients(user.id) : Promise.resolve([]),
+    user.roleLevel >= 3 ? getTaskCreationOptions(user) : Promise.resolve(null),
+  ])
 
   return (
     <TaskDetailClient
@@ -30,6 +33,7 @@ export default async function TaskDetailPage({
       currentUserId={user.id}
       currentUserRoleLevel={user.roleLevel}
       supportRecipients={supportRecipients}
+      reassignmentOptions={(creationOptions?.owners ?? []).filter((owner) => owner.id !== task.ownerId)}
     />
   )
 }
