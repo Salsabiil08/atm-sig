@@ -25,7 +25,7 @@ export default function ATMWordmark({
   const light = variant === 'light'
   return (
     <span
-      className={`inline-flex max-w-full flex-col items-center ${light ? 'text-white' : 'text-[#0D0F0C]'} ${className}`}
+      className={`inline-flex max-w-full flex-col items-center ${light ? 'text-white' : 'atm-wordmark-dark text-[#0D0F0C]'} ${className}`}
       role="img"
       aria-label="ATM — Accounting Task Manager"
     >
