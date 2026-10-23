@@ -10,16 +10,16 @@ type Props = {
 
 export default function AuthPageShell({ title, description, children }: Props) {
   return (
-    <main className="atm-login-page flex min-h-dvh w-full flex-col bg-white px-5 pb-6 pt-3 sm:relative sm:items-center sm:justify-center sm:px-8 sm:py-10">
-      <div className="flex w-full shrink-0 justify-end sm:absolute sm:right-8 sm:top-6 sm:w-auto">
+    <main className="atm-login-page relative flex min-h-dvh w-full items-center justify-center bg-white px-4 py-20 sm:px-8 sm:py-10">
+      <div className="absolute right-4 top-4 sm:right-8 sm:top-6">
         <ThemeToggle />
       </div>
       <section
         aria-labelledby="auth-heading"
-        className="atm-login-card mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center bg-white py-5 sm:flex-none sm:rounded-2xl sm:border sm:border-red-100 sm:px-10 sm:py-11 sm:shadow-sm"
+        className="atm-login-card mx-auto w-full max-w-[420px] rounded-2xl border border-red-100 bg-white px-5 py-7 shadow-sm sm:max-w-[460px] sm:px-10 sm:py-11"
       >
-        <div className="mb-7 flex justify-center">
-          <ATMWordmark variant="dark" showSubtitle className="w-[min(70vw,245px)] sm:w-[210px]" />
+        <div className="mb-5 flex justify-center sm:mb-7">
+          <ATMWordmark variant="dark" showSubtitle className="w-[min(62vw,205px)] sm:w-[210px]" />
         </div>
         <h1 id="auth-heading" className="text-center text-2xl font-bold tracking-tight text-slate-900">
           {title}
