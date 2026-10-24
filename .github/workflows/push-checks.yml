@@ -32,5 +32,7 @@ jobs:
         run: node scripts/check-reminder-template.mjs
       - name: Six-role review and deadline workflow UAT (isolated DB)
         run: node scripts/check-six-role-workflows.mjs
+      - name: R.03 atomic task and organization migration regression
+        run: node scripts/check-r03-db.mjs
       - name: Build
         run: npm run build
