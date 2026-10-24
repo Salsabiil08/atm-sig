@@ -1,3 +1,4 @@
+import WorkspaceTabs, { WORK_TABS } from '../_components/WorkspaceTabs'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getSessionUser } from '@/lib/auth/session'
@@ -41,6 +42,7 @@ export default async function TimelinePage({ searchParams }: { searchParams: Pro
   const canEditDirectly = user.roleLevel >= ROLE_LEVELS.Manager
 
   return <main className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+    <WorkspaceTabs current="/timeline" tabs={WORK_TABS} />
     <nav className="flex gap-2 text-xs font-semibold" aria-label="Tampilan task"><Link href="/kanban" className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">Kanban</Link><Link href="/timeline" aria-current="page" className="rounded-lg bg-red-50 px-3 py-2 text-red-700">Timeline Gantt</Link></nav>
     <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-7 text-white shadow-sm sm:px-8"><div className="relative flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-300">FR-111 · Gantt</p><h1 className="mt-2 text-2xl font-bold sm:text-3xl">Timeline task</h1><p className="mt-2 text-sm text-slate-300">Rentang mulai sampai tenggat. Perubahan tenggat mengikuti alur pengajuan PIC atau persetujuan manager.</p></div><span className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs">{total} task · {active.length} aktif</span></div></header>
     <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3"><input className="min-h-10 rounded-lg border border-slate-300 px-3 text-sm" type="month" name="month" defaultValue={month}/><select className="min-h-10 rounded-lg border border-slate-300 px-3 text-sm" name="section" defaultValue={params.section ?? ''}><option value="">Semua section</option>{options.sections.map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select><div className="flex gap-2"><select className="min-h-10 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-sm" name="owner" defaultValue={params.owner ?? ''}><option value="">Semua PIC</option>{options.owners.map((p)=><option key={p.id} value={p.id}>{p.name}</option>)}</select><button className="rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700">Terapkan</button></div></form>
