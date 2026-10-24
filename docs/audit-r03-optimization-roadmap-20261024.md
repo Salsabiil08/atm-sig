@@ -1,37 +1,41 @@
-# Audit 24 Oktober 2026 — roadmap implementasi ATM R.03
+# ATM R.03 — Audit dan status implementasi 24 Oktober 2026
+PR #7, branch feat/audit-navigation-workflows-20261024. Audit pengguna merupakan dasar rencana, bukan sign-off.
 
-Sumber: audit read-only yang dikirim pemilik proyek. Jangan dianggap sebagai bukti UAT.
+## Tahap 1 — Navigasi
+IMPLEMENTED: sidebar lima menu dalam empat grup, tab pekerjaan (Tugas Saya, Daftar, Kanban, Timeline), Dashboard, Persetujuan, Laporan/Audit, Master. Review Inbox dan lonceng notifikasi.
+PENDING: UAT browser seluruh role.
 
-## Fase 1 — Navigasi aman (PR #7)
-- [x] Lima menu utama role-aware: Dashboard, Pekerjaan, Persetujuan, Laporan, Master Data dalam empat grup.
-- [x] Tugas Saya dengan filter owner server-side; Daftar Task, Kanban, Timeline sebagai tab.
-- [x] Dashboard Ringkasan/Kinerja & Job Load sebagai tab.
-- [x] Inbox reviewer khusus assigned reviewer; Approval Deadline sebagai tab untuk SM+.
-- [x] Pengguna & Role bersama Kategori & Template sebagai tab; Laporan bersama Audit Log sebagai tab.
-- [x] Notifikasi berupa lonceng header + jumlah unread dengan fallback ketika query gagal.
-- [x] URL lama dipertahankan, backend RPC & aturan RLS tidak berubah.
-- [ ] UAT interaktif di HP/desktop dan sign-off enam role; jangan klaim PASS sebelum bukti.
+## Tahap 2 — Jobload
+IMPLEMENTED: Jobload bulanan WIB; total penugasan, carry-over, task baru, selesai, outstanding, overdue dan completion rate. Termasuk task Done dan riwayat reassignment yang tersedia, diuji secara unit.
+LIMITATION: RLS berdasarkan cakupan user saat ini, bukan snapshot historis organisasi; reopened task, PIC historis tanpa nama yang terlihat, atau riwayat status hilang belum dapat direkonstruksi sepenuhnya. Total lintas PIC dapat menghitung task pindahan satu kali untuk masing-masing PIC; tidak boleh disamakan dengan jumlah task unik departemen.
 
-## Fase 2 — Jobload historis (BELUM)
-Audit mendapati buildDashboardPerformance/getActiveTaskWorkloads mengecualikan Done. Menghitung job historis tidak aman dengan menghapus filter karena perlu status as-of cut-off, completed_at, reassignment history dan WIB.
-Persetujuan definisi: task unik yang masuk periode, carry-over, baru, selesai, terbuka, overdue, completion rate. Jangan hitung dengan menjumlah snapshot harian. Test reassignment, Done, cross-month, backdated completion, cut-off WIB dan cakupan RLS sebelum rilis.
+## Tahap 3 — PIC Workflow
+IMPLEMENTED: kategori scope saat create task, support awal opsional bagi PIC, penambahan dan checklist WBS datar di detail, Edit title/priority dan Hapus konfirmasi untuk Manager+, navigasi anchor tahapan detail.
+LIMITATION: support awal disimpan setelah task dibuat (tidak atomik). Bila support gagal, task tetap ada; jangan retry pembuatan task. WBS hierarkis dan WBS langsung dalam transaksi create belum diimplementasikan.
 
-## Fase 3 — Workflow PIC (BELUM)
-Kategori, WBS, support awal pada pembuatan; editor WBS dan progress; Edit/Hapus dengan konfirmasi dan server actions; review/evidence dalam detail task. Periksa kompatibilitas schema dan hak akses sebelum menambah kontrol UI.
+## Tahap 4 — Master, Report, Performance
+IMPLEMENTED: struktur organisasi read-only untuk SM+, Pending/Riwayat Approval, PDF biner asli dan XLSX, scan metrics dashboard paginated dan task perhatian sebelum limit, filter bulan tenggat Dashboard.
+LIMITATION: CRUD struktur organisasi memerlukan transaksi audit atomik dan validasi hirarki sebelum aman. Dashboard filter berdasarkan jatuh tempo; Jobload berdasarkan rentang kepemilikan/assignment. Pengiriman email reminder tetap perlu verifikasi bisnis.
 
-## Fase 4 — Master, laporan, efisiensi (BELUM)
-CRUD organisasi terotorisasi, export PDF asli, agregasi/pagination dashboard, filter perhatian sebelum limit, tab Pending/Riwayat approval, revisi send-time email 72 jam sesuai keputusan bisnis.
+## UAT MANUAL yang WAJIB sebelum release (belum diklaim PASS)
+| ID | Role | Skenario dan target |
+|---|---|---|
+| NAV-01 | Spectator | Tidak dapat mengakses admin, melihat task sebatas RLS |
+| NAV-02 | PIC | Tugas Saya, create kategori, support awal, editor WBS, evidence, review |
+| NAV-03 | Manager | Review Inbox hanya task assigned, Edit/Hapus dengan audit; dilarang approve deadline |
+| NAV-04 | SM | Approval Pending/Riwayat sesuai cakupan unit |
+| NAV-05 | GM | Multi-unit reports, self-review bila dibolehkan |
+| NAV-06 | Super Admin | Review master/user/org & audit |
+| NAV-07 | Semua role | Bell notification, tema Light/Dark, layout mobile/desktop, URL lama |
+| KPI-01 | Manager+ | Jobload: task Done, carry-over, reassignment, overdue, cutoff WIB |
+| KPI-02 | Manager+ | Filter Dashboard: semua metrik relevan dalam periode tenggat |
+| PDF-01 | Manager+ | PDF benar-benar dapat dibuka di viewer, sesuai XLSX; akses di luar role ditolak |
+| PERF-01 | Manager+ | >1000 task, pagination tidak memotong data |
+| REG-01 | Semua role | Reminder, push Android, template, task status, audit tidak regresi |
 
-## Matriks UAT manual wajib
-| ID | Peran | Uji | Hasil yang diharapkan |
-|---|---|---|---|
-| UAT-N01 | Spectator | Sidebar + /tasks?mine=1 | Hanya Pekerjaan, tak bisa review/approve |
-| UAT-N02 | PIC | Tugas Saya, semua tab Pekerjaan | Owner hanya sendiri, bookmark lama bekerja |
-| UAT-N03 | Manager | Review inbox | Hanya task assigned, tak ada Approval Deadline |
-| UAT-N04 | SM | Review dan Approval Deadline | Scope sesuai reviewer/unit |
-| UAT-N05 | GM/Admin | Self-review yang diizinkan, report/audit/master | Guard server tetap berlaku |
-| UAT-N06 | Semua role | Lonceng dan inbox | Jumlah unread sesuai akun; query gagal tak memblokir workspace |
-| UAT-N07 | Semua role | Tema Light/Dark, Android/desktop | Tab dan header responsif, tak overflow |
-| UAT-N08 | Semua role | Direct URL lama | Tautan lama dan RBAC server tetap berjalan |
-
-Automated SQL six-role regression bukan UAT browser; dokumentasikan screenshot, role, timestamp WIB, task ID dan sign-off sebelum release Production.
+## Release gates
+1. SHA HEAD final harus lint/typecheck/unit/SQL regression/build SUCCESS.
+2. Vercel Preview SHA final READY.
+3. Browser UAT enam role, screenshoot + task ID + timestamp WIB dan sign-off.
+4. Verifikasi PDF dengan data aktual serta angka Jobload historis bersama pemilik proses.
+5. PR draft hingga rilis disetujui. Production tetap commit sebelum PR #7.
