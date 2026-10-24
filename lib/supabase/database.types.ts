@@ -797,6 +797,9 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      add_wbs_item_r03: { Args: {p_task_id:string;p_title:string;p_weight:number;p_parent_id?:string|null}; Returns:string }
+      toggle_wbs_item_r03: { Args: {p_task_id:string;p_wbs_item_id:string;p_is_done:boolean}; Returns:number }
+      recalculate_task_wbs_progress_r03: { Args: {p_task_id:string}; Returns:number }
       create_task_bundle_r03: {
         Args: {
           p_owner_id: string
