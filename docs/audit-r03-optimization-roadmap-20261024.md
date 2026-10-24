@@ -2,7 +2,7 @@
 PR #7, branch feat/audit-navigation-workflows-20261024. Audit pengguna merupakan dasar rencana, bukan sign-off.
 
 ## Tahap 1 — Navigasi
-IMPLEMENTED: sidebar lima menu dalam empat grup, tab pekerjaan (Tugas Saya, Daftar, Kanban, Timeline), Dashboard, Persetujuan, Laporan/Audit, Master. Review Inbox dan lonceng notifikasi.
+IMPLEMENTED: sidebar lima menu dalam empat grup, tab pekerjaan (Tugas Saya, Daftar, Kanban, Timeline), Dashboard, Persetujuan, Laporan/Audit, Master. Review Inbox dan lonceng notifikasi. Ikon SVG mandiri di sebelah kiri semua menu utama dan tab, tanpa dependensi eksternal.
 PENDING: UAT browser seluruh role.
 
 ## Tahap 2 — Jobload
@@ -39,3 +39,9 @@ LIMITATION: CRUD struktur organisasi memerlukan transaksi audit atomik dan valid
 3. Browser UAT enam role, screenshoot + task ID + timestamp WIB dan sign-off.
 4. Verifikasi PDF dengan data aktual serta angka Jobload historis bersama pemilik proses.
 5. PR draft hingga rilis disetujui. Production tetap commit sebelum PR #7.
+
+## Update 24 Oktober — navigasi berikon
+- [x] Ikon menu Dashboard, Pekerjaan, Persetujuan, Laporan, Master Data
+- [x] Ikon tab workspaces, ukuran tetap dan decorative aria-hidden
+- [x] Unit tests untuk role gating, active state, dan aksesibilitas ikon
+- [ ] UAT visual ukuran mobile 320/375/430 px dan desktop, mode Light/Dark, login dengan semua role
