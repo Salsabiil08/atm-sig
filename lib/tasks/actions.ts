@@ -1082,94 +1082,28 @@ export async function approveDeadlineChange(input: ApproveDeadlineInput) {
  * FR-032 — Toggle WBS item selesai/belum, lalu hitung ulang progress_pct task.
  */
 export async function addWbsItem(taskId: string, title: string, weight: number, parentId: string | null = null) {
-  const user = await getSessionUser()
-  if (!isValidUuid(taskId) || !title.trim() || title.trim().length > 200 || !Number.isFinite(weight) || weight <= 0 || weight > 100) {
-    return { error: 'Judul WBS atau bobot tidak valid.' }
+  await getSessionUser()
+  if (!isValidUuid(taskId) || (parentId !== null && !isValidUuid(parentId))
+    || !title.trim() || title.length > 200 || !Number.isFinite(weight) || weight<=0 || weight>100) {
+    return {error:'Data WBS tidak valid.'}
   }
-  if (parentId !== null && !isValidUuid(parentId)) return { error: 'Induk WBS tidak valid.' }
-  const supabase = await createClient()
-  const { data: task, error: taskError } = await supabase.from('tasks')
-    .select('id, owner_id, status').eq('id', taskId).maybeSingle()
-  if (taskError || !task) return { error: 'Task tidak ditemukan atau berada di luar cakupan Anda.' }
-  if (task.owner_id !== user.id || !['To do', 'In progress', 'Revisi'].includes(task.status)) {
-    return { error: 'Hanya PIC task aktif yang dapat menambahkan WBS.' }
-  }
-  const { data: existing, error: existingError } = await supabase.from('wbs_items')
-    .select('id, parent_id, weight').eq('task_id', taskId)
-  if (existingError) return { error: 'Daftar WBS tidak tersedia.' }
-  if (parentId) {
-    const parent=(existing??[]).find(x=>x.id===parentId)
-    if (!parent || parent.parent_id!==null) return {error:'Induk harus WBS root dari task ini.'}
-  }
-  const parents=new Set((existing??[]).map(x=>x.parent_id).filter(Boolean))
-  const previousLeafSum=(existing??[]).filter(x=>!parents.has(x.id) && x.id!==parentId)
-    .reduce((sum,x)=>sum+Number(x.weight),0)
-  if(previousLeafSum+weight>100.0001)return {error:'Total bobot WBS leaf tidak boleh melebihi 100%.'}
-  const { error } = await supabase.from('wbs_items').insert({
-    task_id: taskId, parent_id: parentId, title: title.trim(), weight, is_done: false,
+  const supabase=await createClient()
+  const {data,error}=await supabase.rpc('add_wbs_item_r03',{
+    p_task_id:taskId,p_title:title.trim(),p_weight:weight,p_parent_id:parentId,
   })
-  if (error) return { error: 'Gagal menambah WBS; periksa hak akses dan bobot.' }
+  if(error||!data)return {error:'Penambahan WBS ditolak: periksa PIC, parent, dan bobot maksimal.'}
   revalidatePath(`/tasks/${taskId}`)
-  return { data: { success: true } }
+  return {data:{success:true}}
 }
 
 export async function toggleWbsItem(wbsItemId: string, isDone: boolean, taskId: string) {
-  if (!isValidUuid(wbsItemId) || !isValidUuid(taskId) || typeof isDone !== 'boolean') return { error: 'Item WBS tidak valid.' }
-  const user = await getSessionUser()
-  const supabase = await createClient()
-
-  // Pastikan user adalah PIC task
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('owner_id')
-    .eq('id', taskId)
-    .single()
-
-  if (!task) return { error: 'Task tidak ditemukan.' }
-  if (task.owner_id !== user.id) {
-    return { error: 'Hanya PIC task yang dapat memperbarui progress.' }
-  }
-
-  const { data: updatedWbs, error } = await supabase
-    .from('wbs_items')
-    .update({ is_done: isDone })
-    .eq('id', wbsItemId)
-    .eq('task_id', taskId)
-    .select('id')
-    .maybeSingle()
-
-  if (error) return { error: 'Gagal memperbarui item WBS.' }
-  if (!updatedWbs) return { error: 'Akses ditolak: item WBS berada di luar cakupan Anda.' }
-
-  // Hitung ulang progress berdasarkan bobot leaf items
-  // OQ-17: bobot leaf yang selesai / total bobot leaf * 100
-  const { data: allLeafs } = await supabase
-    .from('wbs_items')
-    .select('id, weight, is_done, parent_id')
-    .eq('task_id', taskId)
-
-  if (allLeafs && allLeafs.length > 0) {
-    // Cari leaf items (yang tidak menjadi parent siapapun)
-    const parentIds = new Set(allLeafs.filter((w) => w.parent_id !== null).map((w) => w.parent_id))
-    const leafItems = allLeafs.filter((w) => !parentIds.has(w.id))
-
-    const totalWeight = leafItems.reduce((sum, w) => sum + (w.weight ?? 0), 0)
-    const doneWeight = leafItems
-      .filter((w) => w.is_done)
-      .reduce((sum, w) => sum + (w.weight ?? 0), 0)
-
-    const progress = totalWeight > 0 ? Math.round((doneWeight / totalWeight) * 100) : 0
-
-    const { data: updatedTask, error: progressError } = await supabase
-      .from('tasks')
-      .update({ progress_pct: progress })
-      .eq('id', taskId)
-      .select('id')
-      .maybeSingle()
-    if (progressError) return { error: 'Gagal memperbarui progress task.' }
-    if (!updatedTask) return { error: 'Akses ditolak: task berada di luar cakupan Anda.' }
-  }
-
+  await getSessionUser()
+  if (!isValidUuid(taskId)||!isValidUuid(wbsItemId)||typeof isDone!=='boolean')return {error:'Item WBS tidak valid.'}
+  const supabase=await createClient()
+  const {data,error}=await supabase.rpc('toggle_wbs_item_r03',{
+    p_task_id:taskId,p_wbs_item_id:wbsItemId,p_is_done:isDone,
+  })
+  if(error||data===null)return {error:'Gagal memperbarui WBS dan progress secara atomik.'}
   revalidatePath(`/tasks/${taskId}`)
-  return { data: { success: true } }
+  return {data:{success:true}}
 }
