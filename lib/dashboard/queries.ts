@@ -139,6 +139,8 @@ export function buildDashboardPerformance(
 
 async function getDashboardPerformanceSources(
   user: SessionUser,
+  from?: string,
+  toExclusive?: string,
 ): Promise<DashboardPerformanceSource[]> {
   const supabase = await createClient()
   const scopeFilter = await getTaskScopeFilter(supabase, user)
@@ -159,6 +161,8 @@ async function getDashboardPerformanceSources(
       `)
       .order('due_date', { ascending: true })
       .range(offset, offset + pageSize - 1)
+    if (from) query = query.gte('due_date',from)
+    if (toExclusive) query = query.lt('due_date',toExclusive)
     if (scopeFilter) query = query.or(scopeFilter)
 
     const { data, error } = await query
@@ -189,15 +193,17 @@ async function getDashboardPerformanceSources(
 export async function getDashboardPerformance(
   user: SessionUser,
   now = new Date(),
+  from?: string,
+  toExclusive?: string,
 ): Promise<DashboardPerformance> {
-  const tasks = await getDashboardPerformanceSources(user)
+  const tasks = await getDashboardPerformanceSources(user,from,toExclusive)
   return buildDashboardPerformance(tasks, now)
 }
 
 /**
  * Mengambil metrics ringkasan dashboard sesuai role user.
  */
-export async function getDashboardMetrics(user: SessionUser): Promise<DashboardMetrics> {
+export async function getDashboardMetrics(user: SessionUser, from?: string, toExclusive?: string): Promise<DashboardMetrics> {
   const supabase = await createClient()
   const scopeFilter = await getTaskScopeFilter(supabase, user)
 
@@ -209,6 +215,8 @@ export async function getDashboardMetrics(user: SessionUser): Promise<DashboardM
       .select('id,status,progress_pct,start_date,due_date')
       .order('id',{ascending:true})
       .range(offset,offset+pageSize-1)
+    if (from) query = query.gte('due_date',from)
+    if (toExclusive) query = query.lt('due_date',toExclusive)
     if (scopeFilter) query = query.or(scopeFilter)
     const { data,error } = await query
     if (error || !data) throw new Error('Gagal memuat ringkasan task dashboard.')
@@ -254,6 +262,8 @@ export async function getDashboardMetrics(user: SessionUser): Promise<DashboardM
 export async function getTasksPerluPerhatian(
   user: SessionUser,
   limit = 10,
+  from?: string,
+  toExclusive?: string,
 ): Promise<TaskPerhatian[]> {
   const supabase = await createClient()
   const scopeFilter = await getTaskScopeFilter(supabase, user)
@@ -271,6 +281,8 @@ export async function getTasksPerluPerhatian(
       .not('status','eq','Done')
       .order('due_date',{ascending:true})
       .range(offset,offset+pageSize-1)
+    if (from) query = query.gte('due_date',from)
+    if (toExclusive) query = query.lt('due_date',toExclusive)
     if (scopeFilter) query = query.or(scopeFilter)
     const {data,error} = await query
     if (error || !data) throw new Error('Gagal memuat task yang perlu perhatian.')
