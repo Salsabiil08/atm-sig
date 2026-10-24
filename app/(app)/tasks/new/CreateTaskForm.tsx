@@ -24,6 +24,7 @@ function canAssignOwner(
 export default function CreateTaskForm({
   sections,
   owners,
+  categories,
   currentUserRoleLevel,
   currentUserId,
 }: Props) {
@@ -63,6 +64,7 @@ export default function CreateTaskForm({
         reviewerId: selectedOwner.reviewerId,
         orgUnitId: section.id,
         parentTaskId: null,
+        categoryId: String(formData.get('categoryId') ?? '') || null,
         priority: priority as 'rendah' | 'sedang' | 'tinggi',
         startDate: toJakartaTimestamp(startDate),
         dueDate: toJakartaTimestamp(dueDate, true),
@@ -137,6 +139,15 @@ export default function CreateTaskForm({
               </select>
             </label>
           </div>
+
+          <label className="text-sm font-medium text-slate-700">
+            Kategori task (opsional)
+            <select name="categoryId" className={inputClass} defaultValue="">
+              <option value="">Tanpa kategori</option>
+              {categories.filter(category => category.orgUnitId === section?.id || category.orgUnitId === section?.parentId)
+                .map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
+          </label>
 
           {selectedOwner && (
             <p className="-mt-3 text-xs text-slate-500">
