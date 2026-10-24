@@ -5,6 +5,10 @@ RETURNS integer LANGUAGE plpgsql SECURITY INVOKER
 SET search_path=pg_catalog,public AS $$
 DECLARE total_weight numeric; done_weight numeric; new_progress integer;
 BEGIN
+  IF auth.uid() IS NULL OR NOT EXISTS (
+    SELECT 1 FROM public.tasks t WHERE t.id=p_task_id AND t.owner_id=auth.uid()
+      AND t.status IN ('To do','In progress','Revisi')
+  ) THEN RAISE EXCEPTION 'Hanya PIC task aktif yang dapat menghitung progress WBS'; END IF;
   SELECT coalesce(sum(w.weight),0),coalesce(sum(w.weight) FILTER(WHERE w.is_done),0)
     INTO total_weight,done_weight
   FROM public.wbs_items w WHERE w.task_id=p_task_id
@@ -15,7 +19,9 @@ BEGIN
   RETURN new_progress;
 END; $$;
 REVOKE ALL ON FUNCTION public.recalculate_task_wbs_progress_r03(uuid)
-  FROM PUBLIC,anon,authenticated;
+  FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.recalculate_task_wbs_progress_r03(uuid)
+  TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.add_wbs_item_r03(
   p_task_id uuid,p_title text,p_weight numeric,p_parent_id uuid DEFAULT NULL
