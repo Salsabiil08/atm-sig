@@ -45,12 +45,18 @@ function formatDate(iso: string): string {
   }).format(new Date(iso))
 }
 
-export default async function DashboardPage() {
-  const user = await getSessionUser()
+export default async function DashboardPage({ searchParams }: {searchParams:Promise<{month?:string}>}) {
+  const [user,params] = await Promise.all([getSessionUser(),searchParams])
+  const pieces=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit'}).formatToParts(new Date())
+  const defaultMonth=(pieces.find(p=>p.type==='year')?.value??'2026')+'-'+(pieces.find(p=>p.type==='month')?.value??'01')
+  const month=params.month && /^(19|20)\\d\\d-(0[1-9]|1[0-2])$/.test(params.month) ? params.month : defaultMonth
+  const [year,monthNumber]=month.split('-').map(Number)
+  const nextMonth=monthNumber===12 ? `${year+1}-01` : `${year}-${String(monthNumber+1).padStart(2,'0')}`
+  const from=`${month}-01T00:00:00+07:00`,toExclusive=`${nextMonth}-01T00:00:00+07:00`
   const [metrics, tasksPerhatian, performance] = await Promise.all([
-    getDashboardMetrics(user),
-    getTasksPerluPerhatian(user, 10),
-    getDashboardPerformance(user),
+    getDashboardMetrics(user,from,toExclusive),
+    getTasksPerluPerhatian(user,10,from,toExclusive),
+    getDashboardPerformance(user,new Date(),from,toExclusive),
   ])
 
   const showAlert =
@@ -59,6 +65,14 @@ export default async function DashboardPage() {
   return (
     <div className="px-4 py-5 sm:px-6 lg:px-8">
       <WorkspaceTabs current="/dashboard" tabs={DASHBOARD_TABS} />
+      <form method="get" action="/dashboard" className="mb-5 flex flex-wrap items-end gap-3">
+        <label className="text-sm text-[var(--color-text-secondary)]">Periode tenggat
+          <input type="month" name="month" defaultValue={month}
+            className="ml-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2" />
+        </label>
+        <button className="rounded-lg bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white">Terapkan</button>
+        <span className="text-xs text-[var(--color-text-muted)]">KPI task, perhatian, dan kinerja berdasarkan tenggat periode. Pengajuan deadline masih total pending.</span>
+      </form>
       {/* Judul halaman */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-5 gap-4">
         <div>
