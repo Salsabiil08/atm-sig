@@ -1,3 +1,4 @@
+import WorkspaceTabs, { WORK_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getSessionUser } from '@/lib/auth/session'
@@ -33,7 +34,7 @@ export default async function KanbanPage({ searchParams }: { searchParams: Promi
     }),
   ])
   return <main className="mx-auto max-w-[1800px] space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-    <nav className="flex gap-2 text-xs font-semibold" aria-label="Tampilan task"><Link href="/kanban" aria-current="page" className="rounded-lg bg-red-50 px-3 py-2 text-red-700">Kanban</Link><Link href="/timeline" className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">Timeline Gantt</Link></nav>
+    <WorkspaceTabs current="/kanban" tabs={WORK_TABS} />
     <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-7 text-white shadow-sm sm:px-8"><div className="relative flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-300">FR-110 · Ruang kerja</p><h1 className="mt-2 text-2xl font-bold sm:text-3xl">Kanban task</h1><p className="mt-2 text-sm text-slate-300">Pindahkan status hanya melalui transisi yang diizinkan; syarat support, evidence, dan review tetap diperiksa server.</p></div><span className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs">{total} task dalam filter</span></div></header>
     <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-5">
       <select className="min-h-10 rounded-lg border border-slate-300 px-3 text-sm" name="section" defaultValue={params.section ?? ''}><option value="">Semua section</option>{options.sections.map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
