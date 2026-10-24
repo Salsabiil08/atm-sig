@@ -3,23 +3,24 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { SessionUser } from '@/lib/auth/session'
+import NavIcon, { type NavIconName } from './NavIcon'
 
-type NavItem = { label: string; href: string; minLevel: number; routes: string[] }
+type NavItem = { label: string; href: string; minLevel: number; routes: string[]; icon: NavIconName }
 type NavGroup = { heading: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   { heading: 'DASHBOARD', items: [
-    { label: 'Dashboard', href: '/dashboard', minLevel: 3, routes: ['/dashboard', '/performance'] },
+    { label: 'Dashboard', href: '/dashboard', minLevel: 3, routes: ['/dashboard', '/performance', '/jobload'], icon: 'dashboard' },
   ] },
   { heading: 'INPUT', items: [
-    { label: 'Pekerjaan', href: '/tasks', minLevel: 1, routes: ['/tasks', '/kanban', '/timeline'] },
-    { label: 'Persetujuan', href: '/review-inbox', minLevel: 3, routes: ['/review-inbox', '/approvals'] },
+    { label: 'Pekerjaan', href: '/tasks', minLevel: 1, routes: ['/tasks', '/kanban', '/timeline'], icon: 'tasks' },
+    { label: 'Persetujuan', href: '/review-inbox', minLevel: 3, routes: ['/review-inbox', '/approvals'], icon: 'approval' },
   ] },
   { heading: 'REPORT', items: [
-    { label: 'Laporan', href: '/reports', minLevel: 3, routes: ['/reports', '/audit-log'] },
+    { label: 'Laporan', href: '/reports', minLevel: 3, routes: ['/reports', '/audit-log'], icon: 'reports' },
   ] },
   { heading: 'SETTING', items: [
-    { label: 'Master Data', href: '/users', minLevel: 4, routes: ['/users', '/task-templates'] },
+    { label: 'Master Data', href: '/users', minLevel: 4, routes: ['/users', '/task-templates', '/org-structure'], icon: 'master' },
   ] },
 ]
 
@@ -45,8 +46,9 @@ export default function Sidebar({ user }: { user: SessionUser }) {
                   return (
                     <li key={item.href} className="shrink-0">
                       <Link href={item.href} aria-current={active ? 'page' : undefined}
-                        className={`flex min-h-10 items-center rounded-lg px-3 py-2 text-xs font-medium transition-colors sm:text-sm md:w-full ${active ? 'bg-[var(--color-brand-light)] text-[var(--color-brand)]' : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-brand-muted)] hover:text-[var(--color-text-primary)]'}`}>
-                        {item.label}
+                        className={`flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors sm:text-sm md:w-full ${active ? 'bg-[var(--color-brand-light)] text-[var(--color-brand)]' : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-brand-muted)] hover:text-[var(--color-text-primary)]'}`}>
+                        <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
+                        <span>{item.label}</span>
                       </Link>
                     </li>
                   )
