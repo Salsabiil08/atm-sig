@@ -1042,7 +1042,36 @@ export async function approveDeadlineChange(input: ApproveDeadlineInput) {
 /**
  * FR-032 — Toggle WBS item selesai/belum, lalu hitung ulang progress_pct task.
  */
+export async function addWbsItem(taskId: string, title: string, weight: number) {
+  const user = await getSessionUser()
+  if (!isValidUuid(taskId) || !title.trim() || title.trim().length > 200 || !Number.isFinite(weight) || weight <= 0 || weight > 100) {
+    return { error: 'Judul WBS atau bobot tidak valid.' }
+  }
+  const supabase = await createClient()
+  const { data: task, error: taskError } = await supabase.from('tasks')
+    .select('id, owner_id, status').eq('id', taskId).maybeSingle()
+  if (taskError || !task) return { error: 'Task tidak ditemukan atau berada di luar cakupan Anda.' }
+  if (task.owner_id !== user.id || !['To do', 'In progress', 'Revisi'].includes(task.status)) {
+    return { error: 'Hanya PIC task aktif yang dapat menambahkan WBS.' }
+  }
+  const { data: existing, error: existingError } = await supabase.from('wbs_items')
+    .select('id, parent_id, weight').eq('task_id', taskId)
+  if (existingError) return { error: 'Daftar WBS tidak tersedia.' }
+  // Supports flat independent WBS items; do not mix a new flat item into a
+  // hierarchy whose leaf weights could be interpreted differently.
+  if ((existing ?? []).some(x => x.parent_id !== null)) return { error: 'WBS bertingkat harus dikelola melalui editor khusus.' }
+  const total = (existing ?? []).reduce((sum,x)=>sum+Number(x.weight),0)
+  if (total + weight > 100.0001) return { error: 'Jumlah bobot WBS tidak boleh melebihi 100%.' }
+  const { error } = await supabase.from('wbs_items').insert({
+    task_id: taskId, parent_id: null, title: title.trim(), weight, is_done: false,
+  })
+  if (error) return { error: 'Gagal menambah WBS; periksa hak akses dan bobot.' }
+  revalidatePath(`/tasks/${taskId}`)
+  return { data: { success: true } }
+}
+
 export async function toggleWbsItem(wbsItemId: string, isDone: boolean, taskId: string) {
+  if (!isValidUuid(wbsItemId) || !isValidUuid(taskId) || typeof isDone !== 'boolean') return { error: 'Item WBS tidak valid.' }
   const user = await getSessionUser()
   const supabase = await createClient()
 
@@ -1062,6 +1091,7 @@ export async function toggleWbsItem(wbsItemId: string, isDone: boolean, taskId: 
     .from('wbs_items')
     .update({ is_done: isDone })
     .eq('id', wbsItemId)
+    .eq('task_id', taskId)
     .select('id')
     .maybeSingle()
 
