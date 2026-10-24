@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   addComment,
+  addWbsItem,
+  toggleWbsItem,
   addEvidenceLink,
   addSupportRequest,
   getTaskEvidenceDownloadUrl,
@@ -394,16 +396,19 @@ export default function TaskDetailClient({
             <ul className="mt-4 space-y-3">
               {task.wbsItems.map((item) => (
                 <li key={item.id} className="flex items-start gap-3 text-sm">
-                  <span
-                    aria-label={item.isDone ? 'Selesai' : 'Belum selesai'}
-                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                      item.isDone
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : 'border-slate-300 bg-white'
-                    }`}
-                  >
-                    {item.isDone ? '✓' : ''}
-                  </span>
+                  {isOwner && ['To do', 'In progress', 'Revisi'].includes(task.status) ? (
+                    <input type="checkbox" aria-label={`Tandai WBS ${item.title} selesai`} checked={item.isDone}
+                      disabled={busy} onChange={(event) => void runAction(
+                        () => toggleWbsItem(item.id, event.target.checked, task.id),
+                        'Status WBS dan progress diperbarui.'
+                      )}
+                      className="mt-0.5 h-4 w-4 accent-emerald-600" />
+                  ) : (
+                    <span aria-label={item.isDone ? 'Selesai' : 'Belum selesai'}
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${item.isDone ? 'border-green-600 bg-green-600 text-white' : 'border-slate-300 bg-white'}`}>
+                      {item.isDone ? '✓' : ''}
+                    </span>
+                  )}
                   <span className={item.isDone ? 'text-slate-400 line-through' : 'text-slate-800'}>
                     {item.title}
                   </span>
@@ -412,9 +417,25 @@ export default function TaskDetailClient({
               ))}
             </ul>
           )}
+          {isOwner && ['To do', 'In progress', 'Revisi'].includes(task.status) && (
+            <form className="mt-5 grid gap-2 border-t border-[var(--color-border)] pt-4 sm:grid-cols-[1fr_100px_auto]"
+              onSubmit={(event) => {
+                event.preventDefault()
+                const form = event.currentTarget
+                const data = new FormData(form)
+                void runAction(() => addWbsItem(task.id, String(data.get('wbsTitle') ?? ''), Number(data.get('wbsWeight'))),
+                  'WBS berhasil ditambahkan.').then(result => { if ('data' in result) form.reset() })
+              }}>
+              <input name="wbsTitle" required maxLength={200} placeholder="Langkah pekerjaan" aria-label="Judul WBS"
+                className={fieldClass} />
+              <input name="wbsWeight" required type="number" min="1" max="100" step="1" placeholder="Bobot %" aria-label="Bobot WBS"
+                className={fieldClass} />
+              <button disabled={busy} type="submit" className={buttonClass}>Tambah WBS</button>
+            </form>
+          )}
           {isOwner && (
             <p className="mt-4 text-xs text-slate-500">
-              Progress diperbarui oleh PIC sesuai pekerjaan yang telah diselesaikan.
+              Centang WBS yang selesai untuk menghitung progress berdasarkan bobot pekerjaan.
             </p>
           )}
         </section>
