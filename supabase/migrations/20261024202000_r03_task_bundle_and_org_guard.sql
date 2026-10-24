@@ -97,7 +97,7 @@ BEGIN
   -- Only leaves count toward task progress. Sum must be exactly 100 if WBS exists.
   IF v_n>0 THEN
     FOR v_i IN 1..v_n LOOP
-      IF NOT ((v_i-1)=ANY(v_parent_indices)) THEN
+      IF NOT EXISTS (SELECT 1 FROM unnest(v_parent_indices) AS child_parent(idx) WHERE idx = v_i-1) THEN
         v_leaf_total:=v_leaf_total+v_weights[v_i];
       END IF;
     END LOOP;
