@@ -223,6 +223,7 @@ BEGIN
   v_task := CASE WHEN TG_OP='DELETE' THEN OLD.task_id ELSE NEW.task_id END;
   -- A task-row lock makes competing WBS writers serialize.
   PERFORM 1 FROM public.tasks WHERE id=v_task FOR UPDATE;
+  IF NOT FOUND AND TG_OP<>'DELETE' THEN RAISE EXCEPTION 'Task WBS tidak dapat dikunci sesuai cakupan'; END IF;
   SELECT coalesce(sum(w.weight),0) INTO v_total
     FROM public.wbs_items w
     WHERE w.task_id=v_task
