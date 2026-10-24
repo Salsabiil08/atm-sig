@@ -1,3 +1,4 @@
+import { buildEventWorkloads, type TaskStateEvent } from './event-workload'
 import { createClient } from '@/lib/supabase/server'
 import type { SessionUser } from '@/lib/auth/session'
 import { getTaskScopeFilter } from '@/lib/tasks/scope'
@@ -56,7 +57,9 @@ export function buildPeriodWorkloads(tasks: readonly WorkloadTask[], transfers: 
     .sort((a,b) => b.total-a.total || a.ownerId.localeCompare(b.ownerId))
 }
 
-export async function getPeriodWorkloads(user: SessionUser, from: string, toExclusive: string): Promise<PeriodWorkload[]> {
+export type PeriodWorkloadReport = {rows:PeriodWorkload[];verifiedTasks:number;estimatedTasks:number;quality:'tracked'|'estimated';notice:string}
+
+export async function getPeriodWorkloads(user: SessionUser, from: string, toExclusive: string): Promise<PeriodWorkloadReport> {
   if (user.roleLevel < 3) throw new Error('Tidak berwenang membaca Jobload.')
   const supabase = await createClient()
   const scope = await getTaskScopeFilter(supabase, user)
@@ -88,5 +91,64 @@ export async function getPeriodWorkloads(user: SessionUser, from: string, toExcl
     if (error) throw new Error('Riwayat PIC Jobload tidak tersedia.')
     for (const row of data??[]) transfers.push({taskId:row.task_id,fromId:row.from_user_id,toId:row.to_user_id,at:row.created_at})
   }
-  return buildPeriodWorkloads(tasks,transfers,from,toExclusive)
+  // Read the append-only event stream when R.03 history migration is applied.
+  // Missing/unverifiable periods are reported as ESTIMATES; never fabricate past events.
+  const events:TaskStateEvent[]=[]
+  let historyInstalled=true
+  for(let i=0;i<tasks.length && historyInstalled;i+=100) {
+    const ids=tasks.slice(i,i+100).map(t=>t.id)
+    for(let offset=0;offset<10000;offset+=500) {
+      const {data,error}=await supabase.from('task_state_events')
+        .select('task_id,occurred_at,old_status,new_status,new_owner_id,new_start_date,new_due_date,is_baseline')
+        .in('task_id',ids).order('occurred_at',{ascending:true}).order('id',{ascending:true})
+        .range(offset,offset+499)
+      if(error) {
+        if(error.code==='42P01'||error.code==='PGRST205') {historyInstalled=false;break}
+        throw new Error('Gagal membaca histori perubahan task.')
+      }
+      for(const item of data??[]) events.push({
+        taskId:item.task_id,at:item.occurred_at,oldStatus:item.old_status,
+        newStatus:item.new_status,ownerId:item.new_owner_id,
+        startAt:item.new_start_date,dueAt:item.new_due_date,isBaseline:item.is_baseline,
+      })
+      if((data?.length??0)<500)break
+      if(offset+500>=10000)throw new Error('Histori task terlalu besar untuk perhitungan aman.')
+    }
+  }
+  if(!historyInstalled) {
+    return {rows:buildPeriodWorkloads(tasks,transfers,from,toExclusive),
+      verifiedTasks:0,estimatedTasks:tasks.length,quality:'estimated',
+      notice:'Histori status belum tersedia. Angka adalah estimasi berdasarkan snapshot task saat ini.'}
+  }
+
+  const ids=[...new Set([...tasks.map(t=>t.ownerId),...events.map(e=>e.ownerId)])]
+  const names=new Map<string,string>()
+  for(let i=0;i<ids.length;i+=100) {
+    const {data}=await supabase.from('users').select('id,name').in('id',ids.slice(i,i+100))
+    for(const u of data??[])names.set(u.id,u.name)
+  }
+  const observed=buildEventWorkloads(tasks,events,from,toExclusive,new Date(),names)
+  const uncertain=new Set(observed.uncertainTaskIds)
+  const estimated=buildPeriodWorkloads(tasks.filter(t=>uncertain.has(t.id)),transfers,from,toExclusive)
+  const byOwner=new Map<string,PeriodWorkload>()
+  for(const row of [...observed.rows,...estimated]) {
+    const prior=byOwner.get(row.ownerId)
+    if(!prior) {byOwner.set(row.ownerId,row);continue}
+    const total=prior.total+row.total,completed=prior.completed+row.completed
+    byOwner.set(row.ownerId,{
+      ...prior,ownerName:names.get(row.ownerId)??prior.ownerName,
+      total,carryOver:prior.carryOver+row.carryOver,newTasks:prior.newTasks+row.newTasks,
+      completed,outstanding:prior.outstanding+row.outstanding,overdue:prior.overdue+row.overdue,
+      completionRate:total?Math.round(completed/total*100):0,
+    })
+  }
+  const estimatedTasks=uncertain.size
+  return {
+    rows:[...byOwner.values()].sort((a,b)=>b.total-a.total||a.ownerId.localeCompare(b.ownerId)),
+    verifiedTasks:observed.verifiedTaskCount,estimatedTasks,
+    quality:estimatedTasks>0?'estimated':'tracked',
+    notice:estimatedTasks>0
+      ? estimatedTasks+' task tidak mempunyai histori lengkap pada awal periode. Angka bagian tersebut adalah estimasi; jangan gunakan sebagai laporan historis final.'
+      : 'Periode dihitung dari histori status, PIC dan tenggat yang tercatat setelah baseline migrasi.',
+  }
 }
