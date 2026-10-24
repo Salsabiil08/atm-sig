@@ -279,6 +279,12 @@ export default function TaskDetailClient({
         <PriorityBadge priority={task.priority} />
       </div>
 
+      <nav aria-label="Bagian detail task" className="flex gap-2 overflow-x-auto pb-2">
+        {[['#task-summary','Ringkasan'],['#task-work','Pelaksanaan'],['#task-evidence','Evidence'],['#task-history','Review & Riwayat']].map(([href,label]) => (
+          <a key={href} href={href} className="shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-brand-muted)]">{label}</a>
+        ))}
+      </nav>
+
       {currentUserRoleLevel >= 3 && (
         <section aria-label="Kelola task" className="space-y-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
           <div className="flex flex-wrap gap-2">
@@ -371,6 +377,7 @@ export default function TaskDetailClient({
       )}
 
       <section
+        id="task-summary"
         aria-label="Informasi task"
         className="grid grid-cols-2 gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-5"
       >
@@ -441,7 +448,7 @@ export default function TaskDetailClient({
       )}
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-7">
+        <section id="task-work" className="scroll-mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-7">
           <h2 className="text-sm font-semibold text-slate-900">WBS dan Timeline</h2>
           {task.wbsItems.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">Belum ada rincian WBS untuk task ini.</p>
@@ -561,7 +568,7 @@ export default function TaskDetailClient({
             )}
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="task-evidence" className="scroll-mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-sm font-semibold text-slate-900">
               Evidence wajib
               <span className="ml-2 font-normal text-slate-500">
@@ -725,7 +732,7 @@ export default function TaskDetailClient({
         )}
       </section>
 
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <section id="task-history" className="scroll-mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">Riwayat progress</h2>
           {task.progressHistory.length === 0 ? (
