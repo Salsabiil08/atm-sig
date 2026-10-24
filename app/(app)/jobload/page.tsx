@@ -18,7 +18,8 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
   const nextMonth=mon===12 ? `${year+1}-01` : `${year}-${String(mon+1).padStart(2,'0')}`
   const from=`${month}-01T00:00:00+07:00`
   const to=`${nextMonth}-01T00:00:00+07:00`
-  const rows=await getPeriodWorkloads(user,from,to)
+  const workload=await getPeriodWorkloads(user,from,to)
+  const rows=workload.rows
   const total=rows.reduce((sum,row)=>sum+row.total,0)
   return (
     <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
@@ -34,6 +35,11 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
           </label>
           <button className="rounded-lg bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white">Terapkan</button>
         </form>
+      </div>
+      <div role="status" className={`rounded-xl border px-4 py-3 text-sm ${workload.quality==='tracked'?'border-emerald-300 bg-emerald-50 text-emerald-900':'border-amber-300 bg-amber-50 text-amber-900'}`}>
+        <strong>{workload.quality==='tracked'?'Histori terlacak':'Histori sebagian berupa estimasi'}</strong>
+        <p className="mt-1">{workload.notice}</p>
+        <p className="mt-1 text-xs">{workload.verifiedTasks} task terverifikasi · {workload.estimatedTasks} task estimasi. Cakupan tetap mengikuti izin baca akun saat ini.</p>
       </div>
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5">
         <p className="text-sm text-[var(--color-text-secondary)]">Total penugasan PIC dalam periode</p>
