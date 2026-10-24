@@ -3,11 +3,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type FormEvent } from 'react'
-import { createTask } from '@/lib/tasks/actions'
-import type { TaskCreationOptions } from '@/lib/tasks/queries'
+import { addSupportRequest, createTask } from '@/lib/tasks/actions'
+import type { TaskCreationOptions, TaskSupportRecipient } from '@/lib/tasks/queries'
 import { toJakartaTimestamp } from '@/lib/tasks/dates'
 
-type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string }
+type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string; supportRecipients: TaskSupportRecipient[] }
 
 const inputClass = 'mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600'
 
@@ -25,6 +25,7 @@ export default function CreateTaskForm({
   sections,
   owners,
   categories,
+  supportRecipients,
   currentUserRoleLevel,
   currentUserId,
 }: Props) {
@@ -56,6 +57,12 @@ export default function CreateTaskForm({
     const startDate = String(formData.get('startDate') ?? '')
     const dueDate = String(formData.get('dueDate') ?? '')
     const priority = String(formData.get('priority') ?? '')
+    const supportId = String(formData.get('supportId') ?? '')
+    const supportDescription = String(formData.get('supportDescription') ?? '').trim()
+    if (currentUserRoleLevel === 2 && (supportId && !supportDescription || !supportId && supportDescription)) {
+      setError('Pilih penerima dan isi uraian untuk support awal.')
+      return
+    }
 
     startTransition(async () => {
       const result = await createTask({
@@ -80,6 +87,19 @@ export default function CreateTaskForm({
       if (!('data' in result) || !result.data) {
         setError('Task tidak berhasil dibuat. Silakan coba lagi.')
         return
+      }
+      if (currentUserRoleLevel === 2 && supportId && supportDescription) {
+        const supportResult = await addSupportRequest({
+          taskId: result.data.id, neededFromId: supportId, description: supportDescription,
+        })
+        if ('error' in supportResult && supportResult.error) {
+          // The task has already been created. Never encourage resubmission:
+          // it could duplicate the task. Link to the detail for retry instead.
+          setError(`Task berhasil dibuat, tetapi support awal gagal: ${supportResult.error}. Buka task melalui daftar untuk menambahkan support.`)
+          router.push(`/tasks/${result.data.id}`)
+          router.refresh()
+          return
+        }
       }
       router.push(`/tasks/${result.data.id}`)
       router.refresh()
@@ -148,6 +168,22 @@ export default function CreateTaskForm({
                 .map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </label>
+
+          {currentUserRoleLevel === 2 && supportRecipients.length > 0 && (
+            <fieldset className="space-y-3 rounded-lg border border-slate-200 p-4">
+              <legend className="px-1 text-sm font-semibold text-slate-700">Support awal (opsional)</legend>
+              <p className="text-xs text-slate-500">Diajukan oleh PIC setelah task tersimpan, lalu dapat ditindaklanjuti di detail task.</p>
+              <label className="block text-sm text-slate-700">Dibutuhkan dari
+                <select name="supportId" defaultValue="" className={inputClass}>
+                  <option value="">Tidak memerlukan support</option>
+                  {supportRecipients.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm text-slate-700">Penjelasan support
+                <textarea name="supportDescription" maxLength={1000} rows={2} className={inputClass} placeholder="Dokumen atau bantuan yang dibutuhkan" />
+              </label>
+            </fieldset>
+          )}
 
           {selectedOwner && (
             <p className="-mt-3 text-xs text-slate-500">
