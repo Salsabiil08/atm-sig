@@ -1,3 +1,4 @@
+import WorkspaceTabs, { APPROVAL_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { ROLES } from '@/lib/constants/rbac'
@@ -11,5 +12,5 @@ export default async function ApprovalsPage() {
   requireRole(user, ROLES.SM)
   const requests = await getPendingDeadlineRequests(user)
 
-  return <ApprovalClient requests={requests} />
+  return <><div className="px-4 pt-5 sm:px-6 lg:px-8"><WorkspaceTabs current="/approvals" tabs={APPROVAL_TABS} roleLevel={user.roleLevel} /></div><ApprovalClient requests={requests} /></>
 }
