@@ -192,6 +192,7 @@ RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER
 SET search_path=pg_catalog,public AS $$
 DECLARE v_parent_task uuid; v_grandparent uuid;
 BEGIN
+  IF NEW.weight IS NULL OR NEW.weight<0 OR NEW.weight>100 THEN RAISE EXCEPTION 'Bobot WBS harus 0-100'; END IF;
   IF NEW.parent_id IS NULL THEN RETURN NEW; END IF;
   IF NEW.id = NEW.parent_id THEN RAISE EXCEPTION 'WBS tidak boleh menunjuk dirinya sendiri'; END IF;
   SELECT task_id,parent_id INTO v_parent_task,v_grandparent
@@ -210,3 +211,29 @@ REVOKE EXECUTE ON FUNCTION public.guard_wbs_hierarchy_r03() FROM PUBLIC,anon,aut
 DROP TRIGGER IF EXISTS wbs_hierarchy_r03 ON public.wbs_items;
 CREATE TRIGGER wbs_hierarchy_r03 BEFORE INSERT OR UPDATE OF parent_id,task_id ON public.wbs_items
 FOR EACH ROW EXECUTE FUNCTION public.guard_wbs_hierarchy_r03();
+
+
+-- Serialize changes per task so concurrent WBS additions cannot exceed 100%
+-- leaf weight. Incomplete WBS is allowed during drafting.
+CREATE OR REPLACE FUNCTION public.enforce_wbs_leaf_budget_r03()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER
+SET search_path=pg_catalog,public AS $$
+DECLARE v_task uuid; v_total numeric;
+BEGIN
+  v_task := CASE WHEN TG_OP='DELETE' THEN OLD.task_id ELSE NEW.task_id END;
+  -- A task-row lock makes competing WBS writers serialize.
+  PERFORM 1 FROM public.tasks WHERE id=v_task FOR UPDATE;
+  SELECT coalesce(sum(w.weight),0) INTO v_total
+    FROM public.wbs_items w
+    WHERE w.task_id=v_task
+      AND NOT EXISTS (SELECT 1 FROM public.wbs_items child WHERE child.parent_id=w.id);
+  IF v_total>100.01 THEN RAISE EXCEPTION 'Total bobot leaf WBS tidak boleh lebih dari 100%%'; END IF;
+  IF TG_OP='DELETE' THEN RETURN OLD; END IF;
+  RETURN NEW;
+END; $$;
+REVOKE EXECUTE ON FUNCTION public.enforce_wbs_leaf_budget_r03()
+  FROM PUBLIC,anon,authenticated;
+DROP TRIGGER IF EXISTS wbs_leaf_budget_r03 ON public.wbs_items;
+CREATE TRIGGER wbs_leaf_budget_r03
+AFTER INSERT OR UPDATE OR DELETE ON public.wbs_items
+FOR EACH ROW EXECUTE FUNCTION public.enforce_wbs_leaf_budget_r03();
