@@ -13,19 +13,28 @@ export default async function ReviewInboxPage() {
   requireRole(user, 'Manager')
 
   const supabase = await createClient()
-  let query = supabase.from('tasks')
-    .select('id, title, due_date, progress_pct')
-    .eq('status', 'Review')
-    .order('due_date', { ascending: true })
-    .limit(100)
-  if (user.roleLevel >= 5) {
-    query = query.or(`reviewer_id.eq.${user.id},and(owner_id.eq.${user.id},reviewer_id.is.null)`)
-  } else {
-    query = query.eq('reviewer_id', user.id)
+  // Query all assigned reviews in bounded batches rather than hiding
+  // the 101st pending task. Each request still uses the authenticated RLS scope.
+  const tasks: Array<{id:string;title:string;due_date:string;progress_pct:number}> = []
+  const pageSize = 200
+  for (let offset=0;offset<10000;offset+=pageSize) {
+    let query = supabase.from('tasks')
+      .select('id,title,due_date,progress_pct')
+      .eq('status','Review')
+      .order('due_date',{ascending:true})
+      .order('id',{ascending:true})
+      .range(offset,offset+pageSize-1)
+    if (user.roleLevel >= 5) {
+      query = query.or(`reviewer_id.eq.${user.id},and(owner_id.eq.${user.id},reviewer_id.is.null)`)
+    } else {
+      query = query.eq('reviewer_id',user.id)
+    }
+    const {data,error}=await query
+    if (error || !data) throw new Error('Daftar review task gagal dimuat.')
+    tasks.push(...data)
+    if (data.length<pageSize) break
+    if (offset+pageSize>=10000) throw new Error('Terlalu banyak review; hubungi administrator untuk pengarsipan.')
   }
-
-  const { data: tasks, error } = await query
-  if (error) throw new Error('Daftar review task gagal dimuat.')
 
   return (
     <main className="mx-auto max-w-5xl space-y-5 px-4 py-5 sm:px-6 lg:px-8">
