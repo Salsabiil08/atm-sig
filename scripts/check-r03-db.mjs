@@ -47,6 +47,7 @@ const schema=[
 "CREATE POLICY task_insert ON tasks FOR INSERT TO authenticated WITH CHECK ((get_my_role_level()=2 AND owner_id=auth.uid() AND assigner_id=auth.uid() AND org_unit_id=get_my_org_unit_id()) OR get_my_role_level()>=3)",
 "CREATE POLICY task_update ON tasks FOR UPDATE TO authenticated USING (get_my_role_level()>=2) WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY wbs_read ON wbs_items FOR SELECT TO authenticated USING (true)",
+"CREATE POLICY wbs_update ON wbs_items FOR UPDATE TO authenticated USING (get_my_role_level()>=2) WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY wbs_insert ON wbs_items FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY evidence_insert ON evidence_requirements FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY support_insert ON task_supports FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
@@ -56,6 +57,7 @@ try {
   await db.exec(schema.replaceAll('$PIC',PIC).replaceAll('$BOSS',BOSS).replaceAll('$SUPER',SUPER))
   await db.exec(readFileSync(new URL('../supabase/migrations/20261024202000_r03_task_bundle_and_org_guard.sql',import.meta.url),'utf8'))
   await db.exec(readFileSync(new URL('../supabase/migrations/20261024203000_r03_task_state_event_history.sql',import.meta.url),'utf8'))
+  await db.exec(readFileSync(new URL('../supabase/migrations/20261024204000_r03_atomic_wbs_progress.sql',import.meta.url),'utf8'))
   assert.equal((await q("SELECT has_function_privilege('anon','public.create_task_bundle_r03(uuid,uuid,integer,uuid,text,public.task_priority,timestamptz,timestamptz,uuid,jsonb,jsonb,jsonb)','EXECUTE') AS ok")).ok,false)
   await db.exec("SET app.user_id='"+PIC+"'; SET app.role_level='2'; SET app.org_unit_id='3'; SET ROLE authenticated")
   const call=(wbs,support)=>"SELECT create_task_bundle_r03('"+PIC+"','"+BOSS+"',3,NULL,'Closing','sedang','2026-10-01','2026-10-31',NULL,'[]'::jsonb,'"+JSON.stringify(wbs)+"'::jsonb,'"+JSON.stringify(support)+"'::jsonb)"
@@ -65,6 +67,12 @@ try {
   assert.equal((await q('SELECT count(*)::int n FROM wbs_items')).n,3)
   assert.equal((await q('SELECT count(*)::int n FROM task_supports')).n,1)
   assert.equal((await q('SELECT count(*)::int n FROM task_state_events')).n,1,'task creation writes lifecycle event')
+  const taskId=(await q('SELECT id FROM tasks LIMIT 1')).id
+  const leafId=(await q("SELECT id FROM wbs_items WHERE title='Reconcile' LIMIT 1")).id
+  await db.exec("SELECT toggle_wbs_item_r03('"+taskId+"','"+leafId+"',true)")
+  assert.equal((await q("SELECT progress_pct FROM tasks WHERE id='"+taskId+"'")).progress_pct,60,'WBS and progress update together')
+  await fail("SELECT toggle_wbs_item_r03('"+taskId+"','"+taskId+"',true)",'WBS foreign item rejected')
+  assert.equal((await q("SELECT progress_pct FROM tasks WHERE id='"+taskId+"'")).progress_pct,60,'failed mutation keeps progress')
   await fail(call([{title:'Wrong weight',weight:90,parentIndex:null}],[]),'rollback bad weight')
   await fail(call(good,[{neededFromId:PIC,description:'Self'}]),'rollback bad support')
   await fail(call([{title:'Bad parent',weight:100,parentIndex:7}],[]),'rollback bad parent')
