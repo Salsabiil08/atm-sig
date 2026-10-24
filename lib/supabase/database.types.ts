@@ -5,6 +5,54 @@
 export type Database = {
   public: {
     Tables: {
+      task_state_events: {
+        Row: {
+          id: string
+          task_id: string
+          occurred_at: string
+          actor_id: string | null
+          old_status: Database['public']['Enums']['task_status'] | null
+          new_status: Database['public']['Enums']['task_status']
+          old_owner_id: string | null
+          new_owner_id: string
+          old_completed_at: string | null
+          new_completed_at: string | null
+          new_start_date: string
+          new_due_date: string
+          is_baseline: boolean
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          occurred_at?: string
+          actor_id?: string | null
+          old_status?: Database['public']['Enums']['task_status'] | null
+          new_status: Database['public']['Enums']['task_status']
+          old_owner_id?: string | null
+          new_owner_id: string
+          old_completed_at?: string | null
+          new_completed_at?: string | null
+          new_start_date: string
+          new_due_date: string
+          is_baseline?: boolean
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          occurred_at?: string
+          actor_id?: string | null
+          old_status?: Database['public']['Enums']['task_status'] | null
+          new_status?: Database['public']['Enums']['task_status']
+          old_owner_id?: string | null
+          new_owner_id?: string
+          old_completed_at?: string | null
+          new_completed_at?: string | null
+          new_start_date?: string
+          new_due_date?: string
+          is_baseline?: boolean
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           id: number
