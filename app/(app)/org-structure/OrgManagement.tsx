@@ -25,8 +25,9 @@ export default function OrgManagement({units}:{units:Unit[]}) {
     startTransition(async()=>{
       const result=await saveOrgUnit({id:editing??undefined,name,type,parentId:type==='department'?null:Number(parentId)})
       if(result.error){setFeedback(result.error);return}
+      edit()
       setFeedback('Perubahan organisasi berhasil disimpan dan dicatat audit.')
-      edit();router.refresh()
+      router.refresh()
     })
   }
   function remove(unit:Unit){
