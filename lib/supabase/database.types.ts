@@ -749,6 +749,23 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      create_task_bundle_r03: {
+        Args: {
+          p_owner_id: string
+          p_reviewer_id: string | null
+          p_org_unit_id: number
+          p_parent_task_id: string | null
+          p_title: string
+          p_priority: 'rendah' | 'sedang' | 'tinggi'
+          p_start_date: string
+          p_due_date: string
+          p_category_id?: string | null
+          p_evidence?: {description:string;mandatory:boolean}[]
+          p_wbs?: {title:string;weight:number;parentIndex:number|null}[]
+          p_support?: {neededFromId:string;description:string}[]
+        }
+        Returns: string
+      }
       reassign_task: {
         Args: {
           p_task_id: string
