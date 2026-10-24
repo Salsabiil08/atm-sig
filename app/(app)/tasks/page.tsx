@@ -1,3 +1,4 @@
+import WorkspaceTabs, { WORK_TABS } from '../_components/WorkspaceTabs'
 // FR-029 — Halaman Daftar Task
 // Sesuai Stitch mockup 06_daftar_task: tabel task dengan filter, search, status badge
 
@@ -100,7 +101,8 @@ export default async function TasksPage({
   }
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/tasks" tabs={WORK_TABS} />
       {/* Judul + tombol buat task */}
       <div className="flex items-center justify-between mb-5">
         <div>
