@@ -29,6 +29,7 @@ const schema=[
 "CREATE FUNCTION get_my_org_unit_id() RETURNS int LANGUAGE sql STABLE AS 'SELECT nullif(current_setting(''app.org_unit_id'',true),'''')::int'",
 "INSERT INTO roles VALUES(2,2),(3,3),(6,6)",
 "INSERT INTO org_units(id,parent_id,name,type) VALUES(1,NULL,'Accounting','department'),(2,1,'Unit A','unit'),(3,2,'Section A','section')",
+"SELECT setval(pg_get_serial_sequence('org_units','id'),3,true)",
 "INSERT INTO users(id,role_id,org_unit_id,supervisor_id) VALUES('$PIC',2,3,'$BOSS'),('$BOSS',3,3,NULL),('$SUPER',6,1,NULL)",
 'GRANT USAGE ON SCHEMA public,auth TO authenticated,anon',
 'GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated',
