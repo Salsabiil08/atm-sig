@@ -20,6 +20,8 @@ export default function ApprovalClient({ requests }: Props) {
   const router = useRouter()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [view, setView] = useState<'pending' | 'history'>('pending')
+  const visibleRequests = requests.filter(request => view === 'pending' ? request.status === 'Menunggu approval' : request.status !== 'Menunggu approval')
 
   async function decide(requestId: string, decision: 'Disetujui' | 'Ditolak') {
     setBusyId(requestId)
@@ -59,8 +61,18 @@ export default function ApprovalClient({ requests }: Props) {
         </p>
       )}
 
+      <nav aria-label="Filter pengajuan deadline" className="flex gap-2">
+        <button type="button" aria-pressed={view === 'pending'} onClick={() => setView('pending')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${view === 'pending' ? 'bg-[var(--color-brand-light)] text-[var(--color-brand)]' : 'text-[var(--color-text-secondary)]'}`}>
+          Pending ({requests.filter(r => r.status === 'Menunggu approval').length})
+        </button>
+        <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${view === 'history' ? 'bg-[var(--color-brand-light)] text-[var(--color-brand)]' : 'text-[var(--color-text-secondary)]'}`}>
+          Riwayat ({requests.filter(r => r.status !== 'Menunggu approval').length})
+        </button>
+      </nav>
       <section aria-label="Daftar pengajuan deadline" className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        {requests.length === 0 ? (
+        {visibleRequests.length === 0 ? (
           <p className="px-5 py-10 text-center text-sm text-slate-500">
             Belum ada pengajuan perubahan deadline dalam cakupan Anda.
           </p>
@@ -78,7 +90,7 @@ export default function ApprovalClient({ requests }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {requests.map((request) => (
+                {visibleRequests.map((request) => (
                   <tr key={request.id} className="align-top hover:bg-slate-50">
                     <td className="px-5 py-4 font-medium text-slate-900">{request.taskTitle}</td>
                     <td className="px-5 py-4 text-slate-600">{request.requesterName}</td>
