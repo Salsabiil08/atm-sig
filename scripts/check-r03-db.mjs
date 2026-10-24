@@ -47,6 +47,7 @@ const schema=[
 "CREATE POLICY wbs_insert ON wbs_items FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY evidence_insert ON evidence_requirements FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY support_insert ON task_supports FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
+"CREATE POLICY support_read ON task_supports FOR SELECT TO authenticated USING (true)",
 ].join(';\n')+';'
 try {
   await db.exec(schema.replaceAll('$PIC',PIC).replaceAll('$BOSS',BOSS).replaceAll('$SUPER',SUPER))
