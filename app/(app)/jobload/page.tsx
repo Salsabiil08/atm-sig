@@ -9,9 +9,11 @@ type Params = Promise<{ month?: string }>
 export default async function JobloadPage({ searchParams }: { searchParams: Params }) {
   const [user,params]=await Promise.all([getSessionUser(),searchParams])
   requireRole(user,'Manager')
+  const parts = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',timeZone:'Asia/Jakarta'}).formatToParts(new Date())
+  const defaultMonth = (parts.find(p=>p.type==='year')?.value??'2026') + '-' + (parts.find(p=>p.type==='month')?.value??'01')
   const month= params.month && /^(19|20)\d\d-(0[1-9]|1[0-2])$/.test(params.month)
     ? params.month
-    : new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',timeZone:'Asia/Jakarta'}).format(new Date())
+    : defaultMonth
   const [year,mon]=month.split('-').map(Number)
   const nextMonth=mon===12 ? `${year+1}-01` : `${year}-${String(mon+1).padStart(2,'0')}`
   const from=`${month}-01T00:00:00+07:00`
