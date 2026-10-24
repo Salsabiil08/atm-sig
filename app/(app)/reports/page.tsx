@@ -1,3 +1,4 @@
+import WorkspaceTabs, { REPORT_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import {
@@ -54,6 +55,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
 
   return (
     <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/reports" tabs={REPORT_TABS} />
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">LAPORAN TASK</h1>

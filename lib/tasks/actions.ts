@@ -25,7 +25,10 @@ import { isReminderResponse } from '@/lib/reminders/responses'
 // ============== TIPE INPUT ==============
 
 export type CreateTaskInput = TaskDetailsInput & {
+  categoryId?: string | null
   evidenceRequirements?: EvidenceRequirementInput[]
+  wbsItems?: { title:string; weight:number; parentIndex:number|null }[]
+  initialSupport?: { neededFromId:string; description:string }[]
 }
 
 export type UpdateTaskInput = TaskDetailsInput & {
@@ -248,6 +251,41 @@ export async function createTask(input: CreateTaskInput) {
   )
   if (reviewerError) return { error: reviewerError }
 
+  if (input.categoryId) {
+    if (!isValidUuid(input.categoryId)) return { error: 'Kategori task tidak valid.' }
+    const { data: category, error: categoryError } = await supabase.from('task_categories')
+      .select('id,org_unit_id,is_active').eq('id',input.categoryId).maybeSingle()
+    if (categoryError || !category?.is_active) return { error: 'Kategori tidak tersedia.' }
+    const { data: section, error: sectionError } = await supabase.from('org_units')
+      .select('parent_id').eq('id', task.orgUnitId).maybeSingle()
+    if (sectionError || !section || (category.org_unit_id !== task.orgUnitId && category.org_unit_id !== section.parent_id)) {
+      return { error: 'Kategori tidak berada dalam cakupan section task.' }
+    }
+  }
+
+  // Transaction bundle includes task, evidence, WBS and PIC support. The
+  // function is SECURITY INVOKER, so existing table RLS remains mandatory.
+  if (input.wbsItems?.length || input.initialSupport?.length) {
+    const { data: newId, error: bundleError } = await supabase.rpc('create_task_bundle_r03', {
+      p_owner_id: task.ownerId,
+      p_reviewer_id: task.reviewerId,
+      p_org_unit_id: task.orgUnitId,
+      p_parent_task_id: task.parentTaskId,
+      p_title: task.title,
+      p_priority: task.priority,
+      p_start_date: task.startDate,
+      p_due_date: task.dueDate,
+      p_category_id: input.categoryId ?? null,
+      p_evidence: evidenceValidation.data,
+      p_wbs: input.wbsItems ?? [],
+      p_support: input.initialSupport ?? [],
+    })
+    if (bundleError || !newId) return { error: 'Gagal membuat task beserta WBS/support. Semua perubahan dibatalkan.' }
+    revalidatePath('/tasks')
+    revalidatePath('/dashboard')
+    return { data: { id: newId } }
+  }
+
   const { data, error } = await supabase
     .from('tasks')
     .insert({
@@ -256,6 +294,7 @@ export async function createTask(input: CreateTaskInput) {
       reviewer_id: task.reviewerId,
       org_unit_id: task.orgUnitId,
       parent_task_id: task.parentTaskId,
+      ...(input.categoryId ? { category_id: input.categoryId } : {}),
       title: task.title,
       priority: task.priority,
       start_date: task.startDate,
@@ -1042,61 +1081,29 @@ export async function approveDeadlineChange(input: ApproveDeadlineInput) {
 /**
  * FR-032 — Toggle WBS item selesai/belum, lalu hitung ulang progress_pct task.
  */
-export async function toggleWbsItem(wbsItemId: string, isDone: boolean, taskId: string) {
-  const user = await getSessionUser()
-  const supabase = await createClient()
-
-  // Pastikan user adalah PIC task
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('owner_id')
-    .eq('id', taskId)
-    .single()
-
-  if (!task) return { error: 'Task tidak ditemukan.' }
-  if (task.owner_id !== user.id) {
-    return { error: 'Hanya PIC task yang dapat memperbarui progress.' }
+export async function addWbsItem(taskId: string, title: string, weight: number, parentId: string | null = null) {
+  await getSessionUser()
+  if (!isValidUuid(taskId) || (parentId !== null && !isValidUuid(parentId))
+    || !title.trim() || title.length > 200 || !Number.isFinite(weight) || weight<=0 || weight>100) {
+    return {error:'Data WBS tidak valid.'}
   }
-
-  const { data: updatedWbs, error } = await supabase
-    .from('wbs_items')
-    .update({ is_done: isDone })
-    .eq('id', wbsItemId)
-    .select('id')
-    .maybeSingle()
-
-  if (error) return { error: 'Gagal memperbarui item WBS.' }
-  if (!updatedWbs) return { error: 'Akses ditolak: item WBS berada di luar cakupan Anda.' }
-
-  // Hitung ulang progress berdasarkan bobot leaf items
-  // OQ-17: bobot leaf yang selesai / total bobot leaf * 100
-  const { data: allLeafs } = await supabase
-    .from('wbs_items')
-    .select('id, weight, is_done, parent_id')
-    .eq('task_id', taskId)
-
-  if (allLeafs && allLeafs.length > 0) {
-    // Cari leaf items (yang tidak menjadi parent siapapun)
-    const parentIds = new Set(allLeafs.filter((w) => w.parent_id !== null).map((w) => w.parent_id))
-    const leafItems = allLeafs.filter((w) => !parentIds.has(w.id))
-
-    const totalWeight = leafItems.reduce((sum, w) => sum + (w.weight ?? 0), 0)
-    const doneWeight = leafItems
-      .filter((w) => w.is_done)
-      .reduce((sum, w) => sum + (w.weight ?? 0), 0)
-
-    const progress = totalWeight > 0 ? Math.round((doneWeight / totalWeight) * 100) : 0
-
-    const { data: updatedTask, error: progressError } = await supabase
-      .from('tasks')
-      .update({ progress_pct: progress })
-      .eq('id', taskId)
-      .select('id')
-      .maybeSingle()
-    if (progressError) return { error: 'Gagal memperbarui progress task.' }
-    if (!updatedTask) return { error: 'Akses ditolak: task berada di luar cakupan Anda.' }
-  }
-
+  const supabase=await createClient()
+  const {data,error}=await supabase.rpc('add_wbs_item_r03',{
+    p_task_id:taskId,p_title:title.trim(),p_weight:weight,p_parent_id:parentId,
+  })
+  if(error||!data)return {error:'Penambahan WBS ditolak: periksa PIC, parent, dan bobot maksimal.'}
   revalidatePath(`/tasks/${taskId}`)
-  return { data: { success: true } }
+  return {data:{success:true}}
+}
+
+export async function toggleWbsItem(wbsItemId: string, isDone: boolean, taskId: string) {
+  await getSessionUser()
+  if (!isValidUuid(taskId)||!isValidUuid(wbsItemId)||typeof isDone!=='boolean')return {error:'Item WBS tidak valid.'}
+  const supabase=await createClient()
+  const {data,error}=await supabase.rpc('toggle_wbs_item_r03',{
+    p_task_id:taskId,p_wbs_item_id:wbsItemId,p_is_done:isDone,
+  })
+  if(error||data===null)return {error:'Gagal memperbarui WBS dan progress secara atomik.'}
+  revalidatePath(`/tasks/${taskId}`)
+  return {data:{success:true}}
 }

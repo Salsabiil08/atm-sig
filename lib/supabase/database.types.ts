@@ -5,6 +5,54 @@
 export type Database = {
   public: {
     Tables: {
+      task_state_events: {
+        Row: {
+          id: string
+          task_id: string
+          occurred_at: string
+          actor_id: string | null
+          old_status: Database['public']['Enums']['task_status'] | null
+          new_status: Database['public']['Enums']['task_status']
+          old_owner_id: string | null
+          new_owner_id: string
+          old_completed_at: string | null
+          new_completed_at: string | null
+          new_start_date: string
+          new_due_date: string
+          is_baseline: boolean
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          occurred_at?: string
+          actor_id?: string | null
+          old_status?: Database['public']['Enums']['task_status'] | null
+          new_status: Database['public']['Enums']['task_status']
+          old_owner_id?: string | null
+          new_owner_id: string
+          old_completed_at?: string | null
+          new_completed_at?: string | null
+          new_start_date: string
+          new_due_date: string
+          is_baseline?: boolean
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          occurred_at?: string
+          actor_id?: string | null
+          old_status?: Database['public']['Enums']['task_status'] | null
+          new_status?: Database['public']['Enums']['task_status']
+          old_owner_id?: string | null
+          new_owner_id?: string
+          old_completed_at?: string | null
+          new_completed_at?: string | null
+          new_start_date?: string
+          new_due_date?: string
+          is_baseline?: boolean
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           id: number
@@ -749,6 +797,26 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      add_wbs_item_r03: { Args: {p_task_id:string;p_title:string;p_weight:number;p_parent_id?:string|null}; Returns:string }
+      toggle_wbs_item_r03: { Args: {p_task_id:string;p_wbs_item_id:string;p_is_done:boolean}; Returns:number }
+      recalculate_task_wbs_progress_r03: { Args: {p_task_id:string}; Returns:number }
+      create_task_bundle_r03: {
+        Args: {
+          p_owner_id: string
+          p_reviewer_id: string | null
+          p_org_unit_id: number
+          p_parent_task_id: string | null
+          p_title: string
+          p_priority: 'rendah' | 'sedang' | 'tinggi'
+          p_start_date: string
+          p_due_date: string
+          p_category_id?: string | null
+          p_evidence?: {description:string;mandatory:boolean}[]
+          p_wbs?: {title:string;weight:number;parentIndex:number|null}[]
+          p_support?: {neededFromId:string;description:string}[]
+        }
+        Returns: string
+      }
       reassign_task: {
         Args: {
           p_task_id: string

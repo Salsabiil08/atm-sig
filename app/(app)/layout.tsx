@@ -5,6 +5,7 @@
 import { getSessionUser } from '@/lib/auth/session'
 import Sidebar from './_components/Sidebar'
 import TopHeader from './_components/TopHeader'
+import { getUnreadNotificationCount } from '@/lib/notifications/queries'
 import { Suspense, type ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { connection } from 'next/server'
@@ -21,11 +22,13 @@ async function AuthenticatedAppLayout({ children }: { children: ReactNode }) {
   // Keep it out of the static prerender so client components can safely render relative time.
   await connection()
   const user = await getSessionUser()
+  // Notification availability must not prevent the primary workspace from loading.
+  const unreadCount = await getUnreadNotificationCount(user.id).catch(() => 0)
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Top Header merah */}
-      <TopHeader user={user} />
+      <TopHeader user={user} unreadCount={unreadCount} />
 
       {/* Konten: Sidebar + Main */}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">

@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type FormEvent } from 'react'
 import { createTask } from '@/lib/tasks/actions'
-import type { TaskCreationOptions } from '@/lib/tasks/queries'
+import type { TaskCreationOptions, TaskSupportRecipient } from '@/lib/tasks/queries'
 import { toJakartaTimestamp } from '@/lib/tasks/dates'
 
-type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string }
+type Props = TaskCreationOptions & { currentUserRoleLevel: number; currentUserId: string; supportRecipients: TaskSupportRecipient[] }
 
 const inputClass = 'mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600'
 
@@ -24,6 +24,8 @@ function canAssignOwner(
 export default function CreateTaskForm({
   sections,
   owners,
+  categories,
+  supportRecipients,
   currentUserRoleLevel,
   currentUserId,
 }: Props) {
@@ -35,6 +37,7 @@ export default function CreateTaskForm({
     mandatory: boolean
   }>>([])
   const [error, setError] = useState('')
+  const [wbsItems, setWbsItems] = useState<Array<{title:string;weight:number;parentIndex:number|null}>>([])
   const [isPending, startTransition] = useTransition()
   const section = sections.find((item) => String(item.id) === sectionId)
   const eligibleOwners = section
@@ -55,7 +58,15 @@ export default function CreateTaskForm({
     const startDate = String(formData.get('startDate') ?? '')
     const dueDate = String(formData.get('dueDate') ?? '')
     const priority = String(formData.get('priority') ?? '')
+    const supportId = String(formData.get('supportId') ?? '')
+    const supportDescription = String(formData.get('supportDescription') ?? '').trim()
+    if (currentUserRoleLevel === 2 && (supportId && !supportDescription || !supportId && supportDescription)) {
+      setError('Pilih penerima dan isi uraian untuk support awal.')
+      return
+    }
 
+    const leafWeight=wbsItems.reduce((sum,item,index)=>wbsItems.some(other=>other.parentIndex===index)?sum:sum+item.weight,0)
+    if(wbsItems.length && Math.abs(leafWeight-100)>0.01){setError('Jumlah bobot leaf WBS wajib 100%.');return}
     startTransition(async () => {
       const result = await createTask({
         title,
@@ -63,9 +74,12 @@ export default function CreateTaskForm({
         reviewerId: selectedOwner.reviewerId,
         orgUnitId: section.id,
         parentTaskId: null,
+        categoryId: String(formData.get('categoryId') ?? '') || null,
         priority: priority as 'rendah' | 'sedang' | 'tinggi',
         startDate: toJakartaTimestamp(startDate),
         dueDate: toJakartaTimestamp(dueDate, true),
+        wbsItems: wbsItems.map(item=>({...item,title:item.title.trim()})),
+        initialSupport: currentUserRoleLevel===2 && supportId && supportDescription ? [{neededFromId:supportId,description:supportDescription}]:[],
         evidenceRequirements: evidenceRequirements
           .map(({ description, mandatory }) => ({ description: description.trim(), mandatory }))
           .filter(({ description }) => description.length > 0),
@@ -79,6 +93,7 @@ export default function CreateTaskForm({
         setError('Task tidak berhasil dibuat. Silakan coba lagi.')
         return
       }
+
       router.push(`/tasks/${result.data.id}`)
       router.refresh()
     })
@@ -138,6 +153,31 @@ export default function CreateTaskForm({
             </label>
           </div>
 
+          <label className="text-sm font-medium text-slate-700">
+            Kategori task (opsional)
+            <select name="categoryId" className={inputClass} defaultValue="">
+              <option value="">Tanpa kategori</option>
+              {categories.filter(category => category.orgUnitId === section?.id || category.orgUnitId === section?.parentId)
+                .map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
+          </label>
+
+          {currentUserRoleLevel === 2 && supportRecipients.length > 0 && (
+            <fieldset className="space-y-3 rounded-lg border border-slate-200 p-4">
+              <legend className="px-1 text-sm font-semibold text-slate-700">Support awal (opsional)</legend>
+              <p className="text-xs text-slate-500">Disimpan dalam transaksi yang sama bersama task dan WBS.</p>
+              <label className="block text-sm text-slate-700">Dibutuhkan dari
+                <select name="supportId" defaultValue="" className={inputClass}>
+                  <option value="">Tidak memerlukan support</option>
+                  {supportRecipients.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm text-slate-700">Penjelasan support
+                <textarea name="supportDescription" maxLength={1000} rows={2} className={inputClass} placeholder="Dokumen atau bantuan yang dibutuhkan" />
+              </label>
+            </fieldset>
+          )}
+
           {selectedOwner && (
             <p className="-mt-3 text-xs text-slate-500">
               Reviewer: {selectedOwner.reviewerName ?? 'Tidak diperlukan untuk task GM/Super Admin'}
@@ -162,6 +202,29 @@ export default function CreateTaskForm({
               <input className={inputClass} type="date" name="dueDate" required />
             </label>
           </div>
+
+          <fieldset className="space-y-3 border-t border-slate-100 pt-4">
+            <legend className="text-sm font-semibold text-slate-800">WBS awal (opsional, 2 tingkat)</legend>
+            <p className="text-xs text-slate-500">Tambah root dahulu, lalu pilih induk. Total bobot leaf harus 100%.</p>
+            {wbsItems.map((item,index)=>(
+              <div key={index} className="grid gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-[1fr_100px_135px_auto]">
+                <input aria-label={`Judul WBS ${index+1}`} required maxLength={200} value={item.title} className={inputClass}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,title:event.target.value}:v))} placeholder="Langkah pekerjaan" />
+                <input aria-label={`Bobot WBS ${index+1}`} type="number" min="0" max="100" step="0.01" value={item.weight} className={inputClass}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,weight:Number(event.target.value)}:v))}/>
+                <select aria-label={`Induk WBS ${index+1}`} className={inputClass} value={item.parentIndex??''}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,parentIndex:event.target.value===''?null:Number(event.target.value)}:v))}>
+                  <option value="">Root</option>
+                  {wbsItems.slice(0,index).map((parent,i)=>parent.parentIndex===null?<option key={i} value={i}>Di bawah {i+1}</option>:null)}
+                </select>
+                <button type="button" disabled={wbsItems.some(child=>child.parentIndex===index)}
+                  onClick={()=>setWbsItems(items=>items.filter((_,i)=>i!==index).map(v=>({...v,parentIndex:v.parentIndex===null?null:v.parentIndex>index?v.parentIndex-1:v.parentIndex})))}
+                  className="text-xs text-red-600 disabled:opacity-40">Hapus</button>
+              </div>
+            ))}
+            <button type="button" disabled={wbsItems.length>=30} onClick={()=>setWbsItems(items=>[...items,{title:'',weight:0,parentIndex:null}])}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm">+ Tambah WBS</button>
+          </fieldset>
 
           <fieldset className="grid gap-3 border-t border-slate-100 pt-4">
             <legend className="text-sm font-semibold text-slate-800">Evidence yang dibutuhkan</legend>

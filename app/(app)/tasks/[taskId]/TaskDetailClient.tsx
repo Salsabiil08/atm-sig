@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   addComment,
+  addWbsItem,
+  deleteTask,
+  updateTask,
+  toggleWbsItem,
   addEvidenceLink,
   addSupportRequest,
   getTaskEvidenceDownloadUrl,
@@ -68,6 +72,8 @@ export default function TaskDetailClient({
   const [downloadLinks, setDownloadLinks] = useState<Record<string, string>>({})
   const [deadlineDialogOpen, setDeadlineDialogOpen] = useState(false)
   const [minimumDeadlineDate, setMinimumDeadlineDate] = useState('')
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
   const isOwner = task.ownerId === currentUserId
   const isReviewer = task.reviewerId === currentUserId
   const canReviewOwnTask = isOwner && currentUserRoleLevel >= 5 && task.reviewerId === null
@@ -273,6 +279,61 @@ export default function TaskDetailClient({
         <PriorityBadge priority={task.priority} />
       </div>
 
+      <nav aria-label="Bagian detail task" className="flex gap-2 overflow-x-auto pb-2">
+        {[['#task-summary','Ringkasan'],['#task-work','Pelaksanaan'],['#task-evidence','Evidence'],['#task-history','Review & Riwayat']].map(([href,label]) => (
+          <a key={href} href={href} className="shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-brand-muted)]">{label}</a>
+        ))}
+      </nav>
+
+      {currentUserRoleLevel >= 3 && (
+        <section aria-label="Kelola task" className="space-y-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setEditOpen(!editOpen)} disabled={busy}
+              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)]">
+              {editOpen ? 'Tutup edit' : 'Edit judul & prioritas'}
+            </button>
+          </div>
+          {editOpen && (
+            <form className="grid gap-3 sm:grid-cols-[1fr_160px_auto]" onSubmit={(event)=>{
+              event.preventDefault()
+              const formData=new FormData(event.currentTarget)
+              void runAction(()=>updateTask({
+                taskId:task.id, title:String(formData.get('title')??''),
+                ownerId:task.ownerId, reviewerId:task.reviewerId,
+                orgUnitId:task.orgUnitId, parentTaskId:task.parentTaskId,
+                priority:String(formData.get('priority')??task.priority) as 'rendah'|'sedang'|'tinggi',
+                startDate:task.startDate, dueDate:task.dueDate,
+              }),'Task berhasil diperbarui.').then(result=>{if('data' in result)setEditOpen(false)})
+            }}>
+              <label className="text-xs text-[var(--color-text-secondary)]">Judul
+                <input name="title" required maxLength={200} defaultValue={task.title} className={fieldClass} />
+              </label>
+              <label className="text-xs text-[var(--color-text-secondary)]">Prioritas
+                <select name="priority" defaultValue={task.priority} className={fieldClass}>
+                  <option value="rendah">Rendah</option><option value="sedang">Sedang</option><option value="tinggi">Tinggi</option>
+                </select>
+              </label>
+              <button type="submit" disabled={busy} className={buttonClass}>Simpan</button>
+            </form>
+          )}
+          <details>
+            <summary className="cursor-pointer text-xs font-medium text-red-600">Hapus task (permanen)</summary>
+            <p className="my-2 text-xs text-[var(--color-text-secondary)]">Ketik judul task persis untuk konfirmasi. Task yang mempunyai referensi terkait mungkin tidak dapat dihapus.</p>
+            <div className="flex flex-wrap gap-2">
+              <input aria-label="Ketik judul task untuk konfirmasi hapus" value={deleteConfirm}
+                onChange={event=>setDeleteConfirm(event.target.value)} className={fieldClass} />
+              <button type="button" disabled={busy||deleteConfirm!==task.title}
+                onClick={()=>void runAction(()=>deleteTask(task.id),'Task dihapus.').then(result=>{
+                  if('data' in result) {router.push('/tasks');router.refresh()}
+                })}
+                className="rounded-lg bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-40">
+                Hapus permanen
+              </button>
+            </div>
+          </details>
+        </section>
+      )}
+
       {feedback && (
         <p
           role="status"
@@ -316,6 +377,7 @@ export default function TaskDetailClient({
       )}
 
       <section
+        id="task-summary"
         aria-label="Informasi task"
         className="grid grid-cols-2 gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-5"
       >
@@ -386,7 +448,7 @@ export default function TaskDetailClient({
       )}
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-7">
+        <section id="task-work" className="scroll-mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-7">
           <h2 className="text-sm font-semibold text-slate-900">WBS dan Timeline</h2>
           {task.wbsItems.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">Belum ada rincian WBS untuk task ini.</p>
@@ -394,16 +456,19 @@ export default function TaskDetailClient({
             <ul className="mt-4 space-y-3">
               {task.wbsItems.map((item) => (
                 <li key={item.id} className="flex items-start gap-3 text-sm">
-                  <span
-                    aria-label={item.isDone ? 'Selesai' : 'Belum selesai'}
-                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                      item.isDone
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : 'border-slate-300 bg-white'
-                    }`}
-                  >
-                    {item.isDone ? '✓' : ''}
-                  </span>
+                  {isOwner && ['To do', 'In progress', 'Revisi'].includes(task.status) ? (
+                    <input type="checkbox" aria-label={`Tandai WBS ${item.title} selesai`} checked={item.isDone}
+                      disabled={busy} onChange={(event) => void runAction(
+                        () => toggleWbsItem(item.id, event.target.checked, task.id),
+                        'Status WBS dan progress diperbarui.'
+                      )}
+                      className="mt-0.5 h-4 w-4 accent-emerald-600" />
+                  ) : (
+                    <span aria-label={item.isDone ? 'Selesai' : 'Belum selesai'}
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${item.isDone ? 'border-green-600 bg-green-600 text-white' : 'border-slate-300 bg-white'}`}>
+                      {item.isDone ? '✓' : ''}
+                    </span>
+                  )}
                   <span className={item.isDone ? 'text-slate-400 line-through' : 'text-slate-800'}>
                     {item.title}
                   </span>
@@ -412,9 +477,29 @@ export default function TaskDetailClient({
               ))}
             </ul>
           )}
+          {isOwner && ['To do', 'In progress', 'Revisi'].includes(task.status) && (
+            <form className="mt-5 grid gap-2 border-t border-[var(--color-border)] pt-4 sm:grid-cols-[1fr_100px_150px_auto]"
+              onSubmit={(event) => {
+                event.preventDefault()
+                const form = event.currentTarget
+                const data = new FormData(form)
+                void runAction(() => addWbsItem(task.id, String(data.get('wbsTitle') ?? ''), Number(data.get('wbsWeight'))),
+                  'WBS berhasil ditambahkan.').then(result => { if ('data' in result) form.reset() })
+              }}>
+              <input name="wbsTitle" required maxLength={200} placeholder="Langkah pekerjaan" aria-label="Judul WBS"
+                className={fieldClass} />
+              <input name="wbsWeight" required type="number" min="1" max="100" step="1" placeholder="Bobot %" aria-label="Bobot WBS"
+                className={fieldClass} />
+              <select name="wbsParent" aria-label="Induk WBS" defaultValue="" className={fieldClass}>
+                <option value="">Root</option>
+                {task.wbsItems.filter(item=>item.parentId===null).map(item=><option key={item.id} value={item.id}>Sub dari: {item.title}</option>)}
+              </select>
+              <button disabled={busy} type="submit" className={buttonClass}>Tambah WBS</button>
+            </form>
+          )}
           {isOwner && (
             <p className="mt-4 text-xs text-slate-500">
-              Progress diperbarui oleh PIC sesuai pekerjaan yang telah diselesaikan.
+              Centang WBS yang selesai untuk menghitung progress berdasarkan bobot pekerjaan.
             </p>
           )}
         </section>
@@ -487,7 +572,7 @@ export default function TaskDetailClient({
             )}
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="task-evidence" className="scroll-mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-sm font-semibold text-slate-900">
               Evidence wajib
               <span className="ml-2 font-normal text-slate-500">
@@ -651,7 +736,7 @@ export default function TaskDetailClient({
         )}
       </section>
 
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <section id="task-history" className="scroll-mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">Riwayat progress</h2>
           {task.progressHistory.length === 0 ? (

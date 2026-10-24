@@ -1,3 +1,4 @@
+import WorkspaceTabs, { REPORT_TABS } from '../_components/WorkspaceTabs'
 // T-504 — Tampilan Audit Log — FR-092
 // Hanya role Manager+ yang dapat mengakses halaman ini.
 // Data read-only: tidak ada tombol ubah/hapus.
@@ -104,6 +105,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/audit-log" tabs={REPORT_TABS} />
       <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-7 text-white shadow-sm sm:px-8">
         <div aria-hidden="true" className="absolute -right-12 -top-24 h-64 w-64 rounded-full border-[32px] border-white/5" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">

@@ -5,7 +5,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { getPerformanceReport, parseReportFilters } from '@/lib/reports/queries'
-import { buildXlsx, buildPdfHtml, type ExportParams } from '@/lib/reports/export'
+import { buildXlsx, type ExportParams } from '@/lib/reports/export'
+import { buildReportPdf } from '@/lib/reports/pdf'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -51,15 +52,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       })
     }
 
-    // PDF: return printable HTML; browser prints/saves as PDF
-    const html     = buildPdfHtml(report, params)
-    const filename = `laporan-task-${filters.dateFrom}-${filters.dateTo}.html`
-    return new NextResponse(html, {
+    // True PDF binary; same role and scope controls as XLSX.
+    const pdf = buildReportPdf(report, params)
+    const bytes = new Uint8Array(pdf.byteLength)
+    bytes.set(pdf)
+    const filename = `laporan-task-${filters.dateFrom}-${filters.dateTo}.pdf`
+    return new NextResponse(bytes.buffer, {
       status: 200,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `inline; filename="${filename}"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
       },
     })
   } catch (err) {

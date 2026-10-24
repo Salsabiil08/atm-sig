@@ -1,3 +1,4 @@
+import WorkspaceTabs, { WORK_TABS } from '../_components/WorkspaceTabs'
 // FR-029 — Halaman Daftar Task
 // Sesuai Stitch mockup 06_daftar_task: tabel task dengan filter, search, status badge
 
@@ -16,6 +17,7 @@ type SearchParams = {
   search?: string
   section?: string
   owner?: string
+  mine?: string
   from?: string
   to?: string
   page?: string
@@ -62,7 +64,7 @@ export default async function TasksPage({
   const sectionFilter = params.section && /^\d+$/.test(params.section)
     ? Number(params.section)
     : null
-  const ownerFilter = params.owner || null
+  const ownerFilter = params.mine === '1' ? user.id : params.owner || null
   const dateFromFilter = params.from || null
   const dateToFilter = params.to || null
   const page = parseInt(params.page ?? '1', 10)
@@ -91,7 +93,8 @@ export default async function TasksPage({
     if (merged.priority) qs.set('priority', merged.priority)
     if (merged.search) qs.set('search', merged.search)
     if (merged.section) qs.set('section', merged.section)
-    if (merged.owner) qs.set('owner', merged.owner)
+    if (merged.owner && merged.mine !== '1') qs.set('owner', merged.owner)
+    if (merged.mine === '1') qs.set('mine', '1')
     if (merged.from) qs.set('from', merged.from)
     if (merged.to) qs.set('to', merged.to)
     if (merged.page && merged.page !== '1') qs.set('page', merged.page)
@@ -100,7 +103,8 @@ export default async function TasksPage({
   }
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <WorkspaceTabs current={params.mine === '1' ? '/tasks?mine=1' : '/tasks'} tabs={WORK_TABS} roleLevel={user.roleLevel} />
       {/* Judul + tombol buat task */}
       <div className="flex items-center justify-between mb-5">
         <div>

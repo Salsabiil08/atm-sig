@@ -7,9 +7,10 @@ import { type SessionUser } from '@/lib/auth/session'
 import ATMWordmark from '@/app/_components/ATMWordmark'
 import ThemeToggle from '@/app/_components/ThemeToggle'
 import JakartaClock from './JakartaClock'
+import Link from 'next/link'
 import LogoutButton from './LogoutButton'
 
-type Props = { user: SessionUser }
+type Props = { user: SessionUser; unreadCount?: number }
 
 function getInitials(name: string): string {
   return name
@@ -41,7 +42,7 @@ function avatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
 }
 
-export default function TopHeader({ user }: Props) {
+export default function TopHeader({ user, unreadCount = 0 }: Props) {
   const initials = getInitials(user.name)
   const today = getTodayLabel()
   const bgColor = avatarColor(user.name)
@@ -61,6 +62,20 @@ export default function TopHeader({ user }: Props) {
 
       {/* Kanan: Appearance, tanggal, dan akun */}
       <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-4">
+        <Link
+          href="/notifications"
+          aria-label={unreadCount > 0 ? `Notifikasi: ${unreadCount} belum dibaca` : 'Buka notifikasi'}
+          className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-black/15 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>
+          </svg>
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[#a81c29]">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </Link>
         <JakartaClock />
         <ThemeToggle onBrand />
         {/* Tanggal */}

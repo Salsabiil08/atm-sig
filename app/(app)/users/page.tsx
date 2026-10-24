@@ -1,3 +1,4 @@
+import WorkspaceTabs, { MASTER_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import { getSessionUser } from '@/lib/auth/session'
 import { ROLE_LEVELS, ROLES } from '@/lib/constants/rbac'
@@ -62,12 +63,12 @@ export default async function UsersPage() {
   }
 
   return (
-    <UserManagement
+    <><div className="px-4 pt-5 sm:px-6 lg:px-8"><WorkspaceTabs current="/users" tabs={MASTER_TABS} roleLevel={user.roleLevel} /></div><UserManagement
       currentUserId={user.id}
       currentUserRole={user.role}
       users={data.users}
       assignmentOptions={data.assignmentOptions}
       pendingRoleChangeRequests={data.pendingRoleChangeRequests}
-    />
+    /></>
   )
 }
