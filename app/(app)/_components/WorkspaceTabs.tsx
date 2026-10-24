@@ -30,6 +30,7 @@ export const APPROVAL_TABS: Tab[] = [
 ]
 export const MASTER_TABS: Tab[] = [
   { label: 'Pengguna & Role', href: '/users' },
+  { label: 'Struktur Organisasi', href: '/org-structure' },
   { label: 'Kategori & Template', href: '/task-templates' },
 ]
 export const REPORT_TABS: Tab[] = [
