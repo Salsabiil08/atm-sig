@@ -6,6 +6,8 @@ import Link from 'next/link'
 import {
   addComment,
   addWbsItem,
+  deleteTask,
+  updateTask,
   toggleWbsItem,
   addEvidenceLink,
   addSupportRequest,
@@ -70,6 +72,8 @@ export default function TaskDetailClient({
   const [downloadLinks, setDownloadLinks] = useState<Record<string, string>>({})
   const [deadlineDialogOpen, setDeadlineDialogOpen] = useState(false)
   const [minimumDeadlineDate, setMinimumDeadlineDate] = useState('')
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
   const isOwner = task.ownerId === currentUserId
   const isReviewer = task.reviewerId === currentUserId
   const canReviewOwnTask = isOwner && currentUserRoleLevel >= 5 && task.reviewerId === null
@@ -274,6 +278,55 @@ export default function TaskDetailClient({
         </div>
         <PriorityBadge priority={task.priority} />
       </div>
+
+      {currentUserRoleLevel >= 3 && (
+        <section aria-label="Kelola task" className="space-y-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setEditOpen(!editOpen)} disabled={busy}
+              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)]">
+              {editOpen ? 'Tutup edit' : 'Edit judul & prioritas'}
+            </button>
+          </div>
+          {editOpen && (
+            <form className="grid gap-3 sm:grid-cols-[1fr_160px_auto]" onSubmit={(event)=>{
+              event.preventDefault()
+              const formData=new FormData(event.currentTarget)
+              void runAction(()=>updateTask({
+                taskId:task.id, title:String(formData.get('title')??''),
+                ownerId:task.ownerId, reviewerId:task.reviewerId,
+                orgUnitId:task.orgUnitId, parentTaskId:task.parentTaskId,
+                priority:String(formData.get('priority')??task.priority) as 'rendah'|'sedang'|'tinggi',
+                startDate:task.startDate, dueDate:task.dueDate,
+              }),'Task berhasil diperbarui.').then(result=>{if('data' in result)setEditOpen(false)})
+            }}>
+              <label className="text-xs text-[var(--color-text-secondary)]">Judul
+                <input name="title" required maxLength={200} defaultValue={task.title} className={fieldClass} />
+              </label>
+              <label className="text-xs text-[var(--color-text-secondary)]">Prioritas
+                <select name="priority" defaultValue={task.priority} className={fieldClass}>
+                  <option value="rendah">Rendah</option><option value="sedang">Sedang</option><option value="tinggi">Tinggi</option>
+                </select>
+              </label>
+              <button type="submit" disabled={busy} className={buttonClass}>Simpan</button>
+            </form>
+          )}
+          <details>
+            <summary className="cursor-pointer text-xs font-medium text-red-600">Hapus task (permanen)</summary>
+            <p className="my-2 text-xs text-[var(--color-text-secondary)]">Ketik judul task persis untuk konfirmasi. Task yang mempunyai referensi terkait mungkin tidak dapat dihapus.</p>
+            <div className="flex flex-wrap gap-2">
+              <input aria-label="Ketik judul task untuk konfirmasi hapus" value={deleteConfirm}
+                onChange={event=>setDeleteConfirm(event.target.value)} className={fieldClass} />
+              <button type="button" disabled={busy||deleteConfirm!==task.title}
+                onClick={()=>void runAction(()=>deleteTask(task.id),'Task dihapus.').then(result=>{
+                  if('data' in result) {router.push('/tasks');router.refresh()}
+                })}
+                className="rounded-lg bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-40">
+                Hapus permanen
+              </button>
+            </div>
+          </details>
+        </section>
+      )}
 
       {feedback && (
         <p
