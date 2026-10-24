@@ -20,7 +20,7 @@ function renderPage(lines: string[], page: number, total: number) {
     '0.10 0.16 0.23 rg',
   ]
   lines.forEach((line, i) => {
-    commands.push('BT /F1 9 Tf 48 ' + (753 - i * 17) + ' Td (' + pdfEscape(line.slice(0, 105)) + ') Tj ET')
+    commands.push('BT /F1 9 Tf 48 ' + (753 - i * 17) + ' Td (' + pdfEscape(line) + ') Tj ET')
   })
   commands.push('BT /F1 8 Tf 48 35 Td (Halaman ' + page + ' / ' + total + ') Tj ET')
   return commands.join('\n') + '\n'
@@ -52,9 +52,24 @@ export function buildReportPdf(report: PerformanceReport, params: ExportParams):
       '  PIC: ' + t.ownerName + ' | Tenggat: ' + t.dueDate.slice(0, 10) + ' | ' + t.status + ' | ' + t.progressPct + '%',
     ]) : ['Tidak ada task terlambat.']),
   ]
-  // 41 content lines keep every page comfortably above the footer.
+  // Wrap long titles and descriptions instead of silently truncating them.
+  // Split at whitespace wherever possible; preserve even one long token.
+  const wrapped = text.flatMap(line => {
+    if (line.length <= 88) return [line]
+    const chunks: string[] = []
+    let remaining = line
+    while (remaining.length > 88) {
+      const lastSpace = remaining.lastIndexOf(' ', 88)
+      const at = lastSpace > 16 ? lastSpace : 88
+      chunks.push(remaining.slice(0, at))
+      remaining = remaining.slice(at).trimStart()
+    }
+    chunks.push(remaining)
+    return chunks
+  })
+  // 41 content lines keep every page above the footer.
   const pages: string[][] = []
-  for (let i = 0; i < text.length; i += 41) pages.push(text.slice(i, i + 41))
+  for (let i = 0; i < wrapped.length; i += 41) pages.push(wrapped.slice(i, i + 41))
   if (!pages.length) pages.push([])
   const objects: string[] = []
   const add = (body: string) => { objects.push(body); return objects.length }
