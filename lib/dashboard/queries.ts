@@ -201,24 +201,23 @@ export async function getDashboardMetrics(user: SessionUser): Promise<DashboardM
   const supabase = await createClient()
   const scopeFilter = await getTaskScopeFilter(supabase, user)
 
-  // Query tasks yang visible untuk user ini
-  let taskQuery = supabase
-    .from('tasks')
-    .select('id, status, progress_pct, start_date, due_date, org_unit_id, owner_id, reviewer_id')
-  if (scopeFilter) taskQuery = taskQuery.or(scopeFilter)
-
-  // Hitung pengajuan deadline yang menunggu (independen dari query task) — paralel.
-  const [{ data: tasks, error }, { count: pendingDeadlines, error: deadlineError }] =
-    await Promise.all([
-      taskQuery,
-      supabase
-        .from('deadline_change_requests')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'Menunggu approval'),
-    ])
-
-  if (error) throw new Error('Gagal memuat ringkasan task dashboard.')
-  if (!tasks) throw new Error('Data ringkasan task dashboard tidak tersedia.')
+  // Explicit pagination: Supabase default maximum rows otherwise truncates metrics.
+  const tasks: Array<{ id:string; status:TaskStatus; progress_pct:number; start_date:string; due_date:string }> = []
+  const pageSize = 500
+  for (let offset = 0;offset < 100000;offset += pageSize) {
+    let query = supabase.from('tasks')
+      .select('id,status,progress_pct,start_date,due_date')
+      .order('id',{ascending:true})
+      .range(offset,offset+pageSize-1)
+    if (scopeFilter) query = query.or(scopeFilter)
+    const { data,error } = await query
+    if (error || !data) throw new Error('Gagal memuat ringkasan task dashboard.')
+    tasks.push(...data)
+    if (data.length < pageSize) break
+    if (offset+pageSize >= 100000) throw new Error('Data task melebihi batas aman ringkasan dashboard.')
+  }
+  const {count:pendingDeadlines,error:deadlineError} = await supabase.from('deadline_change_requests')
+    .select('id',{count:'exact',head:true}).eq('status','Menunggu approval')
 
   let tertinggal = 0
   for (const t of tasks) {
