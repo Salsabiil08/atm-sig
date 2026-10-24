@@ -21,7 +21,8 @@ export const WORK_TABS: Tab[] = [
 ]
 export const DASHBOARD_TABS: Tab[] = [
   { label: 'Ringkasan', href: '/dashboard' },
-  { label: 'Kinerja & Job Load', href: '/performance' },
+  { label: 'Kinerja Aktif', href: '/performance' },
+  { label: 'Jobload Periode', href: '/jobload' },
 ]
 export const APPROVAL_TABS: Tab[] = [
   { label: 'Review Task', href: '/review-inbox', minLevel: 3 },
