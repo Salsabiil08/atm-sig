@@ -30,6 +30,7 @@ const task: TaskDetail = {
   reviewerId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
   assignerName: 'Maya',
   reviewerName: 'Maya',
+  orgUnitId: 4,
   orgUnitName: 'Accounting',
   createdAt: '2026-10-20T00:00:00.000Z',
   parentTaskId: null,
