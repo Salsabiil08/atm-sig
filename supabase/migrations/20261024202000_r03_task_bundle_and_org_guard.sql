@@ -128,6 +128,9 @@ $$;
 REVOKE ALL ON FUNCTION public.create_task_bundle_r03(uuid,uuid,integer,uuid,text,public.task_priority,timestamptz,timestamptz,uuid,jsonb,jsonb,jsonb) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.create_task_bundle_r03(uuid,uuid,integer,uuid,text,public.task_priority,timestamptz,timestamptz,uuid,jsonb,jsonb,jsonb) TO authenticated;
 
+-- TRUNCATE bypasses row-level policies and row triggers. Remove legacy grants.
+REVOKE TRUNCATE,TRIGGER,REFERENCES ON public.org_units FROM authenticated,anon;
+
 -- Direct writes to org_units must pass hierarchy validation too, not just UI.
 CREATE OR REPLACE FUNCTION public.guard_org_unit_r03()
 RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog,public AS $$
