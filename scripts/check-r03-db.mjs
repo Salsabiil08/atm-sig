@@ -45,6 +45,7 @@ const schema=[
 "CREATE POLICY org_write ON org_units FOR ALL TO authenticated USING (get_my_role_level()=6) WITH CHECK (get_my_role_level()=6)",
 "CREATE POLICY task_read ON tasks FOR SELECT TO authenticated USING (get_my_role_level()>=2)",
 "CREATE POLICY task_insert ON tasks FOR INSERT TO authenticated WITH CHECK ((get_my_role_level()=2 AND owner_id=auth.uid() AND assigner_id=auth.uid() AND org_unit_id=get_my_org_unit_id()) OR get_my_role_level()>=3)",
+"CREATE POLICY task_update ON tasks FOR UPDATE TO authenticated USING (get_my_role_level()>=2) WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY wbs_read ON wbs_items FOR SELECT TO authenticated USING (true)",
 "CREATE POLICY wbs_insert ON wbs_items FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
 "CREATE POLICY evidence_insert ON evidence_requirements FOR INSERT TO authenticated WITH CHECK (get_my_role_level()>=2)",
