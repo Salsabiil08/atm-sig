@@ -14,6 +14,7 @@ export default function WorkspaceTabs({ current, tabs, roleLevel = 6, label = 'T
   )
 }
 export const WORK_TABS: Tab[] = [
+  { label: 'Tugas Saya', href: '/tasks?mine=1' },
   { label: 'Daftar Task', href: '/tasks' },
   { label: 'Kanban', href: '/kanban' },
   { label: 'Timeline', href: '/timeline' },
