@@ -27,6 +27,8 @@ import { isReminderResponse } from '@/lib/reminders/responses'
 export type CreateTaskInput = TaskDetailsInput & {
   categoryId?: string | null
   evidenceRequirements?: EvidenceRequirementInput[]
+  wbsItems?: { title:string; weight:number; parentIndex:number|null }[]
+  initialSupport?: { neededFromId:string; description:string }[]
 }
 
 export type UpdateTaskInput = TaskDetailsInput & {
@@ -259,6 +261,29 @@ export async function createTask(input: CreateTaskInput) {
     if (sectionError || !section || (category.org_unit_id !== task.orgUnitId && category.org_unit_id !== section.parent_id)) {
       return { error: 'Kategori tidak berada dalam cakupan section task.' }
     }
+  }
+
+  // Transaction bundle includes task, evidence, WBS and PIC support. The
+  // function is SECURITY INVOKER, so existing table RLS remains mandatory.
+  if (input.wbsItems?.length || input.initialSupport?.length) {
+    const { data: newId, error: bundleError } = await supabase.rpc('create_task_bundle_r03', {
+      p_owner_id: task.ownerId,
+      p_reviewer_id: task.reviewerId,
+      p_org_unit_id: task.orgUnitId,
+      p_parent_task_id: task.parentTaskId,
+      p_title: task.title,
+      p_priority: task.priority,
+      p_start_date: task.startDate,
+      p_due_date: task.dueDate,
+      p_category_id: input.categoryId ?? null,
+      p_evidence: evidenceValidation.data,
+      p_wbs: input.wbsItems ?? [],
+      p_support: input.initialSupport ?? [],
+    })
+    if (bundleError || !newId) return { error: 'Gagal membuat task beserta WBS/support. Semua perubahan dibatalkan.' }
+    revalidatePath('/tasks')
+    revalidatePath('/dashboard')
+    return { data: { id: newId } }
   }
 
   const { data, error } = await supabase
