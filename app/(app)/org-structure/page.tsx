@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import WorkspaceTabs, { MASTER_TABS } from '../_components/WorkspaceTabs'
+import OrgManagement from './OrgManagement'
 
 export const metadata: Metadata = { title: 'Struktur Organisasi' }
 type Unit = { id:number; name:string; type:'department'|'unit'|'section';parent_id:number|null }
@@ -20,7 +21,7 @@ export default async function OrganizationStructurePage() {
     <header><h1 className="text-xl font-bold text-[var(--color-text-primary)]">Struktur Organisasi</h1>
       <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Hirarki Department → Unit → Section sesuai data yang tersimpan.</p>
     </header>
-    <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+    {user.roleLevel === 6 ? <OrgManagement units={units} /> : <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
       <table className="w-full min-w-[480px] text-left text-sm">
         <thead className="bg-[var(--color-bg-app)] text-[var(--color-text-secondary)]"><tr><th className="px-4 py-3">Nama</th><th className="px-4 py-3">Level</th><th className="px-4 py-3">Induk</th></tr></thead>
         <tbody>{nodes.map(unit=><tr key={unit.id} className="border-t border-[var(--color-border)] text-[var(--color-text-primary)]">
@@ -28,7 +29,7 @@ export default async function OrganizationStructurePage() {
         </tr>)}
         {!nodes.length&&<tr><td colSpan={3} className="p-8 text-center">Struktur organisasi belum tersedia.</td></tr>}</tbody>
       </table>
-    </div>
-    <p className="text-xs text-[var(--color-text-muted)]">Tampilan read-only. Perubahan hirarki memerlukan validasi referensi user/task dan audit atomik.</p>
+    </div>}
+    <p className="text-xs text-[var(--color-text-muted)]">Perubahan organisasi oleh Super Admin diamankan aturan hirarki dan audit pada database.</p>
   </main>
 }
