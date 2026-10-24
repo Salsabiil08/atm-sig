@@ -478,7 +478,7 @@ export default function TaskDetailClient({
             </ul>
           )}
           {isOwner && ['To do', 'In progress', 'Revisi'].includes(task.status) && (
-            <form className="mt-5 grid gap-2 border-t border-[var(--color-border)] pt-4 sm:grid-cols-[1fr_100px_auto]"
+            <form className="mt-5 grid gap-2 border-t border-[var(--color-border)] pt-4 sm:grid-cols-[1fr_100px_150px_auto]"
               onSubmit={(event) => {
                 event.preventDefault()
                 const form = event.currentTarget
@@ -490,6 +490,10 @@ export default function TaskDetailClient({
                 className={fieldClass} />
               <input name="wbsWeight" required type="number" min="1" max="100" step="1" placeholder="Bobot %" aria-label="Bobot WBS"
                 className={fieldClass} />
+              <select name="wbsParent" aria-label="Induk WBS" defaultValue="" className={fieldClass}>
+                <option value="">Root</option>
+                {task.wbsItems.filter(item=>item.parentId===null).map(item=><option key={item.id} value={item.id}>Sub dari: {item.title}</option>)}
+              </select>
               <button disabled={busy} type="submit" className={buttonClass}>Tambah WBS</button>
             </form>
           )}
