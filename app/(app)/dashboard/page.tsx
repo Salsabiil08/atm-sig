@@ -1,3 +1,4 @@
+import WorkspaceTabs, { DASHBOARD_TABS } from '../_components/WorkspaceTabs'
 // FR-070 — Halaman Dashboard ATM
 // Sesuai Stitch mockup 04_dashboard: metric cards + tabel task perlu perhatian
 
@@ -57,6 +58,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/dashboard" tabs={DASHBOARD_TABS} />
       {/* Judul halaman */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-5 gap-4">
         <div>
