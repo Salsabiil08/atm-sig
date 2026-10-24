@@ -47,6 +47,7 @@ export type TaskFilterOptions = {
 }
 
 export type TaskCreationOptions = {
+  categories: { id: string; name: string; orgUnitId: number }[]
   sections: { id: number; name: string; parentId: number | null }[]
   owners: {
     id: string
@@ -118,7 +119,16 @@ export async function getTaskCreationOptions(user: SessionUser): Promise<TaskCre
     }]
   })
 
-  return { sections, owners }
+  const { data: categories, error: categoriesError } = await supabase.from('task_categories')
+    .select('id,name,org_unit_id').eq('is_active',true).order('name')
+  if (categoriesError) throw new Error('Gagal memuat kategori task.')
+  const allowedCategoryUnitIds = new Set(sections.flatMap(section => [
+    section.id,
+    ...(section.parentId !== null ? [section.parentId] : []),
+  ]))
+  return { sections, owners, categories: (categories ?? [])
+    .filter(category => allowedCategoryUnitIds.has(category.org_unit_id))
+    .map(category => ({id:category.id,name:category.name,orgUnitId:category.org_unit_id})) }
 }
 
 export async function getTaskFilterOptions(user: SessionUser): Promise<TaskFilterOptions> {
