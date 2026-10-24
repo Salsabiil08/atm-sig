@@ -391,6 +391,7 @@ export async function getAllTaskList(
  * FR-029 — Ambil satu task dengan detail lengkap (untuk Task Detail page).
  */
 export type TaskDetail = TaskListItem & {
+  orgUnitId: number
   parentTaskId: string | null
   reviewerId: string | null
   wbsItems: WbsItem[]
@@ -530,7 +531,7 @@ export async function getTaskDetail(
       `
       id, title, status, priority, progress_pct,
       start_date, due_date, completed_at, created_at,
-      parent_task_id, owner_id, reviewer_id,
+      parent_task_id, owner_id, reviewer_id, org_unit_id,
       owner:users!tasks_owner_id_fkey ( name ),
       assigner:users!tasks_assigner_id_fkey ( name ),
       reviewer:users!tasks_reviewer_id_fkey ( name ),
@@ -710,6 +711,7 @@ export async function getTaskDetail(
     reviewerName: reviewerRel?.name ?? null,
     orgUnitName: orgUnitRel?.name ?? '—',
     createdAt: t.created_at,
+    orgUnitId: t.org_unit_id,
     parentTaskId: t.parent_task_id,
     wbsItems,
     progressHistory,
