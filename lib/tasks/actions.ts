@@ -25,6 +25,7 @@ import { isReminderResponse } from '@/lib/reminders/responses'
 // ============== TIPE INPUT ==============
 
 export type CreateTaskInput = TaskDetailsInput & {
+  categoryId?: string | null
   evidenceRequirements?: EvidenceRequirementInput[]
 }
 
@@ -248,6 +249,18 @@ export async function createTask(input: CreateTaskInput) {
   )
   if (reviewerError) return { error: reviewerError }
 
+  if (input.categoryId) {
+    if (!isValidUuid(input.categoryId)) return { error: 'Kategori task tidak valid.' }
+    const { data: category, error: categoryError } = await supabase.from('task_categories')
+      .select('id,org_unit_id,is_active').eq('id',input.categoryId).maybeSingle()
+    if (categoryError || !category?.is_active) return { error: 'Kategori tidak tersedia.' }
+    const { data: section, error: sectionError } = await supabase.from('org_units')
+      .select('parent_id').eq('id', task.orgUnitId).maybeSingle()
+    if (sectionError || !section || (category.org_unit_id !== task.orgUnitId && category.org_unit_id !== section.parent_id)) {
+      return { error: 'Kategori tidak berada dalam cakupan section task.' }
+    }
+  }
+
   const { data, error } = await supabase
     .from('tasks')
     .insert({
@@ -256,6 +269,7 @@ export async function createTask(input: CreateTaskInput) {
       reviewer_id: task.reviewerId,
       org_unit_id: task.orgUnitId,
       parent_task_id: task.parentTaskId,
+      ...(input.categoryId ? { category_id: input.categoryId } : {}),
       title: task.title,
       priority: task.priority,
       start_date: task.startDate,
