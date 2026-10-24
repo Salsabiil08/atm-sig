@@ -180,3 +180,30 @@ REVOKE EXECUTE ON FUNCTION public.audit_org_unit_r03() FROM PUBLIC,anon,authenti
 DROP TRIGGER IF EXISTS org_unit_audit_r03 ON public.org_units;
 CREATE TRIGGER org_unit_audit_r03 AFTER INSERT OR UPDATE OR DELETE ON public.org_units
 FOR EACH ROW EXECUTE FUNCTION public.audit_org_unit_r03();
+
+
+-- WBS guard also covers direct table updates, not just bundle creation.
+-- Reject cross-task references, descendants of descendants, and self parent.
+CREATE OR REPLACE FUNCTION public.guard_wbs_hierarchy_r03()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER
+SET search_path=pg_catalog,public AS $$
+DECLARE v_parent_task uuid; v_grandparent uuid;
+BEGIN
+  IF NEW.parent_id IS NULL THEN RETURN NEW; END IF;
+  IF NEW.id = NEW.parent_id THEN RAISE EXCEPTION 'WBS tidak boleh menunjuk dirinya sendiri'; END IF;
+  SELECT task_id,parent_id INTO v_parent_task,v_grandparent
+  FROM public.wbs_items WHERE id=NEW.parent_id;
+  IF NOT FOUND OR v_parent_task IS DISTINCT FROM NEW.task_id THEN
+    RAISE EXCEPTION 'Induk WBS harus dari task yang sama';
+  END IF;
+  IF v_grandparent IS NOT NULL THEN RAISE EXCEPTION 'WBS maksimal 2 tingkat'; END IF;
+  IF TG_OP='UPDATE' AND EXISTS(SELECT 1 FROM public.wbs_items WHERE parent_id=OLD.id)
+    AND (OLD.task_id IS DISTINCT FROM NEW.task_id OR OLD.parent_id IS DISTINCT FROM NEW.parent_id) THEN
+    RAISE EXCEPTION 'Induk dengan anak tidak boleh dipindahkan ke task/induk lain';
+  END IF;
+  RETURN NEW;
+END; $$;
+REVOKE EXECUTE ON FUNCTION public.guard_wbs_hierarchy_r03() FROM PUBLIC,anon,authenticated;
+DROP TRIGGER IF EXISTS wbs_hierarchy_r03 ON public.wbs_items;
+CREATE TRIGGER wbs_hierarchy_r03 BEFORE INSERT OR UPDATE OF parent_id,task_id ON public.wbs_items
+FOR EACH ROW EXECUTE FUNCTION public.guard_wbs_hierarchy_r03();
