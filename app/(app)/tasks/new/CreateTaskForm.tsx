@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type FormEvent } from 'react'
-import { addSupportRequest, createTask } from '@/lib/tasks/actions'
+import { createTask } from '@/lib/tasks/actions'
 import type { TaskCreationOptions, TaskSupportRecipient } from '@/lib/tasks/queries'
 import { toJakartaTimestamp } from '@/lib/tasks/dates'
 
@@ -37,6 +37,7 @@ export default function CreateTaskForm({
     mandatory: boolean
   }>>([])
   const [error, setError] = useState('')
+  const [wbsItems, setWbsItems] = useState<Array<{title:string;weight:number;parentIndex:number|null}>>([])
   const [isPending, startTransition] = useTransition()
   const section = sections.find((item) => String(item.id) === sectionId)
   const eligibleOwners = section
@@ -64,6 +65,8 @@ export default function CreateTaskForm({
       return
     }
 
+    const leafWeight=wbsItems.reduce((sum,item,index)=>wbsItems.some(other=>other.parentIndex===index)?sum:sum+item.weight,0)
+    if(wbsItems.length && Math.abs(leafWeight-100)>0.01){setError('Jumlah bobot leaf WBS wajib 100%.');return}
     startTransition(async () => {
       const result = await createTask({
         title,
@@ -75,6 +78,8 @@ export default function CreateTaskForm({
         priority: priority as 'rendah' | 'sedang' | 'tinggi',
         startDate: toJakartaTimestamp(startDate),
         dueDate: toJakartaTimestamp(dueDate, true),
+        wbsItems: wbsItems.map(item=>({...item,title:item.title.trim()})),
+        initialSupport: currentUserRoleLevel===2 && supportId && supportDescription ? [{neededFromId:supportId,description:supportDescription}]:[],
         evidenceRequirements: evidenceRequirements
           .map(({ description, mandatory }) => ({ description: description.trim(), mandatory }))
           .filter(({ description }) => description.length > 0),
@@ -88,19 +93,7 @@ export default function CreateTaskForm({
         setError('Task tidak berhasil dibuat. Silakan coba lagi.')
         return
       }
-      if (currentUserRoleLevel === 2 && supportId && supportDescription) {
-        const supportResult = await addSupportRequest({
-          taskId: result.data.id, neededFromId: supportId, description: supportDescription,
-        })
-        if ('error' in supportResult && supportResult.error) {
-          // The task has already been created. Never encourage resubmission:
-          // it could duplicate the task. Link to the detail for retry instead.
-          setError(`Task berhasil dibuat, tetapi support awal gagal: ${supportResult.error}. Buka task melalui daftar untuk menambahkan support.`)
-          router.push(`/tasks/${result.data.id}`)
-          router.refresh()
-          return
-        }
-      }
+
       router.push(`/tasks/${result.data.id}`)
       router.refresh()
     })
@@ -172,7 +165,7 @@ export default function CreateTaskForm({
           {currentUserRoleLevel === 2 && supportRecipients.length > 0 && (
             <fieldset className="space-y-3 rounded-lg border border-slate-200 p-4">
               <legend className="px-1 text-sm font-semibold text-slate-700">Support awal (opsional)</legend>
-              <p className="text-xs text-slate-500">Diajukan oleh PIC setelah task tersimpan, lalu dapat ditindaklanjuti di detail task.</p>
+              <p className="text-xs text-slate-500">Disimpan dalam transaksi yang sama bersama task dan WBS.</p>
               <label className="block text-sm text-slate-700">Dibutuhkan dari
                 <select name="supportId" defaultValue="" className={inputClass}>
                   <option value="">Tidak memerlukan support</option>
@@ -209,6 +202,29 @@ export default function CreateTaskForm({
               <input className={inputClass} type="date" name="dueDate" required />
             </label>
           </div>
+
+          <fieldset className="space-y-3 border-t border-slate-100 pt-4">
+            <legend className="text-sm font-semibold text-slate-800">WBS awal (opsional, 2 tingkat)</legend>
+            <p className="text-xs text-slate-500">Tambah root dahulu, lalu pilih induk. Total bobot leaf harus 100%.</p>
+            {wbsItems.map((item,index)=>(
+              <div key={index} className="grid gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-[1fr_100px_135px_auto]">
+                <input aria-label={`Judul WBS ${index+1}`} required maxLength={200} value={item.title} className={inputClass}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,title:event.target.value}:v))} placeholder="Langkah pekerjaan" />
+                <input aria-label={`Bobot WBS ${index+1}`} type="number" min="0" max="100" step="0.01" value={item.weight} className={inputClass}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,weight:Number(event.target.value)}:v))}/>
+                <select aria-label={`Induk WBS ${index+1}`} className={inputClass} value={item.parentIndex??''}
+                  onChange={event=>setWbsItems(items=>items.map((v,i)=>i===index?{...v,parentIndex:event.target.value===''?null:Number(event.target.value)}:v))}>
+                  <option value="">Root</option>
+                  {wbsItems.slice(0,index).map((parent,i)=>parent.parentIndex===null?<option key={i} value={i}>Di bawah {i+1}</option>:null)}
+                </select>
+                <button type="button" disabled={wbsItems.some(child=>child.parentIndex===index)}
+                  onClick={()=>setWbsItems(items=>items.filter((_,i)=>i!==index).map(v=>({...v,parentIndex:v.parentIndex===null?null:v.parentIndex>index?v.parentIndex-1:v.parentIndex})))}
+                  className="text-xs text-red-600 disabled:opacity-40">Hapus</button>
+              </div>
+            ))}
+            <button type="button" disabled={wbsItems.length>=30} onClick={()=>setWbsItems(items=>[...items,{title:'',weight:0,parentIndex:null}])}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm">+ Tambah WBS</button>
+          </fieldset>
 
           <fieldset className="grid gap-3 border-t border-slate-100 pt-4">
             <legend className="text-sm font-semibold text-slate-800">Evidence yang dibutuhkan</legend>
