@@ -27,6 +27,7 @@ const schema=[
 "CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS 'SELECT nullif(current_setting(''app.user_id'',true),'''')::uuid'",
 "CREATE FUNCTION get_my_role_level() RETURNS int LANGUAGE sql STABLE AS 'SELECT nullif(current_setting(''app.role_level'',true),'''')::int'",
 "CREATE FUNCTION get_my_org_unit_id() RETURNS int LANGUAGE sql STABLE AS 'SELECT nullif(current_setting(''app.org_unit_id'',true),'''')::int'",
+"CREATE FUNCTION can_access_task_scope(int,uuid,uuid) RETURNS boolean LANGUAGE sql STABLE AS 'SELECT get_my_role_level()>=2'",
 "INSERT INTO roles VALUES(2,2),(3,3),(6,6)",
 "INSERT INTO org_units(id,parent_id,name,type) VALUES(1,NULL,'Accounting','department'),(2,1,'Unit A','unit'),(3,2,'Section A','section')",
 "SELECT setval(pg_get_serial_sequence('org_units','id'),3,true)",
@@ -53,6 +54,7 @@ const schema=[
 try {
   await db.exec(schema.replaceAll('$PIC',PIC).replaceAll('$BOSS',BOSS).replaceAll('$SUPER',SUPER))
   await db.exec(readFileSync(new URL('../supabase/migrations/20261024202000_r03_task_bundle_and_org_guard.sql',import.meta.url),'utf8'))
+  await db.exec(readFileSync(new URL('../supabase/migrations/20261024203000_r03_task_state_event_history.sql',import.meta.url),'utf8'))
   assert.equal((await q("SELECT has_function_privilege('anon','public.create_task_bundle_r03(uuid,uuid,integer,uuid,text,public.task_priority,timestamptz,timestamptz,uuid,jsonb,jsonb,jsonb)','EXECUTE') AS ok")).ok,false)
   await db.exec("SET app.user_id='"+PIC+"'; SET app.role_level='2'; SET app.org_unit_id='3'; SET ROLE authenticated")
   const call=(wbs,support)=>"SELECT create_task_bundle_r03('"+PIC+"','"+BOSS+"',3,NULL,'Closing','sedang','2026-10-01','2026-10-31',NULL,'[]'::jsonb,'"+JSON.stringify(wbs)+"'::jsonb,'"+JSON.stringify(support)+"'::jsonb)"
@@ -61,6 +63,7 @@ try {
   assert.equal((await q('SELECT count(*)::int n FROM tasks')).n,1)
   assert.equal((await q('SELECT count(*)::int n FROM wbs_items')).n,3)
   assert.equal((await q('SELECT count(*)::int n FROM task_supports')).n,1)
+  assert.equal((await q('SELECT count(*)::int n FROM task_state_events')).n,1,'task creation writes lifecycle event')
   await fail(call([{title:'Wrong weight',weight:90,parentIndex:null}],[]),'rollback bad weight')
   await fail(call(good,[{neededFromId:PIC,description:'Self'}]),'rollback bad support')
   await fail(call([{title:'Bad parent',weight:100,parentIndex:7}],[]),'rollback bad parent')
