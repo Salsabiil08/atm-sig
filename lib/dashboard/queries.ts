@@ -258,25 +258,26 @@ export async function getTasksPerluPerhatian(
   const supabase = await createClient()
   const scopeFilter = await getTaskScopeFilter(supabase, user)
 
-  let taskQuery = supabase
-    .from('tasks')
-    .select(`
-      id,
-      title,
-      status,
-      progress_pct,
-      start_date,
-      due_date,
-      users!tasks_owner_id_fkey ( name )
-    `)
-    .not('status', 'eq', 'Done')
-    .order('due_date', { ascending: true })
-    .limit(50)
-  if (scopeFilter) taskQuery = taskQuery.or(scopeFilter)
-  const { data: tasks, error } = await taskQuery
-
-  if (error) throw new Error('Gagal memuat task yang perlu perhatian.')
-  if (!tasks) throw new Error('Data task yang perlu perhatian tidak tersedia.')
+  // Scan relevant candidates BEFORE applying the display limit. A hard
+  // limit(50) here hid Blocked/Review tasks with later due dates.
+  const tasks: Array<{
+    id:string; title:string; status:TaskStatus; progress_pct:number;
+    start_date:string; due_date:string; users:{name:string}|null
+  }> = []
+  const pageSize = 500
+  for (let offset=0;offset<100000;offset+=pageSize) {
+    let query = supabase.from('tasks')
+      .select('id,title,status,progress_pct,start_date,due_date,users!tasks_owner_id_fkey(name)')
+      .not('status','eq','Done')
+      .order('due_date',{ascending:true})
+      .range(offset,offset+pageSize-1)
+    if (scopeFilter) query = query.or(scopeFilter)
+    const {data,error} = await query
+    if (error || !data) throw new Error('Gagal memuat task yang perlu perhatian.')
+    tasks.push(...data)
+    if (data.length < pageSize) break
+    if (offset+pageSize>=100000) throw new Error('Data task perhatian melebihi batas aman.')
+  }
 
   const now = new Date()
 
