@@ -1,3 +1,4 @@
+import WorkspaceTabs, { REPORT_TABS } from '../_components/WorkspaceTabs'
 // T-504 — Tampilan Audit Log — FR-092
 // Hanya role Manager+ yang dapat mengakses halaman ini.
 // Data read-only: tidak ada tombol ubah/hapus.
