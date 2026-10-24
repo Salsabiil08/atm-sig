@@ -1,47 +1,61 @@
-# ATM R.03 — Audit dan status implementasi 24 Oktober 2026
-PR #7, branch feat/audit-navigation-workflows-20261024. Audit pengguna merupakan dasar rencana, bukan sign-off.
+# ATM SIG R.03 — Audit, implementasi, risiko, dan UAT (24 Oktober 2026)
 
-## Tahap 1 — Navigasi
-IMPLEMENTED: sidebar lima menu dalam empat grup, tab pekerjaan (Tugas Saya, Daftar, Kanban, Timeline), Dashboard, Persetujuan, Laporan/Audit, Master. Review Inbox dan lonceng notifikasi. Ikon SVG mandiri di sebelah kiri semua menu utama dan tab, tanpa dependensi eksternal.
-PENDING: UAT browser seluruh role.
+**Repository:** Salsabiil08/atm-sig · **PR:** #7 (draft) · **Branch:** feat/audit-navigation-workflows-20261024.
 
-## Tahap 2 — Jobload
-IMPLEMENTED: Jobload bulanan WIB; total penugasan, carry-over, task baru, selesai, outstanding, overdue dan completion rate. Termasuk task Done dan riwayat reassignment yang tersedia, diuji secara unit.
-LIMITATION: RLS berdasarkan cakupan user saat ini, bukan snapshot historis organisasi; reopened task, PIC historis tanpa nama yang terlihat, atau riwayat status hilang belum dapat direkonstruksi sepenuhnya. Total lintas PIC dapat menghitung task pindahan satu kali untuk masing-masing PIC; tidak boleh disamakan dengan jumlah task unik departemen.
+## Implementasi yang selesai di SOURCE CODE
+1. **Navigasi:** lima menu utama, ikon SVG di sebelah kiri, tab role-aware, Tugas Saya, Review Inbox, notification bell, URL lama tetap hidup.
+2. **Jobload:** laporan bulanan WIB, carry-over, task baru, selesai, outstanding, overdue dan tingkat penyelesaian. Untuk periode dengan data lifecycle cukup, dihitung dari event status, kepemilikan, tanggal mulai dan tenggat (bukan status saat ini). Data yang tidak cukup diberi label *ESTIMASI*, bukan disamakan dengan data historis pasti.
+3. **PIC dan WBS:** kategori terbatasi section, WBS root/sub-item maksimal dua tingkat dengan total bobot leaf 100% saat pembuatan, initial support opsional, evidence, dan satu RPC `create_task_bundle_r03` dengan rollback atomik jika salah satu bagian gagal. Update WBS/checkbox dan progress memakai RPC transaksional. Form detail menyediakan WBS dua tingkat dan akses kontrol server.
+4. **Struktur organisasi:** CRUD untuk Super Admin, SM/GM read-only. Hirarki Department→Unit→Section, pencegahan reparent berbahaya serta FK, audit org pada trigger dalam transaksi, pencabutan hak TRUNCATE/REFERENCES/TRIGGER untuk peran web.
+5. **Laporan dan performa:** PDF biner sesungguhnya, report Excel tetap ada, Pending/Riwayat approval, dashboard filter periode, daftar task perhatian tidak lagi dibatasi 50 sebelum evaluasi, pagination untuk metrik.
 
-## Tahap 3 — PIC Workflow
-IMPLEMENTED: kategori scope saat create task, support awal opsional bagi PIC, penambahan dan checklist WBS datar di detail, Edit title/priority dan Hapus konfirmasi untuk Manager+, navigasi anchor tahapan detail.
-LIMITATION: support awal disimpan setelah task dibuat (tidak atomik). Bila support gagal, task tetap ada; jangan retry pembuatan task. WBS hierarkis dan WBS langsung dalam transaksi create belum diimplementasikan.
+## Migrasi baru — BELUM diterapkan pada Production
+Jangan merge aplikasi sebelum migrasi berikut siap dan terverifikasi pada lingkungan SQL:
+- `supabase/migrations/20261024202000_r03_task_bundle_and_org_guard.sql`: atomik create task + WBS/support, constraint hierarki org/WBS, guard bobot, audit org.
+- `supabase/migrations/20261024203000_r03_task_state_event_history.sql`: baseline dan event status/PIC/tanggal, RLS baca sesuai task.
+- `supabase/migrations/20261024204000_r03_atomic_wbs_progress.sql`: RPC add/toggle WBS dan progress dalam satu transaksi.
 
-## Tahap 4 — Master, Report, Performance
-IMPLEMENTED: struktur organisasi read-only untuk SM+, Pending/Riwayat Approval, PDF biner asli dan XLSX, scan metrics dashboard paginated dan task perhatian sebelum limit, filter bulan tenggat Dashboard.
-LIMITATION: CRUD struktur organisasi memerlukan transaksi audit atomik dan validasi hirarki sebelum aman. Dashboard filter berdasarkan jatuh tempo; Jobload berdasarkan rentang kepemilikan/assignment. Pengiriman email reminder tetap perlu verifikasi bisnis.
+Migrasi tidak menambahkan data contoh atau menghapus task Production. Urutan harus 02000→03000→04000. Snapshot database terlebih dahulu. Jangan mengaktifkan aplikasi yang memanggil RPC baru ketika fungsi belum diterapkan.
 
-## UAT MANUAL yang WAJIB sebelum release (belum diklaim PASS)
-| ID | Role | Skenario dan target |
-|---|---|---|
-| NAV-01 | Spectator | Tidak dapat mengakses admin, melihat task sebatas RLS |
-| NAV-02 | PIC | Tugas Saya, create kategori, support awal, editor WBS, evidence, review |
-| NAV-03 | Manager | Review Inbox hanya task assigned, Edit/Hapus dengan audit; dilarang approve deadline |
-| NAV-04 | SM | Approval Pending/Riwayat sesuai cakupan unit |
-| NAV-05 | GM | Multi-unit reports, self-review bila dibolehkan |
-| NAV-06 | Super Admin | Review master/user/org & audit |
-| NAV-07 | Semua role | Bell notification, tema Light/Dark, layout mobile/desktop, URL lama |
-| KPI-01 | Manager+ | Jobload: task Done, carry-over, reassignment, overdue, cutoff WIB |
-| KPI-02 | Manager+ | Filter Dashboard: semua metrik relevan dalam periode tenggat |
-| PDF-01 | Manager+ | PDF benar-benar dapat dibuka di viewer, sesuai XLSX; akses di luar role ditolak |
-| PERF-01 | Manager+ | >1000 task, pagination tidak memotong data |
-| REG-01 | Semua role | Reminder, push Android, template, task status, audit tidak regresi |
+## VALIDASI OTOMATIS
+- GitHub Actions: ESLint, TypeScript, Vitest, SQL regression R.02, role UAT terisolasi, migration R.03 PGlite, dan build Next.js.
+- PGlite R.03 memeriksa role grants, create bundle berhasil, WBS bertingkat, rollback bila total bobot/support/parent salah, org hierarchy dan audit, serta perubahan WBS/progress.
+- Unit Jobload memeriksa task Done, carry-over, perpindahan PIC, reopen, baseline yang terlambat, dan cutoff WIB.
 
-## Release gates
-1. SHA HEAD final harus lint/typecheck/unit/SQL regression/build SUCCESS.
-2. Vercel Preview SHA final READY.
-3. Browser UAT enam role, screenshoot + task ID + timestamp WIB dan sign-off.
-4. Verifikasi PDF dengan data aktual serta angka Jobload historis bersama pemilik proses.
-5. PR draft hingga rilis disetujui. Production tetap commit sebelum PR #7.
+**Penting:** tes database di PGlite bukan bukti alur browser, lingkungan Supabase Production atau UAT manusia sudah lulus. Status final mengikuti commit HEAD dan verifikasi ulang setelah perubahan apa pun.
 
-## Update 24 Oktober — navigasi berikon
-- [x] Ikon menu Dashboard, Pekerjaan, Persetujuan, Laporan, Master Data
-- [x] Ikon tab workspaces, ukuran tetap dan decorative aria-hidden
-- [x] Unit tests untuk role gating, active state, dan aksesibilitas ikon
-- [ ] UAT visual ukuran mobile 320/375/430 px dan desktop, mode Light/Dark, login dengan semua role
+## MATRIKS UAT BISNIS MANUAL — BELUM ADA SIGN-OFF
+| ID | Role | Skenario | Expected |
+|---|---|---|---|
+| UAT-R03-01 | Spectator | Buka Dashboard/Master/Approvals langsung | Ditolak server sesuai RBAC |
+| UAT-R03-02 | PIC | Buat task kategori, dua tingkat WBS bobot 100%, support dan evidence | Satu task + seluruh child tercipta, audit terlihat |
+| UAT-R03-03 | PIC | Coba WBS 90%, parent tidak valid, support ke diri sendiri | Semua ditolak, tidak ada task/sisa child |
+| UAT-R03-04 | PIC | Centang leaf WBS lalu uji gagal update | WBS dan progress konsisten, tanpa partial commit |
+| UAT-R03-05 | Manager | Review assigned task, edit/delete dalam cakupan | Audit dan hak server terjaga |
+| UAT-R03-06 | SM | Approval deadline dan master org | Baca master, tidak boleh CRUD org |
+| UAT-R03-07 | GM | Jobload/reports lintas unit sesuai RLS | Tidak ada kebocoran scope |
+| UAT-R03-08 | Super Admin | Tambah/edit/hapus org, uji parent salah, unit digunakan, rollback audit | Hirarki terjaga, semua perubahan tercatat |
+| UAT-R03-09 | Manager+ | Jobload Oktober lama dan periode sesudah baseline | Data sebelum provenance ditandai estimasi; setelah lengkap dinyatakan terlacak |
+| UAT-R03-10 | Manager+ | Report PDF, Excel, >1000 task | PDF valid, data lengkap dalam cakupan |
+| UAT-R03-11 | Semua role | Light/Dark, Android/desktop, ikon, tab, notifikasi | Responsif, kontras terbaca |
+| UAT-R03-12 | Semua role | Push, reminder, audit task lama, cron, template | Tidak regresi |
+
+Catat role, waktu WIB, ID task, screenshot, hasil aktual, status PASS/FAIL, dan pemberi sign-off.
+
+## KETERBATASAN YANG TIDAK DAPAT DIHILANGKAN SECARA RETROAKTIF
+- **Histori sebelum baseline migrasi tidak pernah dicatat sebagai event lengkap.** Data lama hanya estimasi berdasarkan snapshot/current known reassignment. Tidak boleh merekonstruksi status atau owner dengan menebak.
+- Cakupan Jobload berdasarkan izin baca role saat ini, bukan snapshot struktur organisasi historis. Task yang dihapus tidak dapat dipulihkan dari tabel task aktif.
+- Total penugasan per PIC tidak sama dengan total task unik departemen karena task yang pindah PIC menyumbang kepada lebih dari satu PIC.
+- Nama PIC historis mungkin tidak tersedia bila pengguna tidak lagi terlihat menurut RLS.
+- PDF aktual, email reminder 72 jam, dan browser enam role tetap perlu validasi pengguna.
+- CRUD org berubah hanya untuk Super Admin; user/task yang sudah mereferensikan unit membatasi pemindahan jenis atau penghapusan.
+
+## GATE RILIS PRODUCTION
+1. Semua CI dan Vercel Preview untuk commit HEAD sama-sama sukses.
+2. Snapshot/backup database dipastikan valid.
+3. Ketiga SQL migrasi dipasang berurutan dan dicek grant/RLS/trigger; jangan menggunakan service_role dari browser.
+4. UAT real enam role, aplikasi mobile/desktop, PDF dan Jobload bisnis disetujui.
+5. Merge PR #7 setelah pemilik aplikasi menyetujui Production; verifikasi Vercel menggunakan commit merged.
+6. Bila gagal: hentikan rilis aplikasi/revert deploy; jangan menghapus data atau memotong migrasi secara manual tanpa peninjauan.
+
+**Saat file ini ditulis: semua perubahan masih di PR draft, Production belum berubah.**
