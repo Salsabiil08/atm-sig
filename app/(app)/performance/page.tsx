@@ -1,3 +1,4 @@
+import WorkspaceTabs, { DASHBOARD_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { getDashboardPerformance } from '@/lib/dashboard/queries'
@@ -12,6 +13,7 @@ export default async function PerformancePage() {
 
   return (
     <div className="space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/performance" tabs={DASHBOARD_TABS} />
       <header>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">
           DASHBOARD KINERJA DAN JOB LOAD
