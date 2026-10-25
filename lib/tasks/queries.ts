@@ -231,7 +231,10 @@ function validateTaskFilters(filters: TaskFilters): TaskFilters {
   if (dateFrom && dateTo && dateFrom > dateTo) {
     throw new Error('Tanggal awal periode harus sebelum atau sama dengan tanggal akhir.')
   }
-  return { ...filters, dateFrom, dateTo, search: filters.search?.trim() || null }
+  const createdFrom = parseDateOnly(filters.createdFrom)
+  const createdTo = parseDateOnly(filters.createdTo)
+  if (createdFrom && createdTo && createdFrom > createdTo) throw new Error('Periode pembuatan tugas tidak valid.')
+  return { ...filters, dateFrom, dateTo, createdFrom, createdTo, search: filters.search?.trim() || null }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
