@@ -64,7 +64,8 @@ export default async function TasksPage({
   const sectionFilter = params.section && /^\d+$/.test(params.section)
     ? Number(params.section)
     : null
-  const ownerFilter = params.mine === '1' ? user.id : params.owner || null
+  const isMine = user.roleLevel < 3 || params.mine === '1'
+  const ownerFilter = isMine ? user.id : params.owner || null
   const dateFromFilter = params.from || null
   const dateToFilter = params.to || null
   const page = parseInt(params.page ?? '1', 10)
@@ -93,8 +94,8 @@ export default async function TasksPage({
     if (merged.priority) qs.set('priority', merged.priority)
     if (merged.search) qs.set('search', merged.search)
     if (merged.section) qs.set('section', merged.section)
-    if (merged.owner && merged.mine !== '1') qs.set('owner', merged.owner)
-    if (merged.mine === '1') qs.set('mine', '1')
+    if (merged.owner && !isMine) qs.set('owner', merged.owner)
+    if (isMine) qs.set('mine', '1')
     if (merged.from) qs.set('from', merged.from)
     if (merged.to) qs.set('to', merged.to)
     if (merged.page && merged.page !== '1') qs.set('page', merged.page)
@@ -104,12 +105,12 @@ export default async function TasksPage({
 
   return (
     <div className="px-4 py-5 sm:px-6 lg:px-8">
-      <WorkspaceTabs current={params.mine === '1' ? '/tasks?mine=1' : '/tasks'} tabs={WORK_TABS} roleLevel={user.roleLevel} />
+      <WorkspaceTabs current={isMine ? '/tasks?mine=1' : '/tasks'} tabs={WORK_TABS} roleLevel={user.roleLevel} />
       {/* Judul + tombol buat task */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 uppercase">
-            Daftar Task
+            {isMine ? 'Tugas Saya' : 'Tugas Tim'}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             {total} task ditemukan
