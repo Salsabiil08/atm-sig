@@ -9,13 +9,21 @@ describe('Grouped workspace tabs (audit R.03)', () => {
   it('shows PIC task views without privileged approval', () => {
     render(<WorkspaceTabs current="/tasks?mine=1" tabs={WORK_TABS} roleLevel={2} />)
     expect(screen.getByRole('link', { name: 'Tugas Saya' }).getAttribute('aria-current')).toBe('page')
-    expect(screen.getByRole('link', { name: 'Kanban' }).getAttribute('href')).toBe('/kanban')
+    expect(screen.queryByRole('link', { name: 'Papan Tugas' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Tugas Tim' })).toBeNull()
+  })
+
+  it('shows team views only to Manager and above', () => {
+    render(<WorkspaceTabs current="/tasks" tabs={WORK_TABS} roleLevel={3} />)
+    expect(screen.getByRole('link', { name: 'Tugas Tim' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Papan Tugas' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Linimasa' })).toBeTruthy()
   })
 
   it('does not display deadline approvals for Manager', () => {
     render(<WorkspaceTabs current="/review-inbox" tabs={APPROVAL_TABS} roleLevel={3} />)
-    expect(screen.getByRole('link', { name: 'Review Task' })).toBeTruthy()
-    expect(screen.queryByRole('link', { name: 'Approval Deadline' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'Tinjauan Tugas' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Persetujuan Tenggat' })).toBeNull()
   })
 
   it('shows both approval tabs to Senior Manager', () => {
