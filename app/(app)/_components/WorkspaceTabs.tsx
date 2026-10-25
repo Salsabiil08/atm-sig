@@ -17,14 +17,14 @@ export default function WorkspaceTabs({ current, tabs, roleLevel = 6, label = 'T
 }
 export const WORK_TABS: Tab[] = [
   { label: 'Tugas Saya', icon: 'user', href: '/tasks?mine=1' },
-  { label: 'Daftar Task', icon: 'tasks', href: '/tasks' },
+  { label: 'Tugas Tim', icon: 'tasks', href: '/tasks', minLevel: 3 },
   { label: 'Kanban', icon: 'kanban', href: '/kanban' },
   { label: 'Timeline', icon: 'timeline', href: '/timeline' },
 ]
 export const DASHBOARD_TABS: Tab[] = [
   { label: 'Ringkasan', icon: 'dashboard', href: '/dashboard' },
   { label: 'Kinerja Aktif', icon: 'reports', href: '/performance' },
-  { label: 'Jobload Periode', icon: 'jobload', href: '/jobload' },
+  { label: 'Beban Kerja Periode', icon: 'jobload', href: '/jobload' },
 ]
 export const APPROVAL_TABS: Tab[] = [
   { label: 'Review Task', icon: 'approval', href: '/review-inbox', minLevel: 3 },
@@ -33,7 +33,7 @@ export const APPROVAL_TABS: Tab[] = [
 export const MASTER_TABS: Tab[] = [
   { label: 'Pengguna & Role', icon: 'user', href: '/users' },
   { label: 'Struktur Organisasi', icon: 'structure', href: '/org-structure' },
-  { label: 'Kategori & Template', icon: 'master', href: '/task-templates' },
+  { label: 'Kategori Tugas', icon: 'master', href: '/task-templates' },
 ]
 export const REPORT_TABS: Tab[] = [
   { label: 'Laporan Task', icon: 'reports', href: '/reports' },
