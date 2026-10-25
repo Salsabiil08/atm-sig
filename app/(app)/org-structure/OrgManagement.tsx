@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveOrgUnit, deleteOrgUnit } from '@/lib/org/actions'
 
-type Unit={id:number;name:string;type:'department'|'unit'|'section';parent_id:number|null}
+type Unit={id:number;name:string;type:'department'|'unit'|'section';parent_id:number|null;depth?:number}
 const field='mt-1 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text-primary)]'
 
 export default function OrgManagement({units}:{units:Unit[]}) {
@@ -57,12 +57,12 @@ export default function OrgManagement({units}:{units:Unit[]}) {
     {feedback&&<p role="status" className="rounded-lg bg-[var(--color-brand-light)] px-3 py-2 text-sm text-[var(--color-text-primary)]">{feedback}</p>}
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
       <table className="w-full min-w-[550px] text-left text-sm"><thead><tr className="bg-[var(--color-bg-app)] text-[var(--color-text-secondary)]"><th className="p-3">Nama</th><th className="p-3">Jenis</th><th className="p-3">Induk</th><th className="p-3">Tindakan</th></tr></thead>
-        <tbody>{units.map(u=><tr key={u.id} className="border-t border-[var(--color-border)]"><td className="p-3">{u.name}</td><td className="p-3">{u.type}</td><td className="p-3">{units.find(p=>p.id===u.parent_id)?.name??'—'}</td>
+        <tbody>{units.map(u=><tr key={u.id} className="border-t border-[var(--color-border)]"><td className="p-3"><span className="inline-block" style={{paddingLeft:`${(u.depth??0)*22}px`}}>{(u.depth??0)>0?'↳ ':''}{u.name}</span></td><td className="p-3">{u.type}</td><td className="p-3">{units.find(p=>p.id===u.parent_id)?.name??'—'}</td>
           <td className="flex gap-2 p-3"><button onClick={()=>edit(u)} disabled={pending} className="text-sm font-semibold text-[var(--color-brand)]">Edit</button>
             <button onClick={()=>remove(u)} disabled={pending} className="text-sm font-semibold text-red-600">{confirmation===u.id?'Konfirmasi hapus':'Hapus'}</button></td>
         </tr>)}</tbody>
       </table>
     </div>
-    <p className="text-xs text-[var(--color-text-muted)]">Perubahan parent/jenis untuk unit yang mempunyai anak, task atau user ditolak database. Penghapusan unit yang dirujuk juga ditolak.</p>
+    <p className="text-xs text-[var(--color-text-muted)]">Unit yang memiliki anggota atau pekerjaan tidak dapat dipindahkan maupun dihapus.</p>
   </section>
 }
