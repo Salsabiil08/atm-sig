@@ -43,7 +43,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
     orgUnitId: singleParam(params.orgUnit),
   })
   const page = Math.max(1, Math.min(100000, Number(singleParam(params.page) ?? '1') || 1))
-  const tasks = await getTaskList(user,{dateFrom:filters.dateFrom,dateTo:filters.dateTo,orgUnitId:filters.orgUnitId,page,pageSize:50})
+  const tasks = await getTaskList(user,{createdFrom:filters.dateFrom,createdTo:filters.dateTo,orgUnitId:filters.orgUnitId,page,pageSize:50})
   const report = await getPerformanceReport(user, filters)
 
   // Buat query string untuk tombol export (FR-091)
