@@ -1,4 +1,5 @@
 import type { PerformanceReport } from './queries'
+import type { TaskListItem } from '@/lib/tasks/queries'
 import type { ExportParams } from './export'
 
 /** Dependency-free, printable A4 PDF 1.4. Each object is ASCII for exact xref offsets. */
@@ -52,6 +53,10 @@ export function buildReportPdf(report: PerformanceReport, params: ExportParams):
       '  PIC: ' + t.ownerName + ' | Tenggat: ' + t.dueDate.slice(0, 10) + ' | ' + t.status + ' | ' + t.progressPct + '%',
     ]) : ['Tidak ada task terlambat.']),
   ]
+  return renderPdfLines(text)
+}
+
+function renderPdfLines(text: string[]): Uint8Array {
   // Wrap long titles and descriptions instead of silently truncating them.
   // Split at whitespace wherever possible; preserve even one long token.
   const wrapped = text.flatMap(line => {
@@ -97,4 +102,24 @@ export function buildReportPdf(report: PerformanceReport, params: ExportParams):
   offsets.slice(1).forEach((offset) => { body += String(offset).padStart(10, '0') + ' 00000 n \n' })
   body += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root ' + catalogId + ' 0 R >>\nstartxref\n' + xrefAt + '\n%%EOF\n'
   return encode(body)
+}
+
+/** Daftar rinci semua status tugas, dengan tautan aplikasi untuk melihat berkas evidence. */
+export function buildTaskListPdf(tasks: readonly TaskListItem[], params: ExportParams): Uint8Array {
+  const lines: string[] = [
+    'LAPORAN DETAIL TUGAS - ACCOUNTING SIG',
+    'Tanggal pembuatan: '+params.dateFrom+' s.d. '+params.dateTo,
+    'Cakupan: '+params.orgUnitLabel,
+    'Jumlah tugas: '+tasks.length,
+    '',
+  ]
+  for (const task of tasks) {
+    lines.push(task.title)
+    lines.push('  PIC: '+task.ownerName+' | Status: '+task.status+' | Kemajuan: '+task.progressPct+'%')
+    lines.push('  Dibuat: '+task.createdAt.slice(0,10)+' | Tenggat: '+task.dueDate.slice(0,10))
+    if(task.completedAt) lines.push('  Selesai: '+task.completedAt.slice(0,10))
+    lines.push('  Progres dan lampiran: /tasks/'+task.id)
+    lines.push('')
+  }
+  return renderPdfLines(lines)
 }
