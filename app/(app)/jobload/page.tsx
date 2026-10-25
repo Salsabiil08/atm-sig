@@ -3,7 +3,7 @@ import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { getPeriodWorkloads } from '@/lib/dashboard/period-workload'
 import WorkspaceTabs, { DASHBOARD_TABS } from '../_components/WorkspaceTabs'
 
-export const metadata: Metadata = { title: 'Jobload Periode' }
+export const metadata: Metadata = { title: 'Beban Kerja Periode' }
 
 type Params = Promise<{ month?: string }>
 export default async function JobloadPage({ searchParams }: { searchParams: Params }) {
@@ -26,8 +26,8 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
       <WorkspaceTabs current="/jobload" tabs={DASHBOARD_TABS} roleLevel={user.roleLevel} />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Jobload per Periode</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Menghitung task unik, termasuk yang Done, berdasarkan riwayat PIC yang tersedia.</p>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Beban Kerja per Periode</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Jumlah tugas per penanggung jawab selama bulan yang dipilih, termasuk tugas selesai.</p>
         </div>
         <form method="get" action="/jobload" className="flex items-end gap-2">
           <label className="text-sm text-[var(--color-text-secondary)]">Bulan
@@ -36,15 +36,10 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
           <button className="rounded-lg bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white">Terapkan</button>
         </form>
       </div>
-      <div role="status" className={`rounded-xl border px-4 py-3 text-sm ${workload.quality==='tracked'?'border-emerald-300 bg-emerald-50 text-emerald-900':'border-amber-300 bg-amber-50 text-amber-900'}`}>
-        <strong>{workload.quality==='tracked'?'Histori terlacak':'Histori sebagian berupa estimasi'}</strong>
-        <p className="mt-1">{workload.notice}</p>
-        <p className="mt-1 text-xs">{workload.verifiedTasks} task terverifikasi · {workload.estimatedTasks} task estimasi. Cakupan tetap mengikuti izin baca akun saat ini.</p>
-      </div>
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5">
         <p className="text-sm text-[var(--color-text-secondary)]">Total penugasan PIC dalam periode</p>
         <p className="mt-1 text-3xl font-bold text-[var(--color-text-primary)]">{total}</p>
-        <p className="mt-2 text-xs text-[var(--color-text-muted)]">Total penugasan lintas PIC, bukan task unik departemen. Satu task yang dipindah PIC dapat muncul pada dua PIC.</p>
+        <p className="mt-2 text-xs text-[var(--color-text-muted)]">Tugas yang dialihkan dapat dihitung untuk masing-masing penanggung jawab pada periode yang sama.</p>
       </div>
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
         <table className="w-full min-w-[700px] text-left text-sm">
@@ -61,7 +56,7 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-[var(--color-text-muted)]">Catatan: statistik berdasarkan task yang dapat dibaca role Anda saat ini. Untuk laporan historis lintas cakupan/reopen, diperlukan audit lebih lanjut terhadap histori organisasi dan status.</p>
+      <p className="text-xs text-[var(--color-text-muted)]">Data yang ditampilkan mengikuti cakupan akses pengguna.</p>
     </main>
   )
 }

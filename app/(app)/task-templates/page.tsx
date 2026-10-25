@@ -7,7 +7,7 @@ import { ROLES } from '@/lib/constants/rbac'
 import { getTaskMasterData } from '@/lib/task-masters/queries'
 import TaskTemplateManager from './TaskTemplateManager'
 
-export const metadata: Metadata = { title: 'Kategori & Template Task' }
+export const metadata: Metadata = { title: 'Kategori Tugas' }
 
 export default async function TaskTemplatesPage() {
   const user = await getSessionUser()

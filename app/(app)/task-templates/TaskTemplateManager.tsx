@@ -183,31 +183,28 @@ export default function TaskTemplateManager({
   categories,
   templates,
   canAssignGlobalOwner,
+  mode = 'categories',
 }: {
   sections: MasterSection[]
   people: MasterPerson[]
   categories: TaskCategory[]
   templates: TaskTemplate[]
   canAssignGlobalOwner: boolean
+  mode?: 'categories' | 'recurring'
 }) {
   const categoryById = new Map(categories.map((category) => [category.id, category]))
   const sectionById = new Map(sections.map((section) => [section.id, section]))
 
   return (
     <div className="mx-auto max-w-[1440px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-7 text-white shadow-sm sm:px-8">
-        <div aria-hidden="true" className="absolute -right-12 -top-24 h-64 w-64 rounded-full border-[32px] border-white/5" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-300">Master Data · FR-100</p><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Kategori & template task</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Kelola kategori per section dan jadwal task rutin. Template baru membuat task terpisah pada jadwal berikutnya.</p></div>
-          <span className="w-fit rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-medium text-slate-100">Akses sesuai cakupan SM+</span>
-        </div>
+      <header className="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
+        <h1 className="text-xl font-bold text-slate-900">{mode==='categories'?'Kategori Tugas':'Tugas Berulang'}</h1>
+        <p className="mt-1 text-sm text-slate-600">{mode==='categories'?'Kelola kategori tugas untuk setiap seksi.':'Atur tugas yang otomatis dibuat setiap minggu atau bulan sesuai jadwal penugasan.'}</p>
       </header>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="new-category-heading">
-        <div className="mb-5"><h2 id="new-category-heading" className="text-sm font-semibold text-slate-900">Tambah kategori</h2><p className="mt-1 text-xs text-slate-500">Kategori disimpan pada satu section dan dapat dipakai template di section tersebut.</p></div>
+      {mode==='categories'&&<section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-sm font-semibold text-slate-900">Tambah kategori</h2>
         <CategoryForm sections={sections} />
-      </section>
-
+      </section>}
       {sections.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">Tidak ada section dalam cakupan Anda.</div>
       ) : sections.map((section) => {
@@ -219,10 +216,10 @@ export default function TaskTemplateManager({
               const categoryTemplates = templates.filter((template) => template.categoryId === category.id)
               return (
                 <article key={category.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="border-b border-slate-100 p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-sm font-bold text-slate-900">{category.name}</h3><span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{category.isActive ? 'Aktif' : 'Nonaktif'}</span></div><span className="text-xs text-slate-500">{categoryTemplates.length} template</span></div><CategoryForm category={category} sections={sections} /><CategoryDelete category={category} /></div>
-                  <div className="space-y-4 p-5 sm:p-6">
+                  {mode==='categories'&&<div className="border-b border-slate-100 p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-sm font-bold text-slate-900">{category.name}</h3><span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{category.isActive ? 'Aktif' : 'Nonaktif'}</span></div><span className="text-xs text-slate-500">{categoryTemplates.length} template</span></div><CategoryForm category={category} sections={sections} /><CategoryDelete category={category} /></div>}
+                  {mode==='recurring'&&<div className="space-y-4 p-5 sm:p-6">
                     {category.isActive && <details className="group rounded-xl border border-dashed border-slate-300">
-                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-red-700 marker:hidden">＋ Tambah template rutin</summary>
+                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-red-700 marker:hidden">＋ Tambah tugas berulang</summary>
                       <div className="px-4 pb-4"><TemplateForm section={section} category={category} people={people} canAssignGlobalOwner={canAssignGlobalOwner} /></div>
                     </details>}
                     {categoryTemplates.map((template) => (
@@ -232,7 +229,7 @@ export default function TaskTemplateManager({
                         <TemplateDelete template={template} />
                       </div>
                     ))}
-                  </div>
+                  </div>}
                 </article>
               )
             })}

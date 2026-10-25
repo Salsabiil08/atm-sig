@@ -37,6 +37,8 @@ export type TaskFilters = {
   orgUnitId?: number | null
   dateFrom?: string | null
   dateTo?: string | null
+  createdFrom?: string | null
+  createdTo?: string | null
   page?: number
   pageSize?: number
 }
@@ -229,7 +231,10 @@ function validateTaskFilters(filters: TaskFilters): TaskFilters {
   if (dateFrom && dateTo && dateFrom > dateTo) {
     throw new Error('Tanggal awal periode harus sebelum atau sama dengan tanggal akhir.')
   }
-  return { ...filters, dateFrom, dateTo, search: filters.search?.trim() || null }
+  const createdFrom = parseDateOnly(filters.createdFrom)
+  const createdTo = parseDateOnly(filters.createdTo)
+  if (createdFrom && createdTo && createdFrom > createdTo) throw new Error('Periode pembuatan tugas tidak valid.')
+  return { ...filters, dateFrom, dateTo, createdFrom, createdTo, search: filters.search?.trim() || null }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -324,6 +329,8 @@ export async function getTaskList(
     query = query.eq('org_unit_id', filters.orgUnitId)
   }
 
+  if (filters.createdFrom) query = query.gte('created_at', `${filters.createdFrom}T00:00:00.000+07:00`)
+  if (filters.createdTo) query = query.lte('created_at', `${filters.createdTo}T23:59:59.999+07:00`)
   if (filters.dateFrom) {
     query = query.gte('due_date', `${filters.dateFrom}T00:00:00.000+07:00`)
   }

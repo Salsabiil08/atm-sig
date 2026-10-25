@@ -6,12 +6,12 @@ import type { TaskStatus } from '@/lib/constants/rbac'
 // =================== STATUS BADGE ===================
 
 const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string; label: string }> = {
-  'To do':      { bg: '#F3F4F6', text: '#6B7280', label: 'To do'      },
-  'In progress':{ bg: '#EFF6FF', text: '#2563EB', label: 'In progress' },
-  'Blocked':    { bg: '#FEF2F2', text: '#DC2626', label: 'Blocked'     },
-  'Review':     { bg: '#F5F3FF', text: '#7C3AED', label: 'Review'      },
-  'Revisi':     { bg: '#FFFBEB', text: '#D97706', label: 'Revisi'      },
-  'Done':       { bg: '#F0FDF4', text: '#16A34A', label: 'Done'        },
+  'To do':      { bg: '#F3F4F6', text: '#6B7280', label: 'Belum Dimulai'      },
+  'In progress':{ bg: '#EFF6FF', text: '#2563EB', label: 'Dalam Pengerjaan' },
+  'Blocked':    { bg: '#FEF2F2', text: '#DC2626', label: 'Terhambat'     },
+  'Review':     { bg: '#F5F3FF', text: '#7C3AED', label: 'Menunggu Tinjauan'      },
+  'Revisi':     { bg: '#FFFBEB', text: '#D97706', label: 'Perlu Revisi'      },
+  'Done':       { bg: '#F0FDF4', text: '#16A34A', label: 'Selesai'        },
 }
 
 type StatusBadgeProps = {

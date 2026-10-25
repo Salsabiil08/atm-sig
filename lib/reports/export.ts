@@ -2,6 +2,8 @@
 // Tidak ada dependensi luar; XLSX dibuat dari OOXML (ZIP + XML) secara manual.
 
 import type { PerformanceReport } from './queries'
+import type { TaskListItem } from '@/lib/tasks/queries'
+import { taskStatusLabel } from '@/lib/tasks/status-labels'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers format tanggal
@@ -402,4 +404,30 @@ export function buildPdfHtml(report: PerformanceReport, params: ExportParams): s
   </p>
 </body>
 </html>`
+}
+
+/** Ekspor detail pekerjaan dalam cakupan izin pengguna, bukan ringkasan dashboard. */
+export function buildTaskListXlsx(tasks: readonly TaskListItem[], params: ExportParams): Uint8Array {
+  const rows: Cell[][] = [
+    ['LAPORAN DETAIL TUGAS - ACCOUNTING SIG'],
+    ['Periode pembuatan', params.dateFrom, 'sampai', params.dateTo],
+    ['Cakupan', params.orgUnitLabel],
+    [],
+    ['Judul Tugas','Penanggung Jawab','Dibuat','Mulai','Tenggat','Status','Kemajuan (%)','Diselesaikan','Prioritas','Unit','Detail & Lampiran'],
+    ...tasks.map(task=>[
+      task.title,task.ownerName,formatDateId(task.createdAt),formatDateId(task.startDate),
+      formatDateId(task.dueDate),taskStatusLabel(task.status),task.progressPct,
+      task.completedAt?formatDateId(task.completedAt):'—',
+      task.priority,task.orgUnitName,'/tasks/'+task.id,
+    ] as Cell[]),
+  ]
+  const encoder = new TextEncoder()
+  const sheetXml = buildSheetXml(rows)
+  return buildZip([
+    {name:'[Content_Types].xml',data:encoder.encode(buildContentTypes())},
+    {name:'_rels/.rels',data:encoder.encode(buildRootRels())},
+    {name:'xl/workbook.xml',data:encoder.encode(buildWorkbookXml())},
+    {name:'xl/_rels/workbook.xml.rels',data:encoder.encode(buildWorkbookRels())},
+    {name:'xl/worksheets/sheet1.xml',data:encoder.encode(sheetXml)},
+  ])
 }

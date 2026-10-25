@@ -17,25 +17,25 @@ export default function WorkspaceTabs({ current, tabs, roleLevel = 6, label = 'T
 }
 export const WORK_TABS: Tab[] = [
   { label: 'Tugas Saya', icon: 'user', href: '/tasks?mine=1' },
-  { label: 'Daftar Task', icon: 'tasks', href: '/tasks' },
-  { label: 'Kanban', icon: 'kanban', href: '/kanban' },
-  { label: 'Timeline', icon: 'timeline', href: '/timeline' },
+  { label: 'Tugas Tim', icon: 'tasks', href: '/tasks', minLevel: 3 },
+  { label: 'Papan Tugas', icon: 'kanban', href: '/kanban', minLevel: 3 },
+  { label: 'Linimasa', icon: 'timeline', href: '/timeline', minLevel: 3 },
 ]
 export const DASHBOARD_TABS: Tab[] = [
   { label: 'Ringkasan', icon: 'dashboard', href: '/dashboard' },
-  { label: 'Kinerja Aktif', icon: 'reports', href: '/performance' },
-  { label: 'Jobload Periode', icon: 'jobload', href: '/jobload' },
+  { label: 'Kinerja Berjalan', icon: 'reports', href: '/performance' },
+  { label: 'Beban Kerja Periode', icon: 'jobload', href: '/jobload' },
 ]
 export const APPROVAL_TABS: Tab[] = [
-  { label: 'Review Task', icon: 'approval', href: '/review-inbox', minLevel: 3 },
-  { label: 'Approval Deadline', icon: 'calendar', href: '/approvals', minLevel: 4 },
+  { label: 'Tinjauan Tugas', icon: 'approval', href: '/review-inbox', minLevel: 3 },
+  { label: 'Persetujuan Tenggat', icon: 'calendar', href: '/approvals', minLevel: 4 },
 ]
 export const MASTER_TABS: Tab[] = [
-  { label: 'Pengguna & Role', icon: 'user', href: '/users' },
+  { label: 'Pengguna dan Peran', icon: 'user', href: '/users' },
   { label: 'Struktur Organisasi', icon: 'structure', href: '/org-structure' },
-  { label: 'Kategori & Template', icon: 'master', href: '/task-templates' },
+  { label: 'Kategori Tugas', icon: 'master', href: '/task-templates' },
 ]
 export const REPORT_TABS: Tab[] = [
   { label: 'Laporan Task', icon: 'reports', href: '/reports' },
-  { label: 'Audit Log', icon: 'audit', href: '/audit-log' },
+  { label: 'Catatan Audit', icon: 'audit', href: '/audit-log' },
 ]
