@@ -111,9 +111,9 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-300">Kontrol & transparansi</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Audit log</h1>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Catatan audit</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Telusuri riwayat perubahan data dan role dalam cakupan akses Anda.
+              Telusuri riwayat perubahan data dan peran dalam cakupan akses Anda.
             </p>
           </div>
           <div className="flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-medium text-slate-100">
@@ -287,7 +287,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
 
       <p className="text-xs text-slate-400">
         Entri ditampilkan dalam urutan terbaru terlebih dahulu. Halaman {filters.page} · {entries.length} entri.
-        Audit log tidak dapat diubah atau dihapus dari antarmuka (FR-092).
+        Catatan audit hanya dapat dibaca.
       </p>
     </div>
   )
