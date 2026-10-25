@@ -36,11 +36,6 @@ export default async function JobloadPage({ searchParams }: { searchParams: Para
           <button className="rounded-lg bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white">Terapkan</button>
         </form>
       </div>
-      {workload.quality==='estimated' && <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        <strong>Catatan kelengkapan riwayat</strong>
-        <p className="mt-1">Sebagian tugas lama belum memiliki catatan perubahan yang lengkap. Angka periode tersebut belum dapat dipastikan sepenuhnya dari riwayat yang tersedia.</p>
-        
-      </div>}
       <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5">
         <p className="text-sm text-[var(--color-text-secondary)]">Total penugasan PIC dalam periode</p>
         <p className="mt-1 text-3xl font-bold text-[var(--color-text-primary)]">{total}</p>
