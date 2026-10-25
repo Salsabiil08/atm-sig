@@ -3,6 +3,7 @@
 
 import type { PerformanceReport } from './queries'
 import type { TaskListItem } from '@/lib/tasks/queries'
+import { taskStatusLabel } from '@/lib/tasks/status-labels'
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers format tanggal
@@ -415,7 +416,7 @@ export function buildTaskListXlsx(tasks: readonly TaskListItem[], params: Export
     ['Judul Tugas','Penanggung Jawab','Dibuat','Mulai','Tenggat','Status','Kemajuan (%)','Diselesaikan','Prioritas','Unit','Detail & Lampiran'],
     ...tasks.map(task=>[
       task.title,task.ownerName,formatDateId(task.createdAt),formatDateId(task.startDate),
-      formatDateId(task.dueDate),task.status,task.progressPct,
+      formatDateId(task.dueDate),taskStatusLabel(task.status),task.progressPct,
       task.completedAt?formatDateId(task.completedAt):'—',
       task.priority,task.orgUnitName,'/tasks/'+task.id,
     ] as Cell[]),
