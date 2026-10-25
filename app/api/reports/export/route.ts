@@ -1,73 +1,68 @@
-// T-503 — Route Handler export laporan Excel (.xlsx) dan PDF — FR-091
-// GET /api/reports/export?format=xlsx|pdf&from=YYYY-MM-DD&to=YYYY-MM-DD&orgUnit=<id>
-// Proteksi: minimum role Manager (level 3).
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
-import { getPerformanceReport, parseReportFilters } from '@/lib/reports/queries'
-import { buildXlsx, type ExportParams } from '@/lib/reports/export'
-import { buildReportPdf } from '@/lib/reports/pdf'
+import { parseReportFilters } from '@/lib/reports/queries'
+import { getTaskFilterOptions, getTaskList, type TaskListItem } from '@/lib/tasks/queries'
+import { buildTaskListXlsx, type ExportParams } from '@/lib/reports/export'
+import { buildTaskListPdf } from '@/lib/reports/pdf'
+
+const PAGE_SIZE = 100
+const MAX_EXPORT = 10000
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const user = await getSessionUser()
     requireRole(user, 'Manager')
-
     const sp = request.nextUrl.searchParams
     const format = sp.get('format')
     if (format !== 'xlsx' && format !== 'pdf') {
-      return NextResponse.json({ error: 'Format tidak valid. Gunakan xlsx atau pdf.' }, { status: 400 })
+      return NextResponse.json({error:'Format ekspor tidak valid.'},{status:400})
     }
-
-    const rawFrom    = sp.get('from')   ?? undefined
-    const rawTo      = sp.get('to')     ?? undefined
-    const rawOrgUnit = sp.get('orgUnit') ?? undefined
-
-    const filters = parseReportFilters({ dateFrom: rawFrom, dateTo: rawTo, orgUnitId: rawOrgUnit })
-    const report  = await getPerformanceReport(user, filters)
-
-    const orgUnitLabel =
-      filters.orgUnitId === null
-        ? 'Semua dalam cakupan'
-        : (report.orgUnits.find((u) => u.id === filters.orgUnitId)?.name ?? String(filters.orgUnitId))
-
-    const params: ExportParams = {
-      dateFrom: filters.dateFrom,
-      dateTo:   filters.dateTo,
-      orgUnitLabel,
+    const rawFrom=sp.get('from')||undefined
+    const rawTo=sp.get('to')||undefined
+    if(Boolean(rawFrom)!==Boolean(rawTo)) {
+      return NextResponse.json({error:'Tanggal awal dan akhir harus diisi bersama.'},{status:400})
     }
-
-    if (format === 'xlsx') {
-      const bytes    = buildXlsx(report, params)
-      const filename = `laporan-task-${filters.dateFrom}-${filters.dateTo}.xlsx`
-      const responseBody = new Uint8Array(bytes.byteLength)
-      responseBody.set(bytes)
-      return new NextResponse(responseBody.buffer, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="${filename}"`,
-          'Cache-Control': 'no-store',
-        },
-      })
+    const filters=parseReportFilters({
+      dateFrom:rawFrom,dateTo:rawTo,orgUnitId:sp.get('orgUnit')||undefined,
+    })
+    const options=await getTaskFilterOptions(user)
+    const orgLabel=filters.orgUnitId===null ? 'Semua seksi yang dapat diakses'
+      : options.sections.find(section=>section.id===filters.orgUnitId)?.name??String(filters.orgUnitId)
+    const tasks:TaskListItem[]=[]
+    const base={createdFrom:rawFrom||null,createdTo:rawTo||null,orgUnitId:filters.orgUnitId}
+    const first=await getTaskList(user,{...base,page:1,pageSize:PAGE_SIZE})
+    if(first.total>MAX_EXPORT) {
+      return NextResponse.json({error:'Data lebih dari 10.000 tugas. Gunakan filter tanggal agar ekspor tetap aman.'},{status:422})
     }
-
-    // True PDF binary; same role and scope controls as XLSX.
-    const pdf = buildReportPdf(report, params)
-    const bytes = new Uint8Array(pdf.byteLength)
-    bytes.set(pdf)
-    const filename = `laporan-task-${filters.dateFrom}-${filters.dateTo}.pdf`
-    return new NextResponse(bytes.buffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
+    tasks.push(...first.items)
+    const pages=Math.ceil(first.total/PAGE_SIZE)
+    for(let page=2;page<=pages;page++) {
+      const batch=await getTaskList(user,{...base,page,pageSize:PAGE_SIZE})
+      tasks.push(...batch.items)
+    }
+    const params:ExportParams={
+      dateFrom:rawFrom??'Semua periode',
+      dateTo:rawTo??'Semua periode',
+      orgUnitLabel:orgLabel,
+    }
+    const bytes=format==='xlsx'?buildTaskListXlsx(tasks,params):buildTaskListPdf(tasks,params)
+    const responseBody=new Uint8Array(bytes.byteLength)
+    responseBody.set(bytes)
+    const dateTag=rawFrom&&rawTo ? rawFrom+'-'+rawTo : 'semua'
+    const filename='laporan-detail-tugas-'+dateTag+'.'+format
+    return new NextResponse(responseBody.buffer,{
+      status:200,
+      headers:{
+        'Content-Type':format==='xlsx'
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'application/pdf',
+        'Content-Disposition':'attachment; filename="'+filename+'"',
+        'Cache-Control':'no-store',
+        'X-Content-Type-Options':'nosniff',
       },
     })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengekspor laporan.'
-    return NextResponse.json({ error: message }, { status: 500 })
+  } catch(error) {
+    const message=error instanceof Error?error.message:'Ekspor laporan tidak berhasil.'
+    return NextResponse.json({error:message},{status:500})
   }
 }
