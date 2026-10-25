@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { saveOrgUnit, deleteOrgUnit } from '@/lib/org/actions'
 
 type Unit={id:number;name:string;type:'department'|'unit'|'section';parent_id:number|null;depth?:number}
+const levelName={department:'LV 1 · Departemen',unit:'LV 2 · Unit',section:'LV 3 · Seksi'} as const
 const field='mt-1 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text-primary)]'
 
 export default function OrgManagement({units}:{units:Unit[]}) {
@@ -45,7 +46,7 @@ export default function OrgManagement({units}:{units:Unit[]}) {
       <form className="mt-3 grid gap-3 sm:grid-cols-[1fr_160px_170px_auto]" onSubmit={e=>{e.preventDefault();save()}}>
         <label className="text-xs text-[var(--color-text-secondary)]">Nama<input className={field} value={name} required minLength={2} maxLength={100} onChange={e=>setName(e.target.value)}/></label>
         <label className="text-xs text-[var(--color-text-secondary)]">Tipe<select className={field} value={type} onChange={e=>{setType(e.target.value as Unit['type']);setParentId('')}}>
-          <option value="department">Department</option><option value="unit">Unit</option><option value="section">Section</option>
+          <option value="department">LV 1 · Departemen</option><option value="unit">LV 2 · Unit</option><option value="section">LV 3 · Seksi</option>
         </select></label>
         <label className="text-xs text-[var(--color-text-secondary)]">Induk<select className={field} value={parentId} disabled={type==='department'} required={type!=='department'} onChange={e=>setParentId(e.target.value)}>
           <option value="">Pilih induk</option>{eligibleParents.filter(u=>u.id!==editing).map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
@@ -56,8 +57,8 @@ export default function OrgManagement({units}:{units:Unit[]}) {
     </div>
     {feedback&&<p role="status" className="rounded-lg bg-[var(--color-brand-light)] px-3 py-2 text-sm text-[var(--color-text-primary)]">{feedback}</p>}
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
-      <table className="w-full min-w-[550px] text-left text-sm"><thead><tr className="bg-[var(--color-bg-app)] text-[var(--color-text-secondary)]"><th className="p-3">Nama</th><th className="p-3">Jenis</th><th className="p-3">Induk</th><th className="p-3">Tindakan</th></tr></thead>
-        <tbody>{units.map(u=><tr key={u.id} className="border-t border-[var(--color-border)]"><td className="p-3"><span className="inline-block" style={{paddingLeft:`${(u.depth??0)*22}px`}}>{(u.depth??0)>0?'↳ ':''}{u.name}</span></td><td className="p-3">{u.type}</td><td className="p-3">{units.find(p=>p.id===u.parent_id)?.name??'—'}</td>
+      <table className="w-full min-w-[550px] text-left text-sm"><thead><tr className="bg-[var(--color-bg-app)] text-[var(--color-text-secondary)]"><th className="p-3">Nama</th><th className="p-3">Tingkat</th><th className="p-3">Induk</th><th className="p-3">Tindakan</th></tr></thead>
+        <tbody>{units.map(u=><tr key={u.id} className="border-t border-[var(--color-border)]"><td className="p-3"><span className="inline-block" style={{paddingLeft:`${(u.depth??0)*22}px`}}>{(u.depth??0)>0?'↳ ':''}{u.name}</span></td><td className="p-3">{levelName[u.type]}</td><td className="p-3">{units.find(p=>p.id===u.parent_id)?.name??'—'}</td>
           <td className="flex gap-2 p-3"><button onClick={()=>edit(u)} disabled={pending} className="text-sm font-semibold text-[var(--color-brand)]">Edit</button>
             <button onClick={()=>remove(u)} disabled={pending} className="text-sm font-semibold text-red-600">{confirmation===u.id?'Konfirmasi hapus':'Hapus'}</button></td>
         </tr>)}</tbody>
