@@ -1,3 +1,4 @@
+import { taskStatusLabel } from '@/lib/tasks/status-labels'
 import { getTaskFilterOptions, getTaskList } from '@/lib/tasks/queries'
 import WorkspaceTabs, { REPORT_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
@@ -60,7 +61,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
       <WorkspaceTabs current="/reports" tabs={REPORT_TABS} />
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">LAPORAN TASK</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">LAPORAN TUGAS</h1>
           <p className="mt-1 text-sm text-slate-500">
             Seluruh tugas yang dapat diakses, beserta status, kemajuan, dan lampiran. Kosongkan tanggal untuk menampilkan semua periode.
           </p>
@@ -140,7 +141,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
       </form>
 
       <section aria-label="Daftar detail tugas" className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-        <h2 className="border-b border-slate-200 px-4 py-4 text-base font-semibold text-slate-900">Detail seluruh tugas</h2>
+        <h2 className="border-b border-slate-200 px-4 py-4 text-base font-semibold text-slate-900">Daftar Rincian Tugas</h2>
         <p className="px-4 pt-3 text-sm text-slate-600">Pilih judul tugas untuk memeriksa riwayat kemajuan dan lampiran yang dapat diakses sesuai hak Anda.</p>
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-slate-50 text-slate-600"><tr><th className="px-4 py-3">Tugas</th><th className="px-4 py-3">Penanggung jawab</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Kemajuan</th><th className="px-4 py-3">Tenggat</th><th className="px-4 py-3">Detail</th></tr></thead>
@@ -148,7 +149,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
             {tasks.items.map(task=><tr key={task.id} className="border-t border-slate-100">
               <td className="px-4 py-3 font-medium">{task.title}</td>
               <td className="px-4 py-3">{task.ownerName}</td>
-              <td className="px-4 py-3">{task.status}</td>
+              <td className="px-4 py-3">{taskStatusLabel(task.status)}</td>
               <td className="px-4 py-3">{task.progressPct}%</td>
               <td className="px-4 py-3">{formatDate(task.dueDate)}</td>
               <td className="px-4 py-3"><a className="font-semibold text-red-700 hover:underline" href={`/tasks/${task.id}`}>Lihat progres & lampiran</a></td>
