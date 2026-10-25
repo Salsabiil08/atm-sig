@@ -6,6 +6,7 @@ import OrgManagement from './OrgManagement'
 
 export const metadata: Metadata = { title: 'Struktur Organisasi' }
 type Unit = { id:number; name:string; type:'department'|'unit'|'section';parent_id:number|null }
+const levelName={department:'LV 1 · Departemen',unit:'LV 2 · Unit',section:'LV 3 · Seksi'} as const
 export default async function OrganizationStructurePage() {
   const user = await getSessionUser()
   requireRole(user,'SM')
@@ -34,11 +35,10 @@ export default async function OrganizationStructurePage() {
       <table className="w-full min-w-[480px] text-left text-sm">
         <thead className="bg-[var(--color-bg-app)] text-[var(--color-text-secondary)]"><tr><th className="px-4 py-3">Nama</th><th className="px-4 py-3">Level</th><th className="px-4 py-3">Induk</th></tr></thead>
         <tbody>{ordered.map(unit=><tr key={unit.id} className="border-t border-[var(--color-border)] text-[var(--color-text-primary)]">
-          <td className="px-4 py-3 font-semibold"><span style={{paddingLeft:`${unit.depth*22}px`}} className="inline-block">{unit.depth>0?'↳ ':''}{unit.name}</span></td><td className="px-4 py-3 capitalize">{unit.type}</td><td className="px-4 py-3">{units.find(parent=>parent.id===unit.parent_id)?.name??'—'}</td>
+          <td className="px-4 py-3 font-semibold"><span style={{paddingLeft:`${unit.depth*22}px`}} className="inline-block">{unit.depth>0?'↳ ':''}{unit.name}</span></td><td className="px-4 py-3">{levelName[unit.type]}</td><td className="px-4 py-3">{units.find(parent=>parent.id===unit.parent_id)?.name??'—'}</td>
         </tr>)}
         {!ordered.length&&<tr><td colSpan={3} className="p-8 text-center">Struktur organisasi belum tersedia.</td></tr>}</tbody>
       </table>
     </div>}
-    <p className="text-xs text-[var(--color-text-muted)]"></p>
   </main>
 }
