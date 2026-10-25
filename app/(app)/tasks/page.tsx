@@ -9,7 +9,7 @@ import { StatusBadge, PriorityBadge, ProgressBar } from '../_components/ui/Badge
 import Link from 'next/link'
 import type { TaskStatus } from '@/lib/constants/rbac'
 
-export const metadata: Metadata = { title: 'Daftar Task' }
+export const metadata: Metadata = { title: 'Daftar Tugas' }
 
 type SearchParams = {
   status?: string
@@ -42,12 +42,12 @@ function isValidPriority(s: string): s is 'rendah' | 'sedang' | 'tinggi' {
 
 const STATUS_OPTIONS: Array<{ value: TaskStatus | ''; label: string }> = [
   { value: '', label: 'Semua Status' },
-  { value: 'To do', label: 'To do' },
-  { value: 'In progress', label: 'In progress' },
-  { value: 'Blocked', label: 'Blocked' },
-  { value: 'Review', label: 'Review' },
-  { value: 'Revisi', label: 'Revisi' },
-  { value: 'Done', label: 'Done' },
+  { value: 'To do', label: 'Belum Dimulai' },
+  { value: 'In progress', label: 'Dalam Pengerjaan' },
+  { value: 'Blocked', label: 'Terhambat' },
+  { value: 'Review', label: 'Menunggu Tinjauan' },
+  { value: 'Revisi', label: 'Perlu Revisi' },
+  { value: 'Done', label: 'Selesai' },
 ]
 
 export default async function TasksPage({
@@ -113,7 +113,7 @@ export default async function TasksPage({
             {isMine ? 'Tugas Saya' : 'Tugas Tim'}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            {total} task ditemukan
+            {total} tugas ditemukan
           </p>
         </div>
         {user.roleLevel >= 2 && (
@@ -125,7 +125,7 @@ export default async function TasksPage({
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Buat Task
+            Buat Tugas
           </Link>
         )}
       </div>
@@ -134,13 +134,13 @@ export default async function TasksPage({
       <div className="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <form action="/tasks" method="get" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <label className="text-xs font-medium text-slate-600">
-            Cari task
+            Cari tugas
             <input
               type="search"
               name="search"
               maxLength={100}
               defaultValue={searchFilter ?? ''}
-              placeholder="Judul task"
+              placeholder="Judul tugas"
               className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
                          focus:border-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-600"
             />
