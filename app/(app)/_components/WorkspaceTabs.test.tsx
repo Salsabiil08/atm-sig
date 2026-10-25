@@ -28,6 +28,6 @@ describe('Grouped workspace tabs (audit R.03)', () => {
 
   it('shows both approval tabs to Senior Manager', () => {
     render(<WorkspaceTabs current="/approvals" tabs={APPROVAL_TABS} roleLevel={4} />)
-    expect(screen.getByRole('link', { name: 'Approval Deadline' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getByRole('link', { name: 'Persetujuan Tenggat' }).getAttribute('aria-current')).toBe('page')
   })
 })
