@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { getAuditLogs, parseAuditFilters, KNOWN_AUDIT_ACTIONS } from '@/lib/audit/queries'
 import Link from 'next/link'
+import { auditValueSummary } from '@/lib/audit/format'
 
 export const metadata: Metadata = { title: 'Audit Log' }
 
@@ -233,17 +234,17 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
                   <td className="px-4 py-3.5 whitespace-nowrap">
                     <ActionBadge action={entry.action} />
                   </td>
-                  <td className="px-4 py-3.5 font-mono text-xs text-slate-700 break-all">
+                  <td className="px-4 py-3.5 font-mono text-xs text-slate-700 break-words">
                     {entry.object}
                   </td>
                   <td className="px-4 py-3.5 text-xs text-slate-700 whitespace-nowrap">
                     {entry.userName ?? <span className="text-slate-400 italic">—</span>}
                   </td>
                   <td className="max-w-[240px] px-4 py-3.5 text-xs leading-5 text-slate-600 break-all">
-                    {entry.oldValue ?? <span className="text-slate-300">—</span>}
+                    <ul className="space-y-1 break-words">{auditValueSummary(entry.oldValue,entry.newValue).map((line,i)=><li key={i}>{line}</li>)}</ul>
                   </td>
                   <td className="max-w-[240px] px-4 py-3.5 text-xs leading-5 text-slate-600 break-all">
-                    {entry.newValue ?? <span className="text-slate-300">—</span>}
+                    <ul className="space-y-1 break-words">{auditValueSummary(entry.newValue,entry.oldValue).map((line,i)=><li key={i}>{line}</li>)}</ul>
                   </td>
                 </tr>
               ))}
