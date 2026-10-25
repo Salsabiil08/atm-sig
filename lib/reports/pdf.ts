@@ -1,5 +1,6 @@
 import type { PerformanceReport } from './queries'
 import type { TaskListItem } from '@/lib/tasks/queries'
+import { taskStatusLabel } from '@/lib/tasks/status-labels'
 import type { ExportParams } from './export'
 
 /** Dependency-free, printable A4 PDF 1.4. Each object is ASCII for exact xref offsets. */
@@ -115,7 +116,7 @@ export function buildTaskListPdf(tasks: readonly TaskListItem[], params: ExportP
   ]
   for (const task of tasks) {
     lines.push(task.title)
-    lines.push('  PIC: '+task.ownerName+' | Status: '+task.status+' | Kemajuan: '+task.progressPct+'%')
+    lines.push('  PIC: '+task.ownerName+' | Status: '+taskStatusLabel(task.status)+' | Kemajuan: '+task.progressPct+'%')
     lines.push('  Dibuat: '+task.createdAt.slice(0,10)+' | Tenggat: '+task.dueDate.slice(0,10))
     if(task.completedAt) lines.push('  Selesai: '+task.completedAt.slice(0,10))
     lines.push('  Progres dan lampiran: /tasks/'+task.id)
