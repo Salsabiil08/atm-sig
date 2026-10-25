@@ -37,6 +37,8 @@ export type TaskFilters = {
   orgUnitId?: number | null
   dateFrom?: string | null
   dateTo?: string | null
+  createdFrom?: string | null
+  createdTo?: string | null
   page?: number
   pageSize?: number
 }
@@ -324,6 +326,8 @@ export async function getTaskList(
     query = query.eq('org_unit_id', filters.orgUnitId)
   }
 
+  if (filters.createdFrom) query = query.gte('created_at', `${filters.createdFrom}T00:00:00.000+07:00`)
+  if (filters.createdTo) query = query.lte('created_at', `${filters.createdTo}T23:59:59.999+07:00`)
   if (filters.dateFrom) {
     query = query.gte('due_date', `${filters.dateFrom}T00:00:00.000+07:00`)
   }
