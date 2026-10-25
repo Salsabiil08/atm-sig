@@ -1,11 +1,8 @@
-import { getTaskList } from '@/lib/tasks/queries'
+import { getTaskFilterOptions, getTaskList } from '@/lib/tasks/queries'
 import WorkspaceTabs, { REPORT_TABS } from '../_components/WorkspaceTabs'
 import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
-import {
-  getPerformanceReport,
-  parseReportFilters,
-} from '@/lib/reports/queries'
+import { parseReportFilters } from '@/lib/reports/queries'
 
 export const metadata: Metadata = { title: 'Laporan' }
 
@@ -37,19 +34,24 @@ function MetricCard({ label, value }: { label: string; value: string | number })
 export default async function ReportsPage({ searchParams }: { searchParams: SearchParams }) {
   const [user, params] = await Promise.all([getSessionUser(), searchParams])
   requireRole(user, 'Manager')
+  const selectedFrom=singleParam(params.from)
+  const selectedTo=singleParam(params.to)
+  if (Boolean(selectedFrom)!==Boolean(selectedTo)) throw new Error('Tanggal awal dan akhir harus dipilih bersama.')
   const filters = parseReportFilters({
-    dateFrom: singleParam(params.from),
-    dateTo: singleParam(params.to),
+    dateFrom: selectedFrom,
+    dateTo: selectedTo,
     orgUnitId: singleParam(params.orgUnit),
   })
   const page = Math.max(1, Math.min(100000, Number(singleParam(params.page) ?? '1') || 1))
-  const tasks = await getTaskList(user,{createdFrom:filters.dateFrom,createdTo:filters.dateTo,orgUnitId:filters.orgUnitId,page,pageSize:50})
-  const report = await getPerformanceReport(user, filters)
+  const [tasks,options] = await Promise.all([
+    getTaskList(user,{createdFrom:selectedFrom||null,createdTo:selectedTo||null,orgUnitId:filters.orgUnitId,page,pageSize:50}),
+    getTaskFilterOptions(user),
+  ])
 
   // Buat query string untuk tombol export (FR-091)
   const exportQs = new URLSearchParams({
-    from: filters.dateFrom,
-    to:   filters.dateTo,
+    ...(selectedFrom ? {from:selectedFrom} : {}),
+    ...(selectedTo ? {to:selectedTo} : {}),
     ...(filters.orgUnitId !== null ? { orgUnit: String(filters.orgUnitId) } : {}),
   }).toString()
 
@@ -60,7 +62,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">LAPORAN TASK</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Daftar tugas dan status pekerjaan berdasarkan periode. Klik tugas untuk melihat progres dan lampiran.
+            Seluruh tugas yang dapat diakses, beserta status, kemajuan, dan lampiran. Kosongkan tanggal untuk menampilkan semua periode.
           </p>
         </div>
         {/* Tombol Export — FR-091 */}
@@ -96,38 +98,35 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[1fr_1fr_2fr_auto]"
       >
         <label className="text-xs font-medium text-slate-700">
-          Dari tanggal
+          Dibuat mulai
           <input
             type="date"
             name="from"
-            defaultValue={filters.dateFrom}
-            required
+            defaultValue={selectedFrom??''}
             className="mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-red-600 focus:ring-red-600"
           />
         </label>
         <label className="text-xs font-medium text-slate-700">
-          Sampai tanggal
+          Dibuat sampai
           <input
             type="date"
             name="to"
-            defaultValue={filters.dateTo}
+            defaultValue={selectedTo??''}
             required
             className="mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-red-600 focus:ring-red-600"
           />
         </label>
         <label className="text-xs font-medium text-slate-700">
-          Unit/section
+          Seksi
           <select
             name="orgUnit"
             defaultValue={filters.orgUnitId?.toString() ?? ''}
             className="mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-red-600 focus:ring-red-600"
           >
-            <option value="">Semua dalam cakupan</option>
-            {report.orgUnits.map((orgUnit) => (
+            <option value="">Semua seksi dalam cakupan</option>
+            {options.sections.map((orgUnit) => (
               <option key={orgUnit.id} value={orgUnit.id}>
-                {orgUnit.parentUnitName
-                  ? `${orgUnit.parentUnitName} / ${orgUnit.name}`
-                  : orgUnit.name}
+                {orgUnit.name}
               </option>
             ))}
           </select>
