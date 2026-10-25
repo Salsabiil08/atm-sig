@@ -82,7 +82,7 @@ export default async function TasksPage({
       page,
       pageSize: 20,
     }),
-    getTaskFilterOptions(user),
+    user.roleLevel===2 ? Promise.resolve({sections:[],owners:[]}) : getTaskFilterOptions(user),
   ])
 
   const totalPages = Math.ceil(total / 20)
@@ -133,6 +133,7 @@ export default async function TasksPage({
       {/* Filter bar */}
       <div className="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <form action="/tasks" method="get" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {isMine&&<input type="hidden" name="mine" value="1" />}
           <label className="text-xs font-medium text-slate-600">
             Cari tugas
             <input
@@ -158,22 +159,22 @@ export default async function TasksPage({
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-slate-600">
-            Section
+          {user.roleLevel>=3&&<label className="text-xs font-medium text-slate-600">
+            Seksi
             <select
               name="section"
               defaultValue={sectionFilter ?? ''}
               className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
                          focus:border-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-600"
             >
-              <option value="">Semua section</option>
+              <option value="">Semua seksi</option>
               {filterOptions.sections.map((section) => (
                 <option key={section.id} value={section.id}>{section.name}</option>
               ))}
             </select>
-          </label>
-          <label className="text-xs font-medium text-slate-600">
-            PIC
+          </label>}
+          {user.roleLevel>=3&&<label className="text-xs font-medium text-slate-600">
+            Penanggung Jawab
             <select
               name="owner"
               defaultValue={ownerFilter ?? ''}
@@ -185,7 +186,7 @@ export default async function TasksPage({
                 <option key={owner.id} value={owner.id}>{owner.name}</option>
               ))}
             </select>
-          </label>
+          </label>}
           <label className="text-xs font-medium text-slate-600">
             Prioritas
             <select
@@ -227,7 +228,7 @@ export default async function TasksPage({
               Terapkan filter
             </button>
             <Link
-              href="/tasks"
+              href={isMine?"/tasks?mine=1":"/tasks"}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
             >
               Reset
@@ -241,15 +242,15 @@ export default async function TasksPage({
         <div className="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
           <p className="text-sm text-slate-400">
             {searchFilter || statusFilter
-              ? 'Tidak ada task yang sesuai filter.'
-              : 'Belum ada task.'}
+              ? 'Tidak ada tugas yang sesuai filter.'
+              : 'Belum ada tugas.'}
           </p>
           {user.roleLevel >= 3 && (
             <Link
               href="/tasks/new"
               className="inline-block mt-4 text-sm font-medium text-[var(--color-brand)] hover:underline"
             >
-              Buat task baru →
+              Buat tugas baru →
             </Link>
           )}
         </div>
@@ -259,11 +260,11 @@ export default async function TasksPage({
           <table className="w-full min-w-[760px] border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 text-[11px] font-semibold text-slate-400 tracking-wider bg-slate-50/60">
-                <th className="py-3 px-4 font-semibold" scope="col">TASK</th>
+                <th className="py-3 px-4 font-semibold" scope="col">TUGAS</th>
                 <th className="py-3 px-4 font-semibold" scope="col">PIC</th>
                 <th className="py-3 px-4 font-semibold" scope="col">TENGGAT</th>
                 <th className="py-3 px-4 font-semibold" scope="col">PRIORITAS</th>
-                <th className="py-3 px-4 font-semibold" scope="col">PROGRESS</th>
+                <th className="py-3 px-4 font-semibold" scope="col">KEMAJUAN</th>
                 <th className="py-3 px-4 font-semibold" scope="col">STATUS</th>
               </tr>
             </thead>
@@ -312,7 +313,7 @@ export default async function TasksPage({
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/40">
               <p className="text-xs text-slate-500">
-                Halaman {page} dari {totalPages} ({total} task)
+                Halaman {page} dari {totalPages} ({total} tugas)
               </p>
               <div className="flex gap-2">
                 {page > 1 && (
