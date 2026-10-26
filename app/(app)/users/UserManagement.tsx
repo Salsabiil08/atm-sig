@@ -174,7 +174,7 @@ export default function UserManagement({
   }
 
   return (
-    <section className="p-5 sm:p-8" aria-labelledby="users-heading">
+    <section className="px-4 pt-5 pb-6 sm:px-6 lg:px-8" aria-labelledby="users-heading">
       <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 id="users-heading" className="text-xl font-bold tracking-tight text-slate-900">
@@ -224,10 +224,6 @@ export default function UserManagement({
         </div>
       </header>
 
-      <p className="mb-5 text-xs text-slate-500">
-        Undangan mengatur penempatan awal pada unit inviter. Perubahan role dan section dilakukan
-        melalui alur penetapan role.
-      </p>
 
       {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>}
       {message && <p className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800" role="status">{message}</p>}
