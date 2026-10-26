@@ -26,7 +26,7 @@ export default async function OrganizationStructurePage() {
   }
   byParent(null).forEach(unit=>visit(unit,0))
   units.filter(unit=>!seen.has(unit.id)).forEach(unit=>visit(unit,0))
-  return <main className="mx-auto max-w-5xl space-y-5 px-4 py-5 sm:px-6 lg:px-8">
+  return <main className="w-full space-y-5 px-4 pt-5 pb-6 sm:px-6 lg:px-8">
     <WorkspaceTabs current="/org-structure" tabs={MASTER_TABS} roleLevel={user.roleLevel} />
     <header><h1 className="text-xl font-bold text-[var(--color-text-primary)]">Struktur Organisasi</h1>
       <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Urutan departemen, unit, dan seksi sesuai hierarki organisasi.</p>
