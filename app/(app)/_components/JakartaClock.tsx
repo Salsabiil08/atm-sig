@@ -28,7 +28,7 @@ export default function JakartaClock() {
   return (
     <span
       aria-label={time ? `Waktu Jakarta ${time} WIB` : 'Memuat waktu Jakarta'}
-      className="hidden items-center gap-2 whitespace-nowrap rounded-md bg-black/10 px-2.5 py-1.5 text-xs font-semibold tabular-nums text-white md:inline-flex"
+      className="hidden items-center gap-2 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold tabular-nums text-white md:inline-flex"
       title="Waktu Jakarta diperbarui otomatis"
     >
       <span className="atm-live-indicator" aria-hidden="true" />

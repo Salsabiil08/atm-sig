@@ -79,10 +79,7 @@ export default function TopHeader({ user, unreadCount = 0 }: Props) {
         <JakartaClock />
         <ThemeToggle onBrand />
         {/* Tanggal */}
-        <div
-          className="hidden rounded-md px-3.5 py-1.5 text-xs font-medium text-red-50 sm:block"
-          style={{ backgroundColor: 'rgba(180, 35, 24, 0.7)' }}
-        >
+        <div className="hidden rounded-md px-3.5 py-1.5 text-xs font-medium text-red-50 sm:block">
           {today}
         </div>
 
