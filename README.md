@@ -39,7 +39,7 @@ A Next.js application for managing accounting tasks with Supabase Auth and Postg
 
    select cron.schedule(
      'task-reminder-checkpoints',
-     '*/5 * * * *',
+     '*/30 * * * *',
      $job$
        select net.http_post(
          url := (
