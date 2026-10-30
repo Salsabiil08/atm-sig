@@ -44,8 +44,8 @@ export default async function ReviewInboxPage() {
       <header>
         <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Review Task</h1>
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          {user.roleLevel === 6
-            ? 'Semua task berstatus Review ditampilkan untuk pengawasan dan keputusan Super Admin.'
+          {user.roleLevel >= 5
+            ? 'Semua task berstatus Review ditampilkan untuk pengawasan dan keputusan GM/Super Admin.'
             : 'Task berstatus Review yang menunggu keputusan Anda. Hanya reviewer yang ditetapkan dapat memutuskan.'}
         </p>
       </header>

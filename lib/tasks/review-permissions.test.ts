@@ -8,6 +8,12 @@ describe('review permissions', () => {
     expect(canOpenTaskReview(actor, { ownerId: 'nata', reviewerId: 'salsa' })).toBe(true)
   })
 
+  it('shows every pending review to GM', () => {
+    const actor = { id: 'gm', roleLevel: 5 }
+    expect(getReviewInboxFilter(actor)).toBeNull()
+    expect(canOpenTaskReview(actor, { ownerId: 'nata', reviewerId: 'salsa' })).toBe(true)
+  })
+
   it('keeps other roles scoped to the assigned reviewer or privileged owner', () => {
     expect(getReviewInboxFilter({ id: 'manager', roleLevel: 3 }))
       .toBe('reviewer_id.eq.manager')

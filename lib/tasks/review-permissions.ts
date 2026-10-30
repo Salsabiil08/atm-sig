@@ -9,15 +9,12 @@ export type ReviewableTask = {
 }
 
 export function canOpenTaskReview(actor: ReviewActor, task: ReviewableTask) {
-  if (actor.roleLevel === 6) return true
+  if (actor.roleLevel >= 5) return true
   if (task.reviewerId === actor.id) return true
   return task.ownerId === actor.id && actor.roleLevel >= 5 && task.reviewerId === null
 }
 
 export function getReviewInboxFilter(actor: ReviewActor): string | null {
-  if (actor.roleLevel === 6) return null
-  if (actor.roleLevel >= 5) {
-    return `reviewer_id.eq.${actor.id},and(owner_id.eq.${actor.id},reviewer_id.is.null)`
-  }
+  if (actor.roleLevel >= 5) return null
   return `reviewer_id.eq.${actor.id}`
 }
