@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth/session'
 import { getTaskDetail } from '@/lib/tasks/queries'
 import { isValidUuid } from '@/lib/tasks/validation'
+import { canOpenTaskReview } from '@/lib/tasks/review-permissions'
 import ReviewTaskClient from './ReviewTaskClient'
 
 export const metadata: Metadata = { title: 'Review Task' }
@@ -16,10 +17,7 @@ export default async function ReviewTaskPage({
   if (!isValidUuid(taskId)) notFound()
 
   const task = await getTaskDetail(taskId, user)
-  const isAssignedReviewer = task?.reviewerId === user.id
-  const isPrivilegedOwner =
-    task?.ownerId === user.id && user.roleLevel >= 5 && task.reviewerId === null
-  if (!task || task.status !== 'Review' || (!isAssignedReviewer && !isPrivilegedOwner)) notFound()
+  if (!task || task.status !== 'Review' || !canOpenTaskReview(user, task)) notFound()
 
   return <ReviewTaskClient task={task} />
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
+import { getReviewInboxFilter } from '@/lib/tasks/review-permissions'
 import WorkspaceTabs, { APPROVAL_TABS } from '../_components/WorkspaceTabs'
 
 export const metadata: Metadata = { title: 'Inbox Review Task' }
@@ -24,10 +25,11 @@ export default async function ReviewInboxPage() {
       .order('due_date',{ascending:true})
       .order('id',{ascending:true})
       .range(offset,offset+pageSize-1)
-    if (user.roleLevel >= 5) {
-      query = query.or(`reviewer_id.eq.${user.id},and(owner_id.eq.${user.id},reviewer_id.is.null)`)
-    } else {
-      query = query.eq('reviewer_id',user.id)
+    const reviewFilter = getReviewInboxFilter(user)
+    if (reviewFilter?.startsWith('reviewer_id.eq.') && !reviewFilter.includes(',')) {
+      query = query.eq('reviewer_id', user.id)
+    } else if (reviewFilter) {
+      query = query.or(reviewFilter)
     }
     const {data,error}=await query
     if (error || !data) throw new Error('Daftar review task gagal dimuat.')
@@ -42,7 +44,9 @@ export default async function ReviewInboxPage() {
       <header>
         <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Review Task</h1>
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          Task berstatus Review yang menunggu keputusan Anda. Hanya reviewer yang ditetapkan dapat memutuskan.
+          {user.roleLevel === 6
+            ? 'Semua task berstatus Review ditampilkan untuk pengawasan dan keputusan Super Admin.'
+            : 'Task berstatus Review yang menunggu keputusan Anda. Hanya reviewer yang ditetapkan dapat memutuskan.'}
         </p>
       </header>
       {!tasks?.length ? (
