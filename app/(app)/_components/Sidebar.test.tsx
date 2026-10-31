@@ -33,9 +33,10 @@ describe('sidebar navigation R.03', () => {
   })
   it('shows personal workspace features to Staff/PIC', () => {
     render(<Sidebar user={user(2)} />)
-    for (const label of ['Dashboard', 'Pekerjaan', 'Laporan', 'Master Data', 'Akun']) {
+    for (const label of ['Dashboard', 'Pekerjaan', 'Laporan', 'Master Data']) {
       expect(screen.getByRole('link', { name: label })).toBeTruthy()
     }
+    expect(screen.queryByRole('link', { name: 'Akun' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Persetujuan' })).toBeNull()
   })
 })
