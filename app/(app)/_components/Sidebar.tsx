@@ -5,22 +5,24 @@ import { usePathname } from 'next/navigation'
 import type { SessionUser } from '@/lib/auth/session'
 import NavIcon, { type NavIconName } from './NavIcon'
 
-type NavItem = { label: string; href: string; minLevel: number; routes: string[]; icon: NavIconName }
+type NavItem = { label: string; href: string; minLevel: number; maxLevel?: number; routes: string[]; icon: NavIconName }
 type NavGroup = { heading: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   { heading: 'DASHBOARD', items: [
-    { label: 'Dashboard', href: '/dashboard', minLevel: 3, routes: ['/dashboard', '/performance', '/jobload'], icon: 'dashboard' },
+    { label: 'Dashboard', href: '/dashboard', minLevel: 2, routes: ['/dashboard'], icon: 'dashboard' },
   ] },
   { heading: 'INPUT', items: [
     { label: 'Pekerjaan', href: '/tasks', minLevel: 1, routes: ['/tasks', '/kanban', '/timeline'], icon: 'tasks' },
     { label: 'Persetujuan', href: '/review-inbox', minLevel: 3, routes: ['/review-inbox', '/approvals'], icon: 'approval' },
   ] },
   { heading: 'REPORT', items: [
-    { label: 'Laporan', href: '/reports', minLevel: 3, routes: ['/reports', '/audit-log'], icon: 'reports' },
+    { label: 'Laporan', href: '/reports', minLevel: 2, routes: ['/reports', '/audit-log'], icon: 'reports' },
   ] },
   { heading: 'SETTING', items: [
+    { label: 'Master Data', href: '/master-data', minLevel: 2, maxLevel: 3, routes: ['/master-data'], icon: 'master' },
     { label: 'Master Data', href: '/users', minLevel: 4, routes: ['/users', '/task-templates', '/org-structure'], icon: 'master' },
+    { label: 'Akun', href: '/account', minLevel: 2, routes: ['/account'], icon: 'user' },
   ] },
 ]
 
@@ -33,7 +35,7 @@ export default function Sidebar({ user }: { user: SessionUser }) {
     >
       <nav aria-label="Navigasi utama" className="flex gap-4 overflow-x-auto px-3 py-2 md:h-full md:flex-col md:gap-5 md:overflow-y-auto md:px-3 md:py-5">
         {GROUPS.map((group) => {
-          const available = group.items.filter(item => user.roleLevel >= item.minLevel)
+          const available = group.items.filter(item => user.roleLevel >= item.minLevel && (item.maxLevel === undefined || user.roleLevel <= item.maxLevel))
           if (available.length === 0) return null
           return (
             <div key={group.heading} className="shrink-0 md:w-full">

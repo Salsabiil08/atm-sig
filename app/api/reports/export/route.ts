@@ -11,7 +11,7 @@ const MAX_EXPORT = 10000
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const user = await getSessionUser()
-    requireRole(user, 'Manager')
+    requireRole(user, 'Staff/PIC')
     const sp = request.nextUrl.searchParams
     const format = sp.get('format')
     if (format !== 'xlsx' && format !== 'pdf') {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const orgLabel=filters.orgUnitId===null ? 'Semua seksi yang dapat diakses'
       : options.sections.find(section=>section.id===filters.orgUnitId)?.name??String(filters.orgUnitId)
     const tasks:TaskListItem[]=[]
-    const base={createdFrom:rawFrom||null,createdTo:rawTo||null,orgUnitId:filters.orgUnitId}
+    const base={createdFrom:rawFrom||null,createdTo:rawTo||null,orgUnitId:filters.orgUnitId,ownerId:user.roleLevel === 2 ? user.id : undefined}
     const first=await getTaskList(user,{...base,page:1,pageSize:PAGE_SIZE})
     if(first.total>MAX_EXPORT) {
       return NextResponse.json({error:'Data lebih dari 10.000 tugas. Gunakan filter tanggal agar ekspor tetap aman.'},{status:422})

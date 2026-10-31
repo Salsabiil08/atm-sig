@@ -31,4 +31,11 @@ describe('sidebar navigation R.03', () => {
     render(<Sidebar user={user(3)} />)
     expect(screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current')).toBe('page')
   })
+  it('shows personal workspace features to Staff/PIC', () => {
+    render(<Sidebar user={user(2)} />)
+    for (const label of ['Dashboard', 'Pekerjaan', 'Laporan', 'Master Data', 'Akun']) {
+      expect(screen.getByRole('link', { name: label })).toBeTruthy()
+    }
+    expect(screen.queryByRole('link', { name: 'Persetujuan' })).toBeNull()
+  })
 })

@@ -34,7 +34,7 @@ function MetricCard({ label, value }: { label: string; value: string | number })
 
 export default async function ReportsPage({ searchParams }: { searchParams: SearchParams }) {
   const [user, params] = await Promise.all([getSessionUser(), searchParams])
-  requireRole(user, 'Manager')
+  requireRole(user, 'Staff/PIC')
   const selectedFrom=singleParam(params.from)
   const selectedTo=singleParam(params.to)
   if (Boolean(selectedFrom)!==Boolean(selectedTo)) throw new Error('Tanggal awal dan akhir harus dipilih bersama.')
@@ -45,7 +45,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
   })
   const page = Math.max(1, Math.min(100000, Number(singleParam(params.page) ?? '1') || 1))
   const [tasks,options] = await Promise.all([
-    getTaskList(user,{createdFrom:selectedFrom||null,createdTo:selectedTo||null,orgUnitId:filters.orgUnitId,page,pageSize:50}),
+    getTaskList(user,{createdFrom:selectedFrom||null,createdTo:selectedTo||null,orgUnitId:filters.orgUnitId,ownerId:user.roleLevel === 2 ? user.id : undefined,page,pageSize:50}),
     getTaskFilterOptions(user),
   ])
 
@@ -58,12 +58,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
 
   return (
     <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <WorkspaceTabs current="/reports" tabs={REPORT_TABS} />
+      <WorkspaceTabs current="/reports" tabs={REPORT_TABS} roleLevel={user.roleLevel} />
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">LAPORAN TUGAS</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Seluruh tugas yang dapat diakses, beserta status, kemajuan, dan lampiran. Kosongkan tanggal untuk menampilkan semua periode.
+            {user.roleLevel === 2 ? 'Tugas milik Anda beserta status, kemajuan, dan lampiran.' : 'Seluruh tugas yang dapat diakses, beserta status, kemajuan, dan lampiran.'} Kosongkan tanggal untuk menampilkan semua periode.
           </p>
         </div>
         {/* Tombol Export — FR-091 */}
@@ -117,7 +117,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
             className="mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-red-600 focus:ring-red-600"
           />
         </label>
-        <label className="text-xs font-medium text-slate-700">
+        {user.roleLevel > 2 && <label className="text-xs font-medium text-slate-700">
           Seksi
           <select
             name="orgUnit"
@@ -131,7 +131,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
               </option>
             ))}
           </select>
-        </label>
+        </label>}
         <button
           type="submit"
           className="self-end rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"

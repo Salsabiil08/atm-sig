@@ -53,10 +53,11 @@ export default async function DashboardPage({ searchParams }: {searchParams:Prom
   const [year,monthNumber]=month.split('-').map(Number)
   const nextMonth=monthNumber===12 ? `${year+1}-01` : `${year}-${String(monthNumber+1).padStart(2,'0')}`
   const from=`${month}-01T00:00:00+07:00`,toExclusive=`${nextMonth}-01T00:00:00+07:00`
+  const isPic = user.roleLevel === 2
   const [metrics, tasksPerhatian, performance] = await Promise.all([
     getDashboardMetrics(user,from,toExclusive),
     getTasksPerluPerhatian(user,10,from,toExclusive),
-    getDashboardPerformance(user,new Date(),from,toExclusive),
+    isPic ? Promise.resolve(null) : getDashboardPerformance(user,new Date(),from,toExclusive),
   ])
 
   const showAlert =
@@ -64,7 +65,7 @@ export default async function DashboardPage({ searchParams }: {searchParams:Prom
 
   return (
     <div className="px-4 py-5 sm:px-6 lg:px-8">
-      <WorkspaceTabs current="/dashboard" tabs={DASHBOARD_TABS} />
+      <WorkspaceTabs current="/dashboard" tabs={DASHBOARD_TABS} roleLevel={user.roleLevel} />
       <form method="get" action="/dashboard" className="mb-5 flex flex-wrap items-end gap-3">
         <label className="text-sm text-[var(--color-text-secondary)]">Periode tenggat
           <input type="month" name="month" defaultValue={month}
@@ -80,7 +81,7 @@ export default async function DashboardPage({ searchParams }: {searchParams:Prom
             Dashboard
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Ringkasan task Department of Accounting
+            {isPic ? 'Ringkasan task pribadi Anda' : 'Ringkasan task Department of Accounting'}
           </p>
         </div>
       </section>
@@ -113,19 +114,31 @@ export default async function DashboardPage({ searchParams }: {searchParams:Prom
 
       {/* Metric cards */}
       <section
-        className="grid grid-cols-1 min-[400px]:grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4 mb-7"
+        className={`grid grid-cols-1 min-[400px]:grid-cols-2 ${isPic ? 'lg:grid-cols-3' : 'xl:grid-cols-5'} gap-3 sm:gap-4 mb-7`}
         aria-label="Ringkasan metrics"
       >
-        <MetricCard label="Total Task" value={metrics.totalTask} />
-        <MetricCard label="Tertinggal" value={metrics.tertinggal} color="#ea580c" />
-        <MetricCard label="Blocked" value={metrics.blocked} color="#dc2626" />
-        <MetricCard label="Menunggu Review" value={metrics.menuungguReview} color="#7c3aed" />
-        <MetricCard label="Pengajuan Deadline" value={metrics.pengajuanDeadline} color="#2563eb" />
+        <MetricCard label={isPic ? 'Total Ditugaskan' : 'Total Task'} value={metrics.totalTask} />
+        {isPic ? <>
+          <MetricCard label="Selesai" value={metrics.completed} color="#2563eb" />
+          <MetricCard label="Pending" value={metrics.pending} color="#ea580c" />
+        </> : <>
+          <MetricCard label="Tertinggal" value={metrics.tertinggal} color="#ea580c" />
+          <MetricCard label="Blocked" value={metrics.blocked} color="#dc2626" />
+          <MetricCard label="Menunggu Review" value={metrics.menuungguReview} color="#7c3aed" />
+          <MetricCard label="Pengajuan Deadline" value={metrics.pengajuanDeadline} color="#2563eb" />
+        </>}
       </section>
 
-      <div className="mb-7">
-        <PerformanceOverview performance={performance} />
-      </div>
+      {isPic ? (
+        <section className="mb-7 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" aria-label="Progress penyelesaian task pribadi">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <h2 className="font-semibold text-slate-800">Progress Penyelesaian Saya</h2>
+            <span className="font-bold text-[var(--color-brand)]">{metrics.totalTask ? Math.round(metrics.completed / metrics.totalTask * 100) : 0}%</span>
+          </div>
+          <ProgressBar value={metrics.totalTask ? Math.round(metrics.completed / metrics.totalTask * 100) : 0} />
+          <p className="mt-2 text-xs text-slate-500">Dihitung hanya dari task yang ditugaskan kepada akun Anda pada periode terpilih.</p>
+        </section>
+      ) : performance ? <div className="mb-7"><PerformanceOverview performance={performance} /></div> : null}
 
       {/* Tabel task perlu perhatian */}
       <section aria-label="Task perlu perhatian">

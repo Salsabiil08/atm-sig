@@ -23,8 +23,6 @@ export const WORK_TABS: Tab[] = [
 ]
 export const DASHBOARD_TABS: Tab[] = [
   { label: 'Ringkasan', icon: 'dashboard', href: '/dashboard' },
-  { label: 'Kinerja Berjalan', icon: 'reports', href: '/performance' },
-  { label: 'Beban Kerja Periode', icon: 'jobload', href: '/jobload' },
 ]
 export const APPROVAL_TABS: Tab[] = [
   { label: 'Tinjauan Tugas', icon: 'approval', href: '/review-inbox', minLevel: 3 },
@@ -37,5 +35,5 @@ export const MASTER_TABS: Tab[] = [
 ]
 export const REPORT_TABS: Tab[] = [
   { label: 'Laporan Task', icon: 'reports', href: '/reports' },
-  { label: 'Catatan Audit', icon: 'audit', href: '/audit-log' },
+  { label: 'Catatan Audit', icon: 'audit', href: '/audit-log', minLevel: 3 },
 ]

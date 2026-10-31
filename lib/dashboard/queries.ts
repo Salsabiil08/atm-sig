@@ -9,10 +9,18 @@ import { isTaskOverdue } from '@/lib/tasks/deadline'
 
 export type DashboardMetrics = {
   totalTask: number
+  completed: number
+  pending: number
   tertinggal: number   // task yang waktu > 80% tapi progress jauh di bawah
   blocked: number
   menuungguReview: number
   pengajuanDeadline: number
+}
+
+async function getDashboardScopeFilter(user: SessionUser): Promise<string | null> {
+  if (user.roleLevel === 2) return `owner_id.eq.${user.id}`
+  const supabase = await createClient()
+  return getTaskScopeFilter(supabase, user)
 }
 
 export type TaskPerhatian = {
@@ -143,7 +151,7 @@ async function getDashboardPerformanceSources(
   toExclusive?: string,
 ): Promise<DashboardPerformanceSource[]> {
   const supabase = await createClient()
-  const scopeFilter = await getTaskScopeFilter(supabase, user)
+  const scopeFilter = await getDashboardScopeFilter(user)
   const pageSize = 500
   const tasks: DashboardPerformanceSource[] = []
 
@@ -205,7 +213,7 @@ export async function getDashboardPerformance(
  */
 export async function getDashboardMetrics(user: SessionUser, from?: string, toExclusive?: string): Promise<DashboardMetrics> {
   const supabase = await createClient()
-  const scopeFilter = await getTaskScopeFilter(supabase, user)
+  const scopeFilter = await getDashboardScopeFilter(user)
 
   // Explicit pagination: Supabase default maximum rows otherwise truncates metrics.
   const tasks: Array<{ id:string; status:TaskStatus; progress_pct:number; start_date:string; due_date:string }> = []
@@ -224,8 +232,10 @@ export async function getDashboardMetrics(user: SessionUser, from?: string, toEx
     if (data.length < pageSize) break
     if (offset+pageSize >= 100000) throw new Error('Data task melebihi batas aman ringkasan dashboard.')
   }
-  const {count:pendingDeadlines,error:deadlineError} = await supabase.from('deadline_change_requests')
+  let deadlineQuery = supabase.from('deadline_change_requests')
     .select('id',{count:'exact',head:true}).eq('status','Menunggu approval')
+  if (user.roleLevel === 2) deadlineQuery = deadlineQuery.eq('requested_by', user.id)
+  const {count:pendingDeadlines,error:deadlineError} = await deadlineQuery
 
   let tertinggal = 0
   for (const t of tasks) {
@@ -245,6 +255,8 @@ export async function getDashboardMetrics(user: SessionUser, from?: string, toEx
 
   return {
     totalTask: tasks.length,
+    completed: tasks.filter((task) => task.status === 'Done').length,
+    pending: tasks.filter((task) => task.status !== 'Done').length,
     tertinggal,
     blocked,
     menuungguReview,
@@ -266,7 +278,7 @@ export async function getTasksPerluPerhatian(
   toExclusive?: string,
 ): Promise<TaskPerhatian[]> {
   const supabase = await createClient()
-  const scopeFilter = await getTaskScopeFilter(supabase, user)
+  const scopeFilter = await getDashboardScopeFilter(user)
 
   // Scan relevant candidates BEFORE applying the display limit. A hard
   // limit(50) here hid Blocked/Review tasks with later due dates.
