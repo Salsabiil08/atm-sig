@@ -16,14 +16,14 @@ export const metadata: Metadata = {
 export default async function UsersPage() {
   const user = await getSessionUser()
 
-  if (user.roleLevel < ROLE_LEVELS.SM) {
+  if (user.roleLevel < ROLE_LEVELS.Manager) {
     return (
       <section className="p-6 sm:p-8" aria-labelledby="users-heading">
         <h1 id="users-heading" className="text-xl font-bold text-slate-900">
           Master Data Users
         </h1>
         <p className="mt-3 text-sm text-slate-600" role="alert">
-          Anda tidak berwenang mengelola user.
+          Anda tidak berwenang mengakses data pengguna.
         </p>
       </section>
     )

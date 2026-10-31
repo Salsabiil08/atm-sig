@@ -4,6 +4,7 @@ import type { SessionUser } from '@/lib/auth/session'
 import { ROLE_LEVELS } from '@/lib/constants/rbac'
 import { createClient } from '@/lib/supabase/server'
 import { getManageableOrgUnitIds } from '@/lib/users/scope'
+import { getVisibleTaskOrgUnitIds } from '@/lib/tasks/scope'
 
 export type MasterSection = {
   id: number
@@ -46,6 +47,8 @@ export type TaskTemplate = {
 
 export type TaskMasterData = {
   canAssignGlobalOwner: boolean
+  canManageCategories: boolean
+  ownerSelectionUserId: string | null
   sections: MasterSection[]
   people: MasterPerson[]
   categories: TaskCategory[]
@@ -53,26 +56,32 @@ export type TaskMasterData = {
 }
 
 export async function getTaskMasterData(user: SessionUser): Promise<TaskMasterData> {
-  if (user.roleLevel < ROLE_LEVELS.SM) {
-    throw new Error('Hanya SM, GM, atau Super Admin yang dapat mengakses master task.')
+  if (user.roleLevel < ROLE_LEVELS['Staff/PIC']) {
+    throw new Error('Role Anda tidak dapat mengakses master task.')
   }
 
   const supabase = await createClient()
-  const manageableIds = await getManageableOrgUnitIds(supabase, user)
-  if (!manageableIds.length) {
-    return { canAssignGlobalOwner: user.roleLevel >= ROLE_LEVELS.GM, sections: [], people: [], categories: [], templates: [] }
+  const unitsResult = await supabase.from('org_units').select('id, parent_id, name, type').order('name')
+  if (unitsResult.error) throw new Error('Gagal memuat struktur organisasi master task.')
+  const units = unitsResult.data ?? []
+  const manageableIds = user.roleLevel >= ROLE_LEVELS.SM
+    ? await getManageableOrgUnitIds(supabase, user)
+    : getVisibleTaskOrgUnitIds(user, units)
+  if (!manageableIds.length) return {
+    canAssignGlobalOwner: user.roleLevel >= ROLE_LEVELS.GM,
+    canManageCategories: user.roleLevel >= ROLE_LEVELS.Manager,
+    ownerSelectionUserId: user.roleLevel === ROLE_LEVELS['Staff/PIC'] ? user.id : null,
+    sections: [], people: [], categories: [], templates: [],
   }
-  const [unitsResult, usersResult, categoriesResult] = await Promise.all([
-    supabase.from('org_units').select('id, parent_id, name, type').order('name'),
+  const [usersResult, categoriesResult] = await Promise.all([
     supabase.from('users').select('id, name, role_id, org_unit_id, supervisor_id, status').eq('status', 'aktif').order('name'),
     supabase.from('task_categories').select('id, org_unit_id, name, is_active').in('org_unit_id', manageableIds).order('name'),
   ])
 
-  if (unitsResult.error || usersResult.error || categoriesResult.error) {
+  if (usersResult.error || categoriesResult.error) {
     throw new Error('Gagal memuat master kategori dan template task.')
   }
 
-  const units = unitsResult.data ?? []
   const sections = units
     .filter((unit) => unit.type === 'section' && manageableIds.includes(unit.id))
     .map((section) => ({
@@ -104,7 +113,9 @@ export async function getTaskMasterData(user: SessionUser): Promise<TaskMasterDa
   const roleLevels = new Map((roles ?? []).map((role) => [role.id, role.level]))
   const people = (usersResult.data ?? []).flatMap((profile) => {
     const roleLevel = roleLevels.get(profile.role_id)
-    return roleLevel && roleLevel >= ROLE_LEVELS['Staff/PIC']
+    const visibleToPic = user.roleLevel !== 2 || profile.id === user.id || profile.id === user.supervisorId
+    const visibleToManager = user.roleLevel !== 3 || manageableIds.includes(profile.org_unit_id) || profile.id === user.supervisorId
+    return roleLevel && roleLevel >= ROLE_LEVELS['Staff/PIC'] && visibleToPic && visibleToManager
       ? [{
           id: profile.id,
           name: profile.name,
@@ -120,6 +131,8 @@ export async function getTaskMasterData(user: SessionUser): Promise<TaskMasterDa
 
   return {
     canAssignGlobalOwner: user.roleLevel >= ROLE_LEVELS.GM,
+    canManageCategories: user.roleLevel >= ROLE_LEVELS.Manager,
+    ownerSelectionUserId: user.roleLevel === ROLE_LEVELS['Staff/PIC'] ? user.id : null,
     sections,
     people,
     categories: (categoriesResult.data ?? []).map((category) => ({

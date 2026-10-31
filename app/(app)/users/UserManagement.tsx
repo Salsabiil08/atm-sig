@@ -53,6 +53,7 @@ export default function UserManagement({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const canManageUsers = currentUserRole !== 'Manager'
 
   const filteredUsers = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase()
@@ -181,7 +182,7 @@ export default function UserManagement({
             MASTER DATA USERS
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Kelola akun pada cakupan organisasi Anda. User baru dimulai sebagai Spectator.
+            {canManageUsers ? 'Kelola akun pada cakupan organisasi Anda. User baru dimulai sebagai Spectator.' : 'Daftar pengguna aktif dan penempatannya dalam section Anda. Data ini hanya dapat dilihat.'}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -210,7 +211,7 @@ export default function UserManagement({
             <option value="aktif">Aktif</option>
             <option value="nonaktif">Nonaktif</option>
           </select>
-          <button
+          {canManageUsers && <button
             type="button"
             onClick={() => {
               setInviteOpen(true)
@@ -220,7 +221,7 @@ export default function UserManagement({
             className="min-h-10 rounded-md bg-slate-900 px-4 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
           >
             Tambah user
-          </button>
+          </button>}
         </div>
       </header>
 
@@ -312,7 +313,7 @@ export default function UserManagement({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    {user.id !== currentUserId && (
+                    {canManageUsers && user.id !== currentUserId && (
                       <button
                         type="button"
                         disabled={busy}
@@ -346,7 +347,7 @@ export default function UserManagement({
                         {currentUserRole === 'GM' ? 'Usulkan role' : 'Ubah role'}
                       </button>
                     )}
-                    {user.id !== currentUserId && (
+                    {canManageUsers && user.id !== currentUserId && (
                       <button
                         type="button"
                         disabled={busy}

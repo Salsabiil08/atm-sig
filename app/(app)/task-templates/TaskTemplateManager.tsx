@@ -65,8 +65,9 @@ function CategoryDelete({ category }: { category: TaskCategory }) {
   )
 }
 
-function eligibleOwners(people: MasterPerson[], section: MasterSection, canAssignGlobalOwner: boolean) {
+function eligibleOwners(people: MasterPerson[], section: MasterSection, canAssignGlobalOwner: boolean, ownerSelectionUserId: string | null) {
   return people.filter((person) => {
+    if (ownerSelectionUserId) return person.id === ownerSelectionUserId
     if (person.roleLevel >= 5) return canAssignGlobalOwner
     if (person.roleLevel === 4) return person.orgUnitId === section.parentId
     return person.orgUnitId === section.id
@@ -78,19 +79,21 @@ function TemplateForm({
   category,
   people,
   canAssignGlobalOwner,
+  ownerSelectionUserId,
   template,
 }: {
   section: MasterSection
   category: TaskCategory
   people: MasterPerson[]
   canAssignGlobalOwner: boolean
+  ownerSelectionUserId: string | null
   template?: TaskTemplate
 }) {
   const [state, action, pending] = useActionState(saveTaskTemplate, initialState)
   const [ownerId, setOwnerId] = useState(template?.ownerId ?? '')
   const [reviewerId, setReviewerId] = useState(template?.reviewerId ?? '')
   const [frequency, setFrequency] = useState<'weekly' | 'monthly'>(template?.recurrence ?? 'weekly')
-  const owners = eligibleOwners(people, section, canAssignGlobalOwner)
+  const owners = eligibleOwners(people, section, canAssignGlobalOwner, ownerSelectionUserId)
   const selectedOwner = people.find((person) => person.id === ownerId)
   const reviewers = selectedOwner?.roleLevel && selectedOwner.roleLevel >= 5
     ? []
@@ -183,6 +186,8 @@ export default function TaskTemplateManager({
   categories,
   templates,
   canAssignGlobalOwner,
+  canManageCategories,
+  ownerSelectionUserId,
   mode = 'categories',
 }: {
   sections: MasterSection[]
@@ -190,6 +195,8 @@ export default function TaskTemplateManager({
   categories: TaskCategory[]
   templates: TaskTemplate[]
   canAssignGlobalOwner: boolean
+  canManageCategories: boolean
+  ownerSelectionUserId: string | null
   mode?: 'categories' | 'recurring'
 }) {
   const categoryById = new Map(categories.map((category) => [category.id, category]))
@@ -199,9 +206,9 @@ export default function TaskTemplateManager({
     <div className="w-full space-y-6 px-4 pt-5 pb-6 sm:px-6 lg:px-8">
       <header className="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
         <h1 className="text-xl font-bold text-slate-900">{mode==='categories'?'Kategori Tugas':'Tugas Berulang'}</h1>
-        <p className="mt-1 text-sm text-slate-600">{mode==='categories'?'Kelola kategori tugas untuk setiap seksi.':'Atur tugas yang otomatis dibuat setiap minggu atau bulan sesuai jadwal penugasan.'}</p>
+        <p className="mt-1 text-sm text-slate-600">{mode==='categories'?(canManageCategories?'Kelola kategori tugas untuk setiap seksi dalam cakupan Anda.':'Kategori tugas aktif dari section akun Anda. Data ini hanya dapat dilihat.'):'Atur tugas yang otomatis dibuat setiap minggu atau bulan sesuai jadwal penugasan.'}</p>
       </header>
-      {mode==='categories'&&<section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {mode==='categories'&&canManageCategories&&<section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-slate-900">Tambah kategori</h2>
         <CategoryForm sections={sections} />
       </section>}
@@ -216,16 +223,16 @@ export default function TaskTemplateManager({
               const categoryTemplates = templates.filter((template) => template.categoryId === category.id)
               return (
                 <article key={category.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  {mode==='categories'&&<div className="border-b border-slate-100 p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-sm font-bold text-slate-900">{category.name}</h3><span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{category.isActive ? 'Aktif' : 'Nonaktif'}</span></div><span className="text-xs text-slate-500">{categoryTemplates.length} template</span></div><CategoryForm category={category} sections={sections} /><CategoryDelete category={category} /></div>}
+                  {mode==='categories'&&<div className="border-b border-slate-100 p-5 sm:p-6"><div className={`${canManageCategories ? 'mb-4' : ''} flex flex-wrap items-center justify-between gap-2`}><div><h3 className="text-sm font-bold text-slate-900">{category.name}</h3><span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{category.isActive ? 'Aktif' : 'Nonaktif'}</span></div>{canManageCategories&&<span className="text-xs text-slate-500">{categoryTemplates.length} template</span>}</div>{canManageCategories&&<><CategoryForm category={category} sections={sections} /><CategoryDelete category={category} /></>}</div>}
                   {mode==='recurring'&&<div className="space-y-4 p-5 sm:p-6">
                     {category.isActive && <details className="group rounded-xl border border-dashed border-slate-300">
                       <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-red-700 marker:hidden">＋ Tambah tugas berulang</summary>
-                      <div className="px-4 pb-4"><TemplateForm section={section} category={category} people={people} canAssignGlobalOwner={canAssignGlobalOwner} /></div>
+                      <div className="px-4 pb-4"><TemplateForm section={section} category={category} people={people} canAssignGlobalOwner={canAssignGlobalOwner} ownerSelectionUserId={ownerSelectionUserId} /></div>
                     </details>}
                     {categoryTemplates.map((template) => (
                       <div key={template.id} className="space-y-3 rounded-xl border border-slate-200 p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="text-sm font-semibold text-slate-900">{template.name}</h4><p className="mt-1 text-xs text-slate-500">{template.recurrence === 'weekly' ? 'Mingguan' : 'Bulanan'} · setiap {template.recurrence === 'weekly' ? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'][template.recurrenceDay - 1] : `tanggal ${template.recurrenceDay}`} · PIC {people.find((person) => person.id === template.ownerId)?.name ?? 'Tidak diketahui'}</p></div><TemplateStatus template={template} /></div>
-                        {sectionById.get(template.orgUnitId) && categoryById.get(template.categoryId) && <TemplateForm section={section} category={category} people={people} canAssignGlobalOwner={canAssignGlobalOwner} template={template} />}
+                        {sectionById.get(template.orgUnitId) && categoryById.get(template.categoryId) && <TemplateForm section={section} category={category} people={people} canAssignGlobalOwner={canAssignGlobalOwner} ownerSelectionUserId={ownerSelectionUserId} template={template} />}
                         <TemplateDelete template={template} />
                       </div>
                     ))}

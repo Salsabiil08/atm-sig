@@ -33,10 +33,12 @@ export type PendingRoleChangeRequest = {
 
 export async function getManagedUsers(): Promise<ManagedUser[]> {
   const user = await getSessionUser()
-  if (user.roleLevel < ROLE_LEVELS.SM) return []
+  if (user.roleLevel < ROLE_LEVELS.Manager) return []
 
   const supabase = await createClient()
-  const orgUnitIds = await getManageableOrgUnitIds(supabase, user)
+  const orgUnitIds = user.roleLevel >= ROLE_LEVELS.SM
+    ? await getManageableOrgUnitIds(supabase, user)
+    : [user.orgUnitId]
   if (orgUnitIds.length === 0) return []
 
   const { data: users, error: usersError } = await supabase

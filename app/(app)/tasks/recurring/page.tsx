@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Tugas Berulang' }
 
 export default async function RecurringTasksPage() {
   const user = await getSessionUser()
-  requireRole(user, ROLES.SM)
+  requireRole(user, ROLES.STAFF_PIC)
   const data = await getTaskMasterData(user)
   return <>
     <nav aria-label="Jenis tugas" className="mx-auto flex max-w-6xl gap-2 px-4 pt-5">

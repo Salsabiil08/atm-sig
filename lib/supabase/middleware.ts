@@ -8,8 +8,10 @@ function requiredRoleLevel(pathname: string): number | null {
   if (pathname === '/jobload' || pathname.startsWith('/jobload/')) return 3
   if (pathname === '/reports' || pathname.startsWith('/reports/')) return 2
   if (pathname === '/master-data' || pathname.startsWith('/master-data/')) return 2
+  if (pathname === '/task-templates' || pathname.startsWith('/task-templates/')) return 2
+  if (pathname === '/tasks/recurring' || pathname.startsWith('/tasks/recurring/')) return 2
   if (pathname === '/account' || pathname.startsWith('/account/')) return 2
-  if (pathname === '/users' || pathname.startsWith('/users/')) return 4
+  if (pathname === '/users' || pathname.startsWith('/users/')) return 3
   return null
 }
 

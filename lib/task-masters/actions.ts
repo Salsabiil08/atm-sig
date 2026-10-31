@@ -18,11 +18,13 @@ function field(formData: FormData, key: string): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-async function getManagerContext() {
+async function getMasterContext(minimumRole: 'Staff/PIC' | 'Manager') {
   const user = await getSessionUser()
-  requireRole(user, ROLES.SM)
+  requireRole(user, minimumRole)
   const supabase = await createClient()
-  const orgUnitIds = await getManageableOrgUnitIds(supabase, user)
+  const orgUnitIds = user.roleLevel >= 4
+    ? await getManageableOrgUnitIds(supabase, user)
+    : [user.orgUnitId]
   return { user, supabase, orgUnitIds }
 }
 
@@ -40,7 +42,7 @@ export async function saveTaskCategory(
   _previous: MasterActionState,
   formData: FormData,
 ): Promise<MasterActionState> {
-  const { supabase, orgUnitIds } = await getManagerContext()
+  const { supabase, orgUnitIds } = await getMasterContext(ROLES.MANAGER)
   const id = field(formData, 'id')
   const name = field(formData, 'name')
   const orgUnitId = Number(field(formData, 'org_unit_id'))
@@ -78,7 +80,7 @@ export async function deleteTaskCategory(
   _previous: MasterActionState,
   formData: FormData,
 ): Promise<MasterActionState> {
-  const { supabase } = await getManagerContext()
+  const { supabase } = await getMasterContext(ROLES.MANAGER)
   const id = field(formData, 'id')
   if (!isValidUuid(id)) return failure('ID kategori tidak valid.')
 
@@ -111,7 +113,7 @@ export async function saveTaskTemplate(
   _previous: MasterActionState,
   formData: FormData,
 ): Promise<MasterActionState> {
-  const { user, supabase, orgUnitIds } = await getManagerContext()
+  const { user, supabase, orgUnitIds } = await getMasterContext(ROLES.STAFF_PIC)
   const id = field(formData, 'id')
   const categoryId = field(formData, 'category_id')
   const orgUnitId = Number(field(formData, 'org_unit_id'))
@@ -150,6 +152,7 @@ export async function saveTaskTemplate(
 
   const owner = await getActiveProfile(supabase, ownerId)
   if (!owner || owner.roleLevel < 2) return failure('PIC harus merupakan user aktif yang dapat menerima task.')
+  if (user.roleLevel === 2 && owner.id !== user.id) return failure('PIC hanya dapat membuat tugas berulang untuk dirinya sendiri.')
   if (user.roleLevel < 5 && !orgUnitIds.includes(owner.org_unit_id)) {
     return failure('PIC berada di luar cakupan organisasi Anda.')
   }
@@ -197,7 +200,7 @@ export async function toggleTaskTemplate(
   _previous: MasterActionState,
   formData: FormData,
 ): Promise<MasterActionState> {
-  const { supabase } = await getManagerContext()
+  const { supabase } = await getMasterContext(ROLES.STAFF_PIC)
   const id = field(formData, 'id')
   const isActive = field(formData, 'is_active') === 'true'
   if (!isValidUuid(id)) return failure('ID template tidak valid.')
@@ -214,7 +217,7 @@ export async function deleteTaskTemplate(
   _previous: MasterActionState,
   formData: FormData,
 ): Promise<MasterActionState> {
-  const { supabase } = await getManagerContext()
+  const { supabase } = await getMasterContext(ROLES.STAFF_PIC)
   const id = field(formData, 'id')
   if (!isValidUuid(id)) return failure('ID template tidak valid.')
 

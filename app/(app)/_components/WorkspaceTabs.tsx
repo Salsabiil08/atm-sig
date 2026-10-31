@@ -30,9 +30,13 @@ export const APPROVAL_TABS: Tab[] = [
   { label: 'Persetujuan Tenggat', icon: 'calendar', href: '/approvals', minLevel: 4 },
 ]
 export const MASTER_TABS: Tab[] = [
-  { label: 'Pengguna dan Peran', icon: 'user', href: '/users' },
-  { label: 'Struktur Organisasi', icon: 'structure', href: '/org-structure' },
-  { label: 'Kategori Tugas', icon: 'master', href: '/task-templates' },
+  { label: 'Pengguna', icon: 'user', href: '/users' },
+  { label: 'Kategori Tasks', icon: 'master', href: '/task-templates' },
+  { label: 'Struktur Organisasi', icon: 'structure', href: '/org-structure', minLevel: 4 },
+]
+export const PIC_MASTER_TABS: Tab[] = [
+  { label: 'Pengguna', icon: 'user', href: '/master-data' },
+  { label: 'Kategori Tasks', icon: 'master', href: '/task-templates' },
 ]
 export const REPORT_TABS: Tab[] = [
   { label: 'Laporan Task', icon: 'reports', href: '/reports' },

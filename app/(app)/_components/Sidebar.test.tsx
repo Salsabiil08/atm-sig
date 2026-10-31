@@ -31,6 +31,11 @@ describe('sidebar navigation R.03', () => {
     render(<Sidebar user={user(3)} />)
     expect(screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current')).toBe('page')
   })
+  it('routes Manager master data to the user and category workspace', () => {
+    render(<Sidebar user={user(3)} />)
+    const master = screen.getByRole('link', { name: 'Master Data' })
+    expect(master.getAttribute('href')).toBe('/users')
+  })
   it('shows personal workspace features to Staff/PIC', () => {
     render(<Sidebar user={user(2)} />)
     for (const label of ['Dashboard', 'Pekerjaan', 'Laporan', 'Master Data']) {

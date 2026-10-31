@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getSessionUser, requireRole } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import PersonalUserManagement from './PersonalUserManagement'
+import WorkspaceTabs, { PIC_MASTER_TABS } from '../_components/WorkspaceTabs'
 
 export const metadata: Metadata = { title: 'Master Data' }
 
@@ -23,6 +24,7 @@ export default async function MasterDataPage() {
 
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8">
+      <WorkspaceTabs current="/master-data" tabs={PIC_MASTER_TABS} roleLevel={user.roleLevel} />
       <header>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">MASTER DATA USERS</h1>
         <p className="mt-1 text-sm text-slate-500">Kelola keamanan akun Anda. Data profil dan penempatan organisasi bersifat hanya-baca.</p>
