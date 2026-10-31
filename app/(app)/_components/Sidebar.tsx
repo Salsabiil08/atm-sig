@@ -10,7 +10,7 @@ type NavGroup = { heading: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   { heading: 'DASHBOARD', items: [
-    { label: 'Dashboard', href: '/dashboard', minLevel: 2, routes: ['/dashboard'], icon: 'dashboard' },
+    { label: 'Dashboard', href: '/dashboard', minLevel: 2, routes: ['/dashboard', '/jobload'], icon: 'dashboard' },
   ] },
   { heading: 'INPUT', items: [
     { label: 'Pekerjaan', href: '/tasks', minLevel: 1, routes: ['/tasks', '/kanban', '/timeline'], icon: 'tasks' },

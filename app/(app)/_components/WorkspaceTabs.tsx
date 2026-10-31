@@ -23,6 +23,7 @@ export const WORK_TABS: Tab[] = [
 ]
 export const DASHBOARD_TABS: Tab[] = [
   { label: 'Ringkasan', icon: 'dashboard', href: '/dashboard' },
+  { label: 'Beban Kerja Periode', icon: 'jobload', href: '/jobload', minLevel: 3 },
 ]
 export const APPROVAL_TABS: Tab[] = [
   { label: 'Tinjauan Tugas', icon: 'approval', href: '/review-inbox', minLevel: 3 },

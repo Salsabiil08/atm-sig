@@ -5,6 +5,7 @@ import type { Database } from '@/lib/supabase/database.types'
 
 function requiredRoleLevel(pathname: string): number | null {
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) return 2
+  if (pathname === '/jobload' || pathname.startsWith('/jobload/')) return 3
   if (pathname === '/reports' || pathname.startsWith('/reports/')) return 2
   if (pathname === '/master-data' || pathname.startsWith('/master-data/')) return 2
   if (pathname === '/account' || pathname.startsWith('/account/')) return 2
